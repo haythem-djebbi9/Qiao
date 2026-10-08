@@ -1,0 +1,214 @@
+import React from 'react';
+
+export const CorridorMap: React.FC = () => {
+  return (
+    <div className="w-full bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between select-none">
+      <h3 className="text-lg sm:text-xl font-extrabold text-[#0a1c3d] mb-2 sm:mb-4">
+        Deux régions. D'infinies opportunités.
+      </h3>
+
+      <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] flex items-center justify-center">
+        <svg
+          viewBox="0 0 540 170"
+          className="w-full h-full drop-shadow-xs"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            {/* Arrowhead marker pointing right */}
+            <marker
+              id="redArrowRight"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 1 L 9 5 L 0 9 z" fill="#e01a22" />
+            </marker>
+
+            {/* Arrowhead marker pointing left */}
+            <marker
+              id="redArrowLeft"
+              viewBox="0 0 10 10"
+              refX="2"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
+              <path d="M 9 1 L 0 5 L 9 9 z" fill="#e01a22" />
+            </marker>
+
+            <linearGradient id="chinaMapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#2563eb" />
+              <stop offset="100%" stopColor="#1d4ed8" />
+            </linearGradient>
+          </defs>
+
+          {/* ========================================================================= */}
+          {/* 1. CHINA MAP (Solid Blue Silhouette on Left)                              */}
+          {/* ========================================================================= */}
+          <g transform="translate(-228, -28)">
+            {/* China Geographic Contour */}
+            <path
+              d="M 333.0 164.4 L 331.3 163.4 L 331.3 160.8 L 332.2 159.4 L 334.4 158.6 L 335.6 158.7 L 336.0 159.8 L 335.1 161.2 L 334.7 162.9 L 333.0 164.4 Z M 274.5 90.6 L 274.4 88.9 L 275.7 88.1 L 273.9 82.8 L 277.9 81.5 L 278.9 80.9 L 280.4 75.4 L 284.3 76.4 L 285.4 75.0 L 285.5 71.9 L 287.2 71.7 L 288.7 69.6 L 289.5 69.4 L 290.0 71.5 L 291.7 73.1 L 294.6 74.3 L 295.9 76.7 L 295.2 80.3 L 295.9 81.6 L 298.3 82.1 L 301.0 82.6 L 303.4 84.5 L 304.6 84.8 L 305.5 87.6 L 306.7 89.4 L 308.9 89.4 L 313.0 90.1 L 315.7 89.6 L 317.7 90.1 L 320.6 91.9 L 323.0 91.9 L 323.9 92.9 L 326.3 91.3 L 329.5 90.2 L 332.5 90.1 L 334.8 89.0 L 336.3 87.4 L 337.7 86.3 L 337.3 85.3 L 336.7 84.2 L 337.7 82.2 L 338.9 82.5 L 340.9 83.1 L 342.9 81.5 L 346.0 80.3 L 347.4 78.3 L 348.8 77.4 L 351.7 77.0 L 353.3 77.3 L 353.5 76.2 L 351.7 74.1 L 350.1 73.1 L 348.6 74.3 L 346.6 73.8 L 345.5 74.2 L 345.0 72.9 L 346.4 69.9 L 347.4 67.6 L 349.8 68.7 L 352.6 66.8 L 352.6 65.4 L 354.4 62.2 L 355.5 61.2 L 355.5 59.5 L 354.4 58.8 L 356.0 57.3 L 358.5 56.7 L 361.1 56.7 L 364.1 57.6 L 365.9 58.7 L 367.1 61.8 L 367.9 63.1 L 368.6 65.0 L 369.3 68.0 L 372.8 68.9 L 375.2 71.1 L 376.0 74.0 L 379.0 74.0 L 380.7 72.8 L 384.1 71.9 L 383.0 74.6 L 382.2 75.7 L 381.5 79.1 L 380.2 82.1 L 377.8 81.5 L 376.1 82.6 L 376.6 85.2 L 376.3 88.8 L 375.3 88.9 L 375.3 90.5 L 374.0 88.7 L 373.2 90.4 L 370.1 91.7 L 370.4 93.3 L 368.7 93.2 L 367.7 92.2 L 366.4 94.4 L 364.2 96.0 L 362.5 98.0 L 359.7 98.9 L 358.3 100.3 L 356.1 101.1 L 357.2 99.7 L 356.8 98.5 L 358.3 96.5 L 357.3 94.9 L 355.5 96.0 L 353.3 98.1 L 352.0 100.1 L 350.1 100.2 L 349.1 101.6 L 350.1 103.7 L 351.8 104.2 L 351.8 105.6 L 353.4 106.5 L 355.6 104.3 L 357.4 105.5 L 358.7 105.6 L 359.0 107.2 L 356.2 108.0 L 355.3 109.7 L 353.3 111.2 L 352.3 113.3 L 354.5 115.0 L 355.2 118.0 L 356.5 120.8 L 357.8 123.2 L 357.8 125.4 L 356.5 126.3 L 357.0 127.9 L 358.2 128.8 L 357.9 131.3 L 357.4 133.8 L 356.3 134.0 L 354.8 137.3 L 353.2 141.3 L 351.3 145.0 L 348.6 147.8 L 345.8 150.4 L 343.5 150.7 L 342.3 152.1 L 341.6 151.1 L 340.5 152.6 L 337.7 154.2 L 335.6 154.6 L 334.9 157.8 L 333.8 158.0 L 333.3 155.8 L 333.7 154.6 L 331.0 153.6 L 330.1 154.1 L 328.1 153.4 L 327.1 152.1 L 327.5 150.4 L 325.6 149.8 L 324.7 148.6 L 323.0 150.3 L 321.0 150.6 L 319.4 150.6 L 318.3 151.4 L 317.3 151.8 L 317.6 155.3 L 316.5 155.2 L 316.4 154.5 L 316.3 153.2 L 314.8 154.1 L 314.0 153.6 L 312.5 152.4 L 313.1 149.9 L 311.8 149.3 L 311.3 146.5 L 309.2 147.0 L 309.4 143.4 L 311.3 140.8 L 311.4 138.3 L 311.4 135.9 L 310.5 135.2 L 309.8 133.4 L 308.7 133.6 L 306.5 133.2 L 307.2 131.9 L 306.2 130.0 L 304.8 131.3 L 303.1 130.5 L 300.8 132.5 L 299.0 134.8 L 297.4 135.1 L 296.5 134.3 L 295.5 134.2 L 294.0 133.5 L 293.0 134.3 L 291.6 136.6 L 291.5 134.2 L 290.2 134.8 L 287.9 134.5 L 285.6 133.8 L 284.0 132.5 L 282.5 131.9 L 281.8 130.4 L 280.7 130.0 L 278.7 128.0 L 277.1 127.0 L 276.2 127.8 L 273.4 125.6 L 271.5 123.7 L 270.9 120.3 L 272.4 120.7 L 272.4 119.2 L 271.6 117.6 L 271.8 115.1 L 269.7 111.5 L 266.4 110.3 L 265.8 108.0 L 264.3 106.5 L 264.0 105.7 L 263.7 103.9 L 263.7 102.7 L 262.5 102.0 L 261.9 102.3 L 261.4 99.5 L 261.9 98.8 L 261.6 98.1 L 263.6 96.7 L 264.9 96.1 L 267.1 96.5 L 267.8 94.5 L 270.4 94.2 L 271.1 92.9 L 274.2 91.3 L 274.5 90.6 Z"
+              fill="url(#chinaMapGradient)"
+              stroke="#ffffff"
+              strokeWidth="0.8"
+              opacity="0.95"
+            />
+            {/* White bold CHINE text centered */}
+            <text
+              x="308"
+              y="114"
+              textAnchor="middle"
+              fill="#ffffff"
+              fontSize="11"
+              fontWeight="900"
+              letterSpacing="1"
+            >
+              CHINE
+            </text>
+
+            {/* Red Marker 1: Pékin */}
+            <circle cx="347" cy="80" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="355" y="83" fill="#0a1c3d" fontSize="8" fontWeight="700">
+              Pékin
+            </text>
+
+            {/* Red Marker 2: Shanghai */}
+            <circle cx="363" cy="122" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="371" y="125" fill="#0a1c3d" fontSize="8" fontWeight="700">
+              Shanghai
+            </text>
+
+            {/* Red Marker 3: Shenzhen */}
+            <circle cx="342" cy="150" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="350" y="154" fill="#0a1c3d" fontSize="8" fontWeight="700">
+              Shenzhen
+            </text>
+          </g>
+
+          {/* ========================================================================= */}
+          {/* 2. CENTRAL CORRIDOR (Red Dashed Curved Arrows & Opportunities Text)        */}
+          {/* ========================================================================= */}
+          {/* Top Curved Dashed Arrow: China -> North Africa */}
+          <path
+            d="M 160 52 Q 235 22 312 50"
+            stroke="#e01a22"
+            strokeWidth="1.4"
+            strokeDasharray="4 3"
+            markerEnd="url(#redArrowRight)"
+          />
+
+          {/* Center Text */}
+          <text
+            x="236"
+            y="80"
+            textAnchor="middle"
+            fill="#0a1c3d"
+            fontSize="9"
+            fontWeight="900"
+            letterSpacing="0.4"
+          >
+            DES OPPORTUNITÉS
+          </text>
+          <text
+            x="236"
+            y="94"
+            textAnchor="middle"
+            fill="#0a1c3d"
+            fontSize="9"
+            fontWeight="900"
+            letterSpacing="0.4"
+          >
+            SANS FRONTIÈRES
+          </text>
+
+          {/* Bottom Curved Dashed Arrow: North Africa -> China */}
+          <path
+            d="M 312 118 Q 235 148 160 120"
+            stroke="#e01a22"
+            strokeWidth="1.4"
+            strokeDasharray="4 3"
+            markerEnd="url(#redArrowLeft)"
+          />
+
+          {/* ========================================================================= */}
+          {/* 3. NORTH AFRICA MAP (Segmented Countries in Sky Blue on Right)             */}
+          {/* ========================================================================= */}
+          <g transform="translate(305, -48)">
+            {/* Morocco */}
+            <path
+              d="M 74.8 92.1 L 76.0 96.0 L 76.2 99.7 L 77.3 106.1 L 78.1 107.4 L 77.5 109.7 L 73.4 110.7 L 72.0 113.0 L 70.2 113.5 L 70.0 118.0 L 66.4 120.4 L 65.2 123.4 L 62.6 125.0 L 59.4 126.0 L 54.4 130.4 L 54.4 137.6 L 53.9 137.6 L 54.0 140.8 L 52.0 141.0 L 51.0 142.4 L 49.6 142.4 L 48.4 141.6 L 45.8 142.3 L 44.8 147.0 L 43.8 147.4 L 42.3 155.1 L 37.9 161.6 L 36.9 170.0 L 35.6 172.7 L 35.2 174.9 L 28.1 175.3 L 28.1 175.3 L 28.2 172.5 L 29.4 170.9 L 30.5 167.7 L 30.3 165.7 L 31.4 161.4 L 33.1 157.6 L 34.2 156.6 L 35.0 153.1 L 35.1 149.8 L 36.2 146.1 L 38.3 143.9 L 40.3 137.7 L 40.4 137.6 L 41.9 135.3 L 44.9 134.6 L 47.3 130.5 L 48.9 128.9 L 51.6 123.8 L 50.8 116.3 L 52.0 111.1 L 52.4 107.9 L 54.4 103.8 L 57.6 101.0 L 59.9 98.5 L 62.0 92.3 L 63.0 88.6 L 65.3 88.6 L 67.2 91.2 L 70.2 90.7 L 73.5 92.1 L 74.8 92.1 Z"
+              fill="#93c5fd"
+              stroke="#ffffff"
+              strokeWidth="0.8"
+            />
+            {/* Algeria */}
+            <path
+              d="M 54.3 139.2 L 54.4 138.0 L 54.4 137.6 L 54.4 130.4 L 59.4 126.0 L 62.6 125.0 L 65.2 123.4 L 66.4 120.4 L 70.0 118.0 L 70.2 113.5 L 72.0 113.0 L 73.4 110.7 L 77.5 109.7 L 78.1 107.4 L 77.3 106.1 L 76.2 99.7 L 76.0 96.0 L 74.8 92.1 L 77.9 88.8 L 81.3 87.8 L 83.3 85.3 L 86.3 83.4 L 91.6 82.4 L 96.8 81.9 L 98.4 82.8 L 101.4 80.4 L 104.7 80.3 L 106.0 81.7 L 108.2 81.4 L 107.5 84.5 L 108.0 90.3 L 107.3 95.2 L 105.4 98.6 L 105.6 103.2 L 108.2 106.8 L 108.2 108.3 L 110.2 110.7 L 111.5 121.6 L 112.5 126.9 L 112.7 129.7 L 112.2 134.7 L 112.4 137.4 L 112.0 140.7 L 112.3 144.5 L 111.0 147.1 L 112.9 151.5 L 113.0 154.1 L 114.1 157.4 L 115.6 156.3 L 118.1 159.1 L 119.4 162.9 L 108.7 174.5 L 99.5 186.4 L 95.1 189.1 L 91.6 189.7 L 91.6 185.8 L 90.1 184.8 L 88.2 183.1 L 87.4 180.3 L 76.8 167.0 L 66.2 153.8 L 54.3 139.2 Z"
+              fill="#bfdbfe"
+              stroke="#ffffff"
+              strokeWidth="0.8"
+            />
+            {/* Tunisia */}
+            <path
+              d="M 111.5 121.6 L 110.2 110.7 L 108.2 108.3 L 108.2 106.8 L 105.6 103.2 L 105.4 98.6 L 107.3 95.2 L 108.0 90.3 L 107.5 84.5 L 108.2 81.4 L 111.6 78.9 L 113.8 79.7 L 113.7 82.7 L 116.4 80.5 L 116.6 81.7 L 115.0 84.6 L 115.0 87.4 L 116.1 88.9 L 115.7 94.2 L 113.6 97.2 L 114.2 100.5 L 115.8 100.6 L 116.6 103.5 L 117.8 104.4 L 117.7 109.1 L 116.1 110.8 L 115.2 112.8 L 113.0 115.1 L 113.3 117.6 L 113.1 120.2 L 111.5 121.6 Z"
+              fill="#60a5fa"
+              stroke="#ffffff"
+              strokeWidth="0.8"
+            />
+            {/* Libya */}
+            <path
+              d="M 160.4 171.8 L 160.4 183.9 L 156.8 183.9 L 156.7 186.5 L 144.2 174.9 L 131.6 163.3 L 128.4 166.6 L 126.2 168.9 L 124.4 165.5 L 119.4 162.9 L 118.1 159.1 L 115.6 156.3 L 114.1 157.4 L 113.0 154.1 L 112.9 151.5 L 111.0 147.1 L 112.3 144.5 L 112.0 140.7 L 112.4 137.4 L 112.2 134.7 L 112.7 129.7 L 112.5 126.9 L 111.5 121.6 L 113.1 120.2 L 113.3 117.6 L 113.0 115.1 L 115.2 112.8 L 116.1 110.8 L 117.7 109.1 L 117.8 104.4 L 121.5 106.5 L 122.9 106.0 L 125.5 107.0 L 129.7 109.7 L 131.1 115.1 L 134.0 116.3 L 138.4 118.8 L 141.8 121.8 L 143.3 120.2 L 144.8 117.5 L 144.1 112.8 L 145.1 109.9 L 147.3 107.0 L 149.5 106.2 L 153.7 107.5 L 154.8 110.2 L 156.0 110.2 L 157.0 111.2 L 160.1 111.9 L 160.9 113.9 L 159.7 116.8 L 160.2 119.4 L 159.4 123.2 L 160.4 128.0 L 160.4 149.6 L 160.4 171.8 Z"
+              fill="#93c5fd"
+              stroke="#ffffff"
+              strokeWidth="0.8"
+            />
+            {/* Egypt */}
+            <path
+              d="M 197.7 171.8 L 185.2 171.8 L 173.0 171.8 L 160.4 171.8 L 160.4 149.6 L 160.4 128.0 L 159.4 123.2 L 160.2 119.4 L 159.7 116.8 L 160.9 113.9 L 165.1 113.8 L 168.1 115.4 L 171.2 117.2 L 172.7 118.2 L 175.1 116.2 L 176.4 114.5 L 179.2 114.0 L 181.4 114.8 L 182.3 117.8 L 183.0 115.8 L 185.5 117.2 L 188.0 117.6 L 189.5 116.0 L 189.5 116.0 L 191.3 124.9 L 191.6 126.4 L 190.7 128.9 L 190.0 133.4 L 189.2 136.6 L 188.5 137.7 L 187.4 135.7 L 186.0 133.0 L 183.7 124.3 L 183.4 124.9 L 184.7 131.3 L 186.7 137.3 L 189.0 146.8 L 190.2 150.1 L 191.2 153.5 L 194.0 160.2 L 193.4 161.2 L 193.5 165.2 L 197.2 170.6 L 197.7 171.8 Z"
+              fill="#bfdbfe"
+              stroke="#ffffff"
+              strokeWidth="0.8"
+            />
+
+            {/* Red Markers + Country Labels */}
+            {/* Maroc */}
+            <circle cx="56" cy="104" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="56" y="96" textAnchor="middle" fill="#0a1c3d" fontSize="7.5" fontWeight="700">
+              Maroc
+            </text>
+
+            {/* Algérie */}
+            <circle cx="88" cy="132" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="88" y="142" textAnchor="middle" fill="#0a1c3d" fontSize="7.5" fontWeight="700">
+              Algérie
+            </text>
+
+            {/* Tunisie */}
+            <circle cx="113" cy="94" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="113" y="86" textAnchor="middle" fill="#0a1c3d" fontSize="7.5" fontWeight="700">
+              Tunisie
+            </text>
+
+            {/* Libye */}
+            <circle cx="138" cy="130" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="138" y="140" textAnchor="middle" fill="#0a1c3d" fontSize="7.5" fontWeight="700">
+              Libye
+            </text>
+
+            {/* Égypte */}
+            <circle cx="178" cy="132" r="3" fill="#e01a22" stroke="#ffffff" strokeWidth="1.2" />
+            <text x="178" y="142" textAnchor="middle" fill="#0a1c3d" fontSize="7.5" fontWeight="700">
+              Égypte
+            </text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
+};

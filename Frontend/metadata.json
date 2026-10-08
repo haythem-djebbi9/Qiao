@@ -1,0 +1,6 @@
+{
+  "name": "QIAO - The Bridge Between China & North Africa",
+  "description": "Plateforme de mise en relation d'affaires, services professionnels, académie et réseau d'experts entre la Chine et l'Afrique du Nord.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

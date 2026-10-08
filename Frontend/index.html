@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          var desc = Object.getOwnPropertyDescriptor(window, 'fetch');
+          if (!desc || desc.configurable) {
+            Object.defineProperty(window, 'fetch', {
+              get: function() {
+                return originalFetch;
+              },
+              set: function(fn) {
+                originalFetch = fn;
+              },
+              configurable: true,
+              enumerable: true
+            });
+          }
+        } catch (e) {
+          try {
+            if (typeof Window !== 'undefined' && Window.prototype) {
+              var protoDesc = Object.getOwnPropertyDescriptor(Window.prototype, 'fetch');
+              if (protoDesc && protoDesc.configurable) {
+                var protoFetch = Window.prototype.fetch;
+                Object.defineProperty(Window.prototype, 'fetch', {
+                  get: function() { return protoFetch; },
+                  set: function(fn) { protoFetch = fn; },
+                  configurable: true,
+                  enumerable: true
+                });
+              }
+            }
+          } catch (err) {}
+        }
+        window.addEventListener('error', function(e) {
+          if (e && e.message && typeof e.message === 'string' && e.message.indexOf('fetch') !== -1 && e.message.indexOf('getter') !== -1) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>QIAO (桥) - Le pont entre la Chine et l'Afrique du Nord</title>
+    <meta name="description" content="Plateforme de mise en relation d'affaires, services professionnels, académie et réseau d'experts entre la Chine et l'Afrique du Nord." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-white text-slate-800 font-sans antialiased selection:bg-red-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

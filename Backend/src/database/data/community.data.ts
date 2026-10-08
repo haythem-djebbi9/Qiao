@@ -1,0 +1,207 @@
+import { CommunityPost, Expert } from '../../modules/community/community.entities';
+
+const AVATAR = (id: string, w = 200) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
+
+export interface SeedPost extends Partial<CommunityPost> {
+  /** Ancienneté de la publication en minutes au moment du seed. */
+  ageMinutes: number;
+  seedComments?: { author: string; avatar: string; text: string; ageMinutes: number }[];
+}
+
+export const POSTS: SeedPost[] = [
+  {
+    authorName: 'Li Wei',
+    authorRole: 'Entrepreneur',
+    authorLocation: 'Shanghai, Chine',
+    authorAvatar: AVATAR('photo-1507003211169-0a1dd7228f2d'),
+    ageMinutes: 120,
+    content: 'À la recherche de partenaires en Afrique du Nord pour développer la distribution de produits électroniques.',
+    tags: ['Partenariat', 'Business'],
+    category: 'Business',
+    community: 'trade',
+    likesCount: 24,
+    seedComments: [
+      {
+        author: 'Karim Haddad',
+        avatar: AVATAR('photo-1500648767791-00dcc994a43e', 150),
+        text: 'Bonjour Li Wei, notre groupe de distribution à Alger et Tunis serait très intéressé. Pouvons-nous échanger en privé ?',
+        ageMinutes: 60,
+      },
+      {
+        author: 'Sofia Mezhoud',
+        avatar: AVATAR('photo-1534528741775-53994a69daeb', 150),
+        text: 'Excellente opportunité. Avez-vous déjà la certification CE / conformité maghrébine ?',
+        ageMinutes: 45,
+      },
+    ],
+  },
+  {
+    authorName: 'Amina Ben Youssef',
+    authorRole: 'Consultante en import-export',
+    authorLocation: 'Tunis, Tunisie',
+    authorAvatar: AVATAR('photo-1573496359142-b8d87734a5a2'),
+    ageMinutes: 240,
+    content: "Webinaire : Comprendre les opportunités d'importation depuis la Chine. Rejoignez-nous jeudi à 18h (GMT+1) !",
+    tags: ['Événement', 'Import/Export'],
+    category: 'À la une',
+    community: 'business',
+    likesCount: 18,
+    seedComments: [
+      {
+        author: 'Youssef El Amrani',
+        avatar: AVATAR('photo-1519085360753-af0119f7cbe7', 150),
+        text: "Inscrit ! Très hâte d'assister au volet sur la conformité douanière.",
+        ageMinutes: 180,
+      },
+    ],
+  },
+  {
+    authorName: 'Zhang Min',
+    authorRole: "Chargée d'investissements",
+    authorLocation: 'Beijing, Chine',
+    authorAvatar: AVATAR('photo-1580489944761-15a19d654956'),
+    ageMinutes: 360,
+    content: "Quels secteurs offrent actuellement les meilleures opportunités d'investissement en Afrique du Nord ?",
+    tags: ['Question', 'Investissement'],
+    category: 'Questions',
+    community: 'investment',
+    likesCount: 15,
+    seedComments: [
+      {
+        author: 'Dr. Wang Hui',
+        avatar: AVATAR('photo-1472099645785-5658abf4ff4e', 150),
+        text: "Les énergies renouvelables (solaire et hydrogène vert) ainsi que l'agro-industrie et les composants automobiles.",
+        ageMinutes: 300,
+      },
+    ],
+  },
+  {
+    authorName: 'Karim Haddad',
+    authorRole: 'Directeur Logistique',
+    authorLocation: 'Alger, Algérie',
+    authorAvatar: AVATAR('photo-1500648767791-00dcc994a43e'),
+    ageMinutes: 480,
+    content: "Offre d'espace groupage maritime Ningbo/Shanghai vers Alger & Radès avec dédouanement clé en main.",
+    tags: ['Offres', 'Logistique'],
+    category: 'Offres',
+    community: 'trade',
+    likesCount: 21,
+  },
+  {
+    authorName: 'Chen Tao',
+    authorRole: 'Directeur R&D CleanTech',
+    authorLocation: 'Shenzhen, Chine',
+    authorAvatar: AVATAR('photo-1506794778202-cad84cf45f1d'),
+    ageMinutes: 720,
+    content:
+      'Nouvelle législation sur les transferts technologiques solaires en Afrique du Nord : analyse comparative publiée sur QIAO.',
+    tags: ['Actualités', 'Énergie'],
+    category: 'Actualités',
+    community: 'tech',
+    likesCount: 35,
+  },
+  {
+    authorName: 'Nadia Belkacem',
+    authorRole: 'Étudiante en Master Commerce International',
+    authorLocation: 'Oran, Algérie',
+    authorAvatar: AVATAR('photo-1544005313-94ddf0286df2'),
+    ageMinutes: 1440,
+    content: 'Je cherche un stage de 6 mois en sourcing ou logistique à Shenzhen ou Ningbo. Des conseils pour les démarches de visa ?',
+    tags: ['Question', 'Formation'],
+    category: 'Questions',
+    community: 'students',
+    likesCount: 9,
+  },
+  {
+    authorName: 'Omar Tazi',
+    authorRole: 'Responsable relocation',
+    authorLocation: 'Casablanca, Maroc',
+    authorAvatar: AVATAR('photo-1492562080023-ab3db95bfbce'),
+    ageMinutes: 2160,
+    content:
+      "Guide pratique pour les cadres chinois qui s'installent à Casablanca : logement, écoles internationales et démarches de résidence.",
+    tags: ['Actualités', 'Relocation'],
+    category: 'Actualités',
+    community: 'expats',
+    likesCount: 14,
+  },
+  {
+    authorName: 'Liu Yan',
+    authorRole: 'Professeure de mandarin',
+    authorLocation: 'Tunis, Tunisie',
+    authorAvatar: AVATAR('photo-1573497019940-1c28c88b4f3e'),
+    ageMinutes: 2880,
+    content: 'Atelier gratuit de conversation en mandarin des affaires chaque samedi matin à Tunis. Places limitées à 12 personnes.',
+    tags: ['Événement', 'Langues'],
+    category: 'Business',
+    community: 'culture',
+    likesCount: 27,
+  },
+];
+
+export const EXPERTS: Partial<Expert>[] = [
+  {
+    id: 'e1',
+    name: 'Dr. Wang Hui',
+    role: 'Expert en commerce international',
+    country: 'Chine',
+    flag: '🇨🇳',
+    avatar: AVATAR('photo-1472099645785-5658abf4ff4e'),
+  },
+  {
+    id: 'e2',
+    name: 'Youssef El Amrani',
+    role: "Conseil en stratégie d'entreprise",
+    country: 'Maroc',
+    flag: '🇲🇦',
+    avatar: AVATAR('photo-1519085360753-af0119f7cbe7'),
+  },
+  {
+    id: 'e3',
+    name: 'Zhao Ling',
+    role: 'Avocate en droit des affaires',
+    country: 'Chine',
+    flag: '🇨🇳',
+    avatar: AVATAR('photo-1544005313-94ddf0286df2'),
+  },
+  {
+    id: 'e4',
+    name: 'Sofia Mezhoud',
+    role: 'Investisseuse & Mentore',
+    country: 'Tunisie',
+    flag: '🇹🇳',
+    avatar: AVATAR('photo-1534528741775-53994a69daeb'),
+  },
+  {
+    id: 'e5',
+    name: 'Karim Haddad',
+    role: 'Directeur logistique & transit',
+    country: 'Algérie',
+    flag: '🇩🇿',
+    avatar: AVATAR('photo-1500648767791-00dcc994a43e'),
+  },
+  {
+    id: 'e6',
+    name: 'Li Mei',
+    role: 'Responsable supply chain',
+    country: 'Chine',
+    flag: '🇨🇳',
+    avatar: AVATAR('photo-1580489944761-15a19d654956'),
+  },
+  {
+    id: 'e7',
+    name: 'Mona Fawzy',
+    role: 'Consultante réglementaire GOEIC',
+    country: 'Égypte',
+    flag: '🇪🇬',
+    avatar: AVATAR('photo-1573496359142-b8d87734a5a2'),
+  },
+  {
+    id: 'e8',
+    name: 'Ahmed Chen',
+    role: "Avocat d'affaires franco-chinois",
+    country: 'Chine',
+    flag: '🇨🇳',
+    avatar: AVATAR('photo-1506794778202-cad84cf45f1d'),
+  },
+].map((expert, index) => ({ ...expert, sortOrder: index }));
