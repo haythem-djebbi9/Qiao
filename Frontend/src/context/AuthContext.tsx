@@ -2,7 +2,11 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { api, getToken, setToken } from '../lib/api';
 import { User } from '../lib/models';
 
-export type AuthMode = 'login' | 'register';
+/**
+ * login / register : formulaires classiques ; forgot : demande de lien ; reset : nouveau mot de passe ;
+ * oauth : finalisation d'une connexion WeChat/Facebook dont l'identité n'est liée à aucun compte.
+ */
+export type AuthMode = 'login' | 'register' | 'forgot' | 'reset' | 'oauth';
 
 export interface RegisterPayload {
   fullName: string;
@@ -11,6 +15,12 @@ export interface RegisterPayload {
   company?: string;
   accountType: User['accountType'];
   origin: User['origin'];
+  acceptTerms: boolean;
+}
+
+export interface Session {
+  token: string;
+  user: User;
 }
 
 interface AuthContextValue {
@@ -19,10 +29,13 @@ interface AuthContextValue {
   initializing: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (payload: RegisterPayload) => Promise<User>;
+  /** Ouvre une session renvoyée par l'API (connexion WeChat/Facebook, liaison de compte). */
+  acceptSession: (session: Session) => User;
   logout: () => void;
-  updateProfile: (patch: Partial<Pick<User, 'fullName' | 'company' | 'title' | 'location' | 'language'>>) => Promise<User>;
-  authModal: { isOpen: boolean; mode: AuthMode; reason?: string };
-  openAuth: (mode?: AuthMode, reason?: string) => void;
+  refreshUser: () => Promise<User | null>;
+  updateProfile: (patch: Partial<Pick<User, 'fullName' | 'company' | 'title' | 'location' | 'language' | 'avatarUrl'>>) => Promise<User>;
+  authModal: { isOpen: boolean; mode: AuthMode; reason?: string; ticket?: string };
+  openAuth: (mode?: AuthMode, reason?: string, ticket?: string) => void;
   /** Ferme la fenêtre sans exécuter l'action en attente (annulation). */
   closeAuth: () => void;
   /** Ferme la fenêtre après une connexion réussie et exécute l'action en attente. */
@@ -39,19 +52,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authModal, setAuthModal] = useState<AuthContextValue['authModal']>({ isOpen: false, mode: 'login' });
   const pendingAction = useRef<(() => void) | null>(null);
 
+  // Session enregistrée : renouvelée au chargement (expiration glissante), abandonnée si révoquée.
   useEffect(() => {
     if (!getToken()) {
       setInitializing(false);
       return;
     }
     api
-      .get<User>('/auth/me')
-      .then(setUser)
+      .post<Session>('/auth/refresh')
+      .then((session) => {
+        setToken(session.token);
+        setUser(session.user);
+      })
       .catch(() => setToken(null))
       .finally(() => setInitializing(false));
   }, []);
 
-  const completeSession = useCallback((session: { token: string; user: User }) => {
+  const acceptSession = useCallback((session: Session) => {
     setToken(session.token);
     setUser(session.user);
     return session.user;
@@ -65,21 +82,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string) =>
-      completeSession(await api.post<{ token: string; user: User }>('/auth/login', { email, password })),
-    [completeSession],
+    async (email: string, password: string) => acceptSession(await api.post<Session>('/auth/login', { email, password })),
+    [acceptSession],
   );
 
   const register = useCallback(
-    async (payload: RegisterPayload) =>
-      completeSession(await api.post<{ token: string; user: User }>('/auth/register', payload)),
-    [completeSession],
+    async (payload: RegisterPayload) => acceptSession(await api.post<Session>('/auth/register', payload)),
+    [acceptSession],
   );
 
   const logout = useCallback(() => {
+    // Révoque la session côté serveur (le jeton ne sera plus accepté), puis l'oublie localement.
+    if (getToken()) api.post('/auth/logout').catch(() => undefined);
     setToken(null);
     setUser(null);
     pendingAction.current = null;
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    if (!getToken()) return null;
+    try {
+      const me = await api.get<User>('/auth/me');
+      setUser(me);
+      return me;
+    } catch {
+      return null;
+    }
   }, []);
 
   const updateProfile = useCallback<AuthContextValue['updateProfile']>(async (patch) => {
@@ -88,8 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return updated;
   }, []);
 
-  const openAuth = useCallback((mode: AuthMode = 'login', reason?: string) => {
-    setAuthModal({ isOpen: true, mode, reason });
+  const openAuth = useCallback((mode: AuthMode = 'login', reason?: string, ticket?: string) => {
+    setAuthModal({ isOpen: true, mode, reason, ticket });
   }, []);
 
   const closeAuth = useCallback(() => {
@@ -111,7 +139,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ user, initializing, login, register, logout, updateProfile, authModal, openAuth, closeAuth, finishAuth, requireAuth }}
+      value={{
+        user,
+        initializing,
+        login,
+        register,
+        acceptSession,
+        logout,
+        refreshUser,
+        updateProfile,
+        authModal,
+        openAuth,
+        closeAuth,
+        finishAuth,
+        requireAuth,
+      }}
     >
       {children}
     </AuthContext.Provider>

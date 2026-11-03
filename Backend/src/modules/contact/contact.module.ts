@@ -1,7 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { mkdirSync } from 'fs';
-import { join } from 'path';
+import { uploadsPath } from '../../common/uploads';
 import { ContactMessage } from './contact-message.entity';
 import { ContactController } from './contact.controller';
 import { ContactService } from './contact.service';
@@ -14,6 +14,6 @@ import { ContactService } from './contact.service';
 })
 export class ContactModule implements OnModuleInit {
   onModuleInit() {
-    mkdirSync(join(process.cwd(), 'uploads', 'contact'), { recursive: true });
+    mkdirSync(uploadsPath('contact'), { recursive: true });
   }
 }

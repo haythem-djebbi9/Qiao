@@ -122,7 +122,7 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
       tag1: 'Énergie',
       tag2: 'Import',
       growth: '68%',
-      image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=400&q=80',
+      image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80',
     },
     {
       id: 'hp-2',

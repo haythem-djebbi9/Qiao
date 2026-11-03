@@ -15,13 +15,18 @@ import {
   Building2,
   Globe,
   Star,
+  MapPin,
+  ArrowRight,
 } from 'lucide-react';
+import { VisitorLocation } from '../lib/geo';
+import { FlagIcon } from './common/FlagIcon';
 
 interface HeroProps {
   onSearch?: (query: string) => void;
   onSelectCategory?: (cat: string) => void;
-  onSelectOrientation?: (origin: 'china' | 'north-africa') => void;
-  selectedOrientation?: 'china' | 'north-africa' | null;
+  /** Position détectée automatiquement (compte, fuseau horaire ou langue). */
+  visitorLocation: VisitorLocation;
+  onExploreOpportunities?: () => void;
   onOpenCalculator?: () => void;
   onOpenRegister?: () => void;
   onOpenVideo?: () => void;
@@ -31,21 +36,16 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({
   onSearch,
   onSelectCategory,
-  onSelectOrientation,
-  selectedOrientation: propOrientation,
+  visitorLocation,
+  onExploreOpportunities,
   onOpenCalculator,
   onOpenRegister,
   onOpenVideo,
   onExploreServices,
 }) => {
-  const [internalOrientation, setInternalOrientation] = useState<'china' | 'north-africa' | null>(null);
-  const selectedOrientation = propOrientation !== undefined ? propOrientation : internalOrientation;
-  
-  const handleOrientationChange = (origin: 'china' | 'north-africa') => {
-    setInternalOrientation(origin);
-    onSelectOrientation?.(origin);
-  };
-  
+  const fromChina = visitorLocation.region === 'china';
+  const fromNorthAfrica = visitorLocation.region === 'north-africa';
+
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('Business');
 
@@ -117,38 +117,48 @@ export const Hero: React.FC<HeroProps> = ({
             <p>et développez vos projets en toute sérénité.</p>
           </div>
 
-          {/* Orientation Pill Buttons - Centered base of the pyramid */}
+          {/* Position détectée automatiquement + parcours adapté - Centered base of the pyramid */}
           <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-5">
-            {/* China Pill */}
+            {/* Detected location pill */}
+            <div
+              className={`px-5 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium flex items-center gap-2.5 shadow-xl backdrop-blur-md text-white ${
+                fromChina ? 'bg-[#dc2626]' : 'bg-[#0a1b38]/90 border border-white/20'
+              }`}
+              title="Position détectée automatiquement"
+            >
+              {visitorLocation.countryCode ? (
+                <FlagIcon country={visitorLocation.countryCode} size="md" className="rounded-sm overflow-hidden shrink-0" />
+              ) : (
+                <MapPin className="w-4 h-4 shrink-0" />
+              )}
+              <span>
+                {fromChina || fromNorthAfrica ? (
+                  <>
+                    Vous êtes en <strong className="font-semibold">{visitorLocation.country}</strong>
+                  </>
+                ) : (
+                  'Bienvenue sur QIAO'
+                )}
+              </span>
+            </div>
+
+            {/* Personalized CTA according to the detected region */}
             <button
-              onClick={() => handleOrientationChange('china')}
+              onClick={fromChina || fromNorthAfrica ? onExploreOpportunities : onExploreServices}
               className={`px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl active:scale-98 ${
-                selectedOrientation === 'china'
-                  ? 'bg-[#dc2626] text-white ring-2 ring-red-400'
+                fromChina
+                  ? 'bg-[#0a1b38]/90 hover:bg-[#122852] text-white border border-white/20 backdrop-blur-md'
                   : 'bg-[#dc2626] hover:bg-[#b91c1c] text-white'
               }`}
             >
-              {/* Round China Flag Circle */}
-              <span className="w-5 h-5 rounded-full bg-red-700 border border-red-400/50 flex items-center justify-center text-[10px] text-white shadow-xs font-bold shrink-0">
-                ★
+              <span>
+                {fromChina
+                  ? "S'implanter en Afrique du Nord"
+                  : fromNorthAfrica
+                  ? 'Sourcer & exporter avec la Chine'
+                  : 'Découvrir nos services'}
               </span>
-              <span>Je viens de Chine</span>
-            </button>
-
-            {/* North Africa Pill */}
-            <button
-              onClick={() => handleOrientationChange('north-africa')}
-              className={`px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl backdrop-blur-md active:scale-98 ${
-                selectedOrientation === 'north-africa'
-                  ? 'bg-[#0a1b38] text-white ring-2 ring-blue-400 border border-blue-400'
-                  : 'bg-[#0a1b38]/90 hover:bg-[#122852] text-white border border-white/20'
-              }`}
-            >
-              {/* Round Blue Globe Circle */}
-              <span className="w-5 h-5 rounded-full bg-blue-600 border border-white/40 flex items-center justify-center text-[11px] text-white shadow-xs shrink-0">
-                🌍
-              </span>
-              <span>Je viens d'Afrique du Nord</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>

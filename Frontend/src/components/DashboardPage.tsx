@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Calendar,
   CalendarCheck,
@@ -21,6 +21,11 @@ import {
   Building2,
   MessageSquare,
   ArrowRight,
+  Gavel,
+  Lock,
+  BookOpen,
+  CalendarCog,
+  Monitor,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Dashboard } from '../lib/models';
@@ -30,15 +35,37 @@ import { useApi } from '../hooks/useApi';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useDownloads } from '../hooks/useDownloads';
+import { navigateDashboard, useDashboardRoute } from '../lib/payments';
+import { TransactionsView } from './payments/TransactionsView';
+import { PaymentsAdminView } from './payments/PaymentsAdminView';
+import { MyCourses } from './academy/MyCourses';
+import { CoursePlayer } from './academy/CoursePlayer';
+import { AcademyAdminView } from './academy/admin/AcademyAdminView';
+import { EventsAdminView } from './events/admin/EventsAdminView';
+import { EVENT_FORMAT_LABELS } from '../lib/events';
 
 interface DashboardPageProps {
   onNavigate: (tab: string) => void;
 }
 
-type Section = 'overview' | 'appointments' | 'events' | 'academy' | 'opportunities' | 'downloads' | 'network' | 'requests' | 'profile';
+type Section =
+  | 'overview'
+  | 'prestations'
+  | 'appointments'
+  | 'events'
+  | 'academy'
+  | 'opportunities'
+  | 'downloads'
+  | 'network'
+  | 'requests'
+  | 'profile'
+  | 'admin-paiements'
+  | 'admin-academy'
+  | 'admin-events';
 
-const SECTIONS: { id: Section; label: string; icon: React.ElementType }[] = [
+const SECTIONS: { id: Section; label: string; icon: React.ElementType; adminOnly?: boolean }[] = [
   { id: 'overview', label: "Vue d'ensemble", icon: Bell },
+  { id: 'prestations', label: 'Prestations & paiements', icon: ShieldCheck },
   { id: 'appointments', label: 'Rendez-vous', icon: CalendarCheck },
   { id: 'events', label: 'Événements', icon: Calendar },
   { id: 'academy', label: 'Formations', icon: GraduationCap },
@@ -47,6 +74,9 @@ const SECTIONS: { id: Section; label: string; icon: React.ElementType }[] = [
   { id: 'network', label: 'Réseau', icon: Users },
   { id: 'requests', label: 'Demandes & cotations', icon: FileText },
   { id: 'profile', label: 'Mon profil', icon: Pencil },
+  { id: 'admin-paiements', label: 'Admin : paiements & litiges', icon: Gavel, adminOnly: true },
+  { id: 'admin-academy', label: 'Admin : QIAO Academy', icon: BookOpen, adminOnly: true },
+  { id: 'admin-events', label: 'Admin : Événements', icon: CalendarCog, adminOnly: true },
 ];
 
 const Empty: React.FC<{ text: string; action?: { label: string; onClick: () => void } }> = ({ text, action }) => (
@@ -65,7 +95,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const { notify } = useToast();
   const { downloadDocument, pending } = useDownloads();
   const { data, loading, error, reload } = useApi<Dashboard>('/me/dashboard');
-  const [section, setSection] = useState<Section>('overview');
+  // Section et élément sélectionné portés par l'URL (?dv=prestations/<id>) : liens de notification et bouton retour.
+  const route = useDashboardRoute();
+  const [routeSection, routeId] = route;
+  const section: Section = SECTIONS.some((s) => s.id === routeSection) ? (routeSection as Section) : 'overview';
+  const setSection = (next: Section) => navigateDashboard(next === 'overview' ? '' : next);
+  // Retour du lecteur de formation vers « Mes formations » : progression rechargée depuis le serveur.
+  // « academy/commande/<id> » : retour de la page de paiement (commande), pas une formation.
+  const orderRoute = section === 'academy' && routeId === 'commande';
+  const playerOpen = section === 'academy' && Boolean(routeId) && !orderRoute;
+  const wasPlayerOpen = useRef(playerOpen);
+  useEffect(() => {
+    if (wasPlayerOpen.current && !playerOpen) reload();
+    wasPlayerOpen.current = playerOpen;
+  }, [playerOpen, reload]);
   const [profile, setProfile] = useState({ fullName: '', company: '', title: '', location: '' });
   const [savingProfile, setSavingProfile] = useState(false);
   const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' });
@@ -130,6 +173,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     }
   };
 
+  // Vues qui chargent leurs propres données (sans attendre le tableau de bord).
+  const standalone = ['prestations', 'admin-paiements', 'admin-academy', 'admin-events'].includes(section) || playerOpen;
   const stats = data?.stats ?? {};
   const statCards = [
     { label: 'Rendez-vous à venir', value: stats.appointments ?? 0, icon: CalendarCheck, section: 'appointments' as Section },
@@ -137,7 +182,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     { label: 'Formations suivies', value: stats.enrollments ?? 0, icon: GraduationCap, section: 'academy' as Section },
     { label: 'Candidatures', value: stats.applications ?? 0, icon: Target, section: 'opportunities' as Section },
     { label: 'Téléchargements', value: stats.downloads ?? 0, icon: Download, section: 'downloads' as Section },
-    { label: 'Connexions', value: stats.connections ?? 0, icon: Users, section: 'network' as Section },
+    { label: 'Membres suivis', value: stats.connections ?? 0, icon: Users, section: 'network' as Section },
   ];
 
   return (
@@ -181,7 +226,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           {/* Navigation */}
           <aside className="lg:col-span-3">
             <nav className="bg-white border border-slate-200 rounded-2xl p-2 flex lg:flex-col gap-1 overflow-x-auto">
-              {SECTIONS.map(({ id, label, icon: Icon }) => (
+              {SECTIONS.filter((s) => !s.adminOnly || user.role === 'admin').map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => setSection(id)}
@@ -200,15 +245,37 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </aside>
 
           <main className="lg:col-span-9 space-y-6">
-            {loading && !data && (
+            {loading && !data && !standalone && (
               <div className="flex items-center gap-2 text-sm text-slate-500 p-6">
                 <Loader2 className="w-5 h-5 animate-spin text-red-600" /> Chargement de votre espace...
               </div>
             )}
-            {error && <div className="p-4 rounded-2xl bg-red-50 border border-red-100 text-sm text-red-700">{error}</div>}
+            {error && !standalone && (
+              <div className="p-4 rounded-2xl bg-red-50 border border-red-100 text-sm text-red-700">{error}</div>
+            )}
+
+            {section === 'prestations' && <TransactionsView selectedId={routeId} onNavigate={onNavigate} />}
+            {section === 'admin-paiements' && <PaymentsAdminView selectedId={routeId} />}
+            {section === 'admin-academy' && <AcademyAdminView route={route.slice(1)} />}
+            {section === 'admin-events' && <EventsAdminView route={route.slice(1)} />}
 
             {data && section === 'overview' && (
               <>
+                <button
+                  onClick={() => setSection('prestations')}
+                  className="w-full bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 text-left hover:border-red-300 hover:shadow-sm cursor-pointer"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                      <Lock className="w-5 h-5" />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-bold text-slate-900">Prestations & paiements sécurisés</span>
+                      <span className="block text-xs text-slate-500">Vos achats et ventes de prestations, fonds retenus par QIAO, litiges et versements.</span>
+                    </span>
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+                </button>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {statCards.map(({ label, value, icon: Icon, section: target }) => (
                     <button
@@ -295,75 +362,74 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 {data.eventRegistrations.length === 0 ? (
                   <Empty text="Vous n'êtes inscrit à aucun événement." action={{ label: 'Voir les événements', onClick: () => onNavigate('evenements') }} />
                 ) : (
-                  data.eventRegistrations.map((r) => (
-                    <div key={r.id} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-4">
-                      <img src={resolveImage(r.event.image)} alt={r.event.title} className="w-20 h-16 rounded-xl object-cover shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-slate-900 text-sm truncate">{r.event.title}</div>
-                        <div className="text-xs text-slate-500">
-                          {r.event.dateRange} {r.event.monthYear} · {r.event.location}
+                  data.eventRegistrations.map((r) => {
+                    const upcoming = r.event.startDate >= new Date().toISOString().slice(0, 10);
+                    return (
+                      <div key={r.id} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <img src={resolveImage(r.event.image)} alt={r.event.title} className="w-20 h-16 rounded-xl object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-slate-900 text-sm truncate">{r.event.title}</div>
+                          <div className="text-xs text-slate-500">
+                            {r.event.dateRange} {r.event.monthYear} · {r.event.time} · {r.event.location} · {EVENT_FORMAT_LABELS[r.event.format]}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                            {r.status === 'waitlisted' ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-amber-50 text-amber-700 border-amber-200">
+                                Liste d'attente : vous serez prévenu si une place se libère
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                                {r.checkedInAt ? 'Présence enregistrée' : 'Inscription confirmée'}
+                              </span>
+                            )}
+                            {r.event.onlineUrl && upcoming && (
+                              <a
+                                href={r.event.onlineUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2.5 py-1 rounded-full bg-[#071329] hover:bg-slate-800 text-white text-[10px] font-bold inline-flex items-center gap-1"
+                              >
+                                <Monitor className="w-3 h-3" /> Rejoindre en ligne
+                              </a>
+                            )}
+                            {r.status === 'confirmed' && r.event.format !== 'onsite' && !r.event.onlineUrl && upcoming && (
+                              <span className="text-[10px] text-slate-400">Le lien de connexion sera ajouté ici avant l'événement.</span>
+                            )}
+                            {upcoming && (
+                              <button
+                                disabled={busyId === r.id}
+                                onClick={() =>
+                                  window.confirm(`Annuler votre inscription à « ${r.event.title} » ?`) &&
+                                  run(r.id, () => api.post(`/events/registrations/${r.id}/cancel`), 'Inscription annulée.')
+                                }
+                                className="text-[10px] font-semibold text-slate-400 hover:text-red-600 cursor-pointer disabled:opacity-50"
+                              >
+                                Annuler mon inscription
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="sm:text-right">
+                          <div className="text-[10px] uppercase font-bold text-slate-400">Badge</div>
+                          <div className="font-mono text-sm font-bold text-red-600">{r.badgeCode}</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-[10px] uppercase font-bold text-slate-400">Badge</div>
-                        <div className="font-mono text-sm font-bold text-red-600">{r.badgeCode}</div>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}
 
-            {data && section === 'academy' && (
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <h2 className="text-lg font-bold text-slate-900">Mes formations</h2>
-                  {data.enrollments.length === 0 ? (
-                    <Empty text="Aucune formation pour le moment." action={{ label: 'Découvrir QIAO Academy', onClick: () => onNavigate('academy') }} />
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {data.enrollments.map((e) => (
-                        <div key={e.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                          <img src={resolveImage(e.image)} alt={e.title} className="w-full h-28 object-cover" />
-                          <div className="p-4">
-                            <div className="text-[10px] font-bold uppercase text-red-600">{e.itemType === 'path' ? 'Parcours' : 'Formation'}</div>
-                            <div className="font-bold text-sm text-slate-900 leading-snug">{e.title}</div>
-                            <div className="mt-3 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                              <div className="bg-red-600 h-full" style={{ width: `${e.progress}%` }} />
-                            </div>
-                            <div className="text-[11px] text-slate-500 mt-1">Progression : {e.progress}% · inscrit le {formatDate(e.createdAt)}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {data.cart.count > 0 && (
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-sm text-slate-700">
-                      <ShoppingCart className="w-4 h-4 text-red-600" />
-                      {data.cart.count} formation(s) dans votre panier — {data.cart.total} TND
-                    </div>
-                    <button onClick={() => onNavigate('academy')} className="text-xs font-bold text-red-600 hover:underline cursor-pointer">
-                      Finaliser ma commande →
-                    </button>
-                  </div>
-                )}
-                {data.orders.length > 0 && (
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4">
-                    <h3 className="text-sm font-bold text-slate-900 mb-2">Historique des commandes</h3>
-                    <div className="divide-y divide-slate-100 text-sm">
-                      {data.orders.map((o) => (
-                        <div key={o.id} className="py-2 flex items-center justify-between gap-3">
-                          <span className="font-mono text-xs text-slate-500">{o.reference}</span>
-                          <span className="flex-1 text-slate-700 truncate">{o.items.map((i) => i.title).join(', ')}</span>
-                          <span className="font-bold text-slate-900">{o.total} TND</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+            {playerOpen && routeId && <CoursePlayer courseId={routeId} lessonId={route[2]} />}
+            {data && section === 'academy' && !playerOpen && (
+              <MyCourses
+                enrollments={data.enrollments}
+                cart={data.cart}
+                orders={data.orders}
+                onNavigate={onNavigate}
+                focusOrderId={orderRoute ? route[2] : undefined}
+                onOrdersChanged={reload}
+              />
             )}
 
             {data && section === 'opportunities' && (
@@ -435,26 +501,30 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             {data && section === 'network' && (
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <h2 className="text-lg font-bold text-slate-900">Mes connexions</h2>
+                  <h2 className="text-lg font-bold text-slate-900">Membres que je suis</h2>
                   {data.connections.length === 0 ? (
-                    <Empty text="Aucune connexion pour le moment." action={{ label: 'Découvrir la communauté', onClick: () => onNavigate('community') }} />
+                    <Empty text="Vous ne suivez aucun membre pour le moment." action={{ label: 'Découvrir les experts', onClick: () => onNavigate('community/experts') }} />
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {data.connections.map((c) => (
                         <div key={c.id} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
-                          <img src={c.avatar} alt={c.name} className="w-11 h-11 rounded-full object-cover" />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-sm text-slate-900">{c.name}</div>
+                          {c.avatarUrl ? (
+                            <img src={c.avatarUrl} alt={c.fullName} className="w-11 h-11 rounded-full object-cover" />
+                          ) : (
+                            <span className="w-11 h-11 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">{c.fullName.slice(0, 2).toUpperCase()}</span>
+                          )}
+                          <button onClick={() => onNavigate(`community/member/${c.handle}`)} className="flex-1 min-w-0 text-left cursor-pointer">
+                            <div className="font-bold text-sm text-slate-900 hover:text-red-600">{c.fullName}</div>
                             <div className="text-xs text-slate-500 truncate">
-                              {c.role} · {c.flag} {c.country}
+                              {[c.headline, c.location].filter(Boolean).join(' · ')}
                             </div>
-                          </div>
+                          </button>
                           <button
-                            onClick={() => run(c.id, () => api.post(`/community/experts/${c.id}/connect`), `Connexion avec ${c.name} retirée.`)}
+                            onClick={() => run(c.id, () => api.post(`/community/members/${c.handle}/follow`), `Vous ne suivez plus ${c.fullName}.`)}
                             disabled={busyId === c.id}
                             className="text-xs font-semibold text-slate-400 hover:text-red-600 cursor-pointer"
                           >
-                            Retirer
+                            Ne plus suivre
                           </button>
                         </div>
                       ))}
@@ -469,12 +539,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                     <Empty text="Aucune publication enregistrée." />
                   ) : (
                     data.bookmarks.map((p) => (
-                      <div key={p.id} className="bg-white border border-slate-200 rounded-2xl p-4 text-sm">
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigate(`community/post/${p.id}`)}
+                        className="w-full text-left bg-white border border-slate-200 rounded-2xl p-4 text-sm hover:border-red-300 cursor-pointer"
+                      >
                         <div className="text-xs text-slate-500 mb-1">
-                          {p.author} · {p.location}
+                          {p.author?.fullName} · {p.community?.name ?? 'Fil général'}
                         </div>
-                        <p className="text-slate-800">{p.content}</p>
-                      </div>
+                        {p.title && <p className="font-bold text-slate-900">{p.title}</p>}
+                        <p className="text-slate-800 line-clamp-2">{p.content}</p>
+                      </button>
                     ))
                   )}
                 </div>

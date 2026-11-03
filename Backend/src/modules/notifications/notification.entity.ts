@@ -9,6 +9,7 @@ export type NotificationType =
   | 'academy'
   | 'community'
   | 'resource'
+  | 'payment'
   | 'info';
 
 @Entity('notifications')
@@ -29,9 +30,20 @@ export class Notification {
   @Column({ type: 'varchar', length: 20, default: 'info' })
   type: NotificationType;
 
-  /** Page de l'application à ouvrir au clic (ex. « evenements », « dashboard »). */
-  @Column({ type: 'varchar', length: 60, nullable: true })
+  /** Page de l'application à ouvrir au clic (ex. « evenements », « dashboard », « community/post/<id> »). */
+  @Column({ type: 'varchar', length: 120, nullable: true })
   link: string | null;
+
+  /** Événement Community à l'origine de la notification (préférences par type). */
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  kind: string | null;
+
+  /** Objet concerné : post, community, conversation, member, report. */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  targetType: string | null;
+
+  @Column({ type: 'varchar', length: 80, nullable: true })
+  targetId: string | null;
 
   @Column({ default: false })
   read: boolean;

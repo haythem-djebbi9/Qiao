@@ -80,8 +80,21 @@ export const api = {
   get: <T>(path: string, query?: Query) => request<T>('GET', path, { query }),
   post: <T>(path: string, body?: unknown) => request<T>('POST', path, { body }),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, { body }),
+  put: <T>(path: string, body?: unknown) => request<T>('PUT', path, { body }),
   delete: <T>(path: string) => request<T>('DELETE', path),
 };
+
+/** Récupère un fichier protégé (pièce jointe) avec le jeton de session et renvoie une URL locale. */
+export async function fetchObjectUrl(path: string): Promise<string> {
+  const headers: Record<string, string> = {};
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(buildUrl(path), { headers });
+  if (!response.ok) throw await parseError(response);
+  return URL.createObjectURL(await response.blob());
+}
+
+export const apiUrl = (path: string) => buildUrl(path);
 
 /** Télécharge un fichier généré par l'API et déclenche l'enregistrement dans le navigateur. */
 export async function downloadFile(path: string, fallbackName: string): Promise<string> {

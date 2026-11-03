@@ -116,7 +116,9 @@ export type AppTab =
   | 'secteurs'
   | 'sector-detail'
   | 'commerce-hub'
-  | 'dashboard';
+  | 'dashboard'
+  /** Vérification publique d'un certificat QIAO Academy (?numero=). */
+  | 'certificat';
 
 export type CommerceHubTab =
   | 'vue-ensemble'

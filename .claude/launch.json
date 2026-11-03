@@ -4,8 +4,35 @@
     {
       "name": "qiao-frontend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "Frontend", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "Frontend",
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "qiao-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "Backend",
+        "run",
+        "start:dev"
+      ],
+      "port": 4000
+    },
+    {
+      "name": "qiao-frontend-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "Frontend/node_modules/vite/bin/vite.js",
+        "Frontend",
+        "--port=3100",
+        "--strictPort"
+      ],
+      "port": 3100
     }
   ]
 }

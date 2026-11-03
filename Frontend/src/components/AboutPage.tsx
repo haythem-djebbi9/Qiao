@@ -76,7 +76,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       author: 'Yassine Belkacem',
       role: 'Directeur Général, Maghreb Green Energy',
       image:
-        'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80',
+        'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=600&q=80',
     },
     {
       quote:

@@ -11,7 +11,7 @@ const RED = '#dc2626';
 const NAVY = '#07152b';
 
 /** Les polices standard PDF ne couvrent que le jeu Latin : on remplace les symboles hors jeu. */
-function pdfSafe(text: string): string {
+export function pdfSafe(text: string): string {
   return text
     .replace(/[→➔]/g, '->')
     .replace(/[↔]/g, '<->')

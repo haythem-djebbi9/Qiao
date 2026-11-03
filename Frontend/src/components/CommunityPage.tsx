@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Search,
   Users,
@@ -7,47 +7,64 @@ import {
   Handshake,
   ArrowRight,
   ChevronRight,
-  ChevronLeft,
-  Plus,
-  ThumbsUp,
   MessageSquare,
-  Share2,
-  Bookmark,
   FileText,
   Target,
   Trophy,
-  Calendar,
   MapPin,
   Clock,
   Check,
-  TrendingUp,
-  GraduationCap,
-  Lightbulb,
-  Send,
   X,
-  Sparkles,
-  UserCheck,
+  Loader2,
+  Home,
   Compass,
-  Briefcase,
-  Loader2
+  BadgeCheck,
+  Mail,
+  UserCircle,
+  FilePen,
+  ShieldAlert,
+  Settings2,
+  Bell,
+  Activity,
 } from 'lucide-react';
 import { AppTab } from '../types';
 import { Logo } from './Logo';
 import { useApi } from '../hooks/useApi';
 import { api } from '../lib/api';
-import { CommunityPost, Expert, PostComment, QiaoEvent } from '../lib/models';
-import { initials, timeAgo } from '../lib/text';
+import { QiaoEvent } from '../lib/models';
+import { timeAgo } from '../lib/text';
+import {
+  ActivityItem,
+  CommunitySummary,
+  ModerationSummary,
+  Paged,
+  RecommendedMember,
+  navigateCommunity,
+  routeFromLink,
+  useCommunityRoute,
+} from '../lib/community';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useAppActions } from '../context/AppActionsContext';
+import { FeedSection } from './community/FeedSection';
+import { CommunityDirectory } from './community/CommunityDirectory';
+import { CommunityDetailView } from './community/CommunityDetailView';
+import { PostDetailView } from './community/PostDetailView';
+import { MemberProfileView } from './community/MemberProfileView';
+import { ExpertDirectory } from './community/ExpertDirectory';
+import { MessagesView } from './community/MessagesView';
+import { CommunitySettings } from './community/CommunitySettings';
+import { ModerationPanel } from './community/ModerationPanel';
+import { AdminPanel } from './community/AdminPanel';
+import { SearchResultsView } from './community/SearchResultsView';
+import { DraftsView } from './community/DraftsView';
+import { Avatar, CommunityIcon, MemberName, VisibilityBadge, errorMessage } from './community/ui';
 
 interface CommunityPageProps {
   onNavigate: (tab: AppTab) => void;
   onOpenRegister?: () => void;
   onOpenContact?: () => void;
 }
-
-type PostItem = CommunityPost;
 
 const PROFILE_TYPES = [
   'Fournisseur / Fabricant chinois vérifié',
@@ -57,14 +74,15 @@ const PROFILE_TYPES = [
   'Transitaire & Partenaire Logistique',
 ];
 
-const Avatar: React.FC<{ src: string | null; name: string; className: string }> = ({ src, name, className }) =>
-  src ? (
-    <img src={src} alt={name} className={`${className} rounded-full object-cover`} />
-  ) : (
-    <span className={`${className} rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[11px]`}>
-      {initials(name)}
-    </span>
-  );
+interface CommunityStats {
+  members: number;
+  countries: number;
+  companies: number;
+  experts: number;
+  communities: number;
+}
+
+const formatCount = (value: number | undefined) => (value === undefined ? '—' : value.toLocaleString('fr-FR'));
 
 export const CommunityPage: React.FC<CommunityPageProps> = ({
   onNavigate,
@@ -74,93 +92,60 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
   const { user, requireAuth } = useAuth();
   const { notify } = useToast();
   const { openLegal } = useAppActions();
+  const [route] = useCommunityRoute();
 
   // Filters & State
-  const [activeTab, setActiveTab] = useState<'Tout' | 'À la une' | 'Questions' | 'Offres' | 'Actualités'>('Tout');
-  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
-  const [showMorePosts, setShowMorePosts] = useState(false);
-  const [newPostModalOpen, setNewPostModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(route.name === 'search' ? route.query.get('q') ?? '' : '');
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [selectedStory, setSelectedStory] = useState<{ title: string; subtitle: string; fullText: string; image: string } | null>(null);
-  const [shareToast, setShareToast] = useState(false);
   const [showAllExperts, setShowAllExperts] = useState(false);
-
-  // New post form state
-  const [newPostContent, setNewPostContent] = useState('');
-  const [newPostCategory, setNewPostCategory] = useState('Business');
-  const [newPostTag, setNewPostTag] = useState('Opportunité');
-  const [newPostCommunity, setNewPostCommunity] = useState('');
-  const [publishing, setPublishing] = useState(false);
-
-  // Comments
-  const [openComments, setOpenComments] = useState<Record<string, PostComment[] | 'loading'>>({});
-  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
 
   // QIAO Connect
   const [connectForm, setConnectForm] = useState({ profileType: PROFILE_TYPES[0], description: '', fullName: '', email: '' });
   const [connectSending, setConnectSending] = useState(false);
   const [connectSent, setConnectSent] = useState(false);
 
-  // Recherche appliquée après une courte pause de frappe.
-  useEffect(() => {
-    const timer = setTimeout(() => setAppliedQuery(searchQuery.trim()), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  // Statistiques réelles de la communauté
+  const { data: stats } = useApi<CommunityStats>('/community/stats');
 
-// Community categories
-  const categories = [
-    {
-      id: 'business',
-      title: 'Business & Entrepreneurs',
-      members: '1,245 membres',
-      icon: Users,
-      color: 'bg-blue-50 text-blue-700',
-    },
-    {
-      id: 'trade',
-      title: 'China–North Africa Trade',
-      members: '1,876 membres',
-      icon: Handshake,
-      color: 'bg-indigo-50 text-indigo-700',
-    },
-    {
-      id: 'investment',
-      title: 'Investissement',
-      members: '965 membres',
-      icon: TrendingUp,
-      color: 'bg-red-50 text-red-600',
-    },
-    {
-      id: 'students',
-      title: 'Étudiants & Formation',
-      members: '1,102 membres',
-      icon: GraduationCap,
-      color: 'bg-amber-50 text-amber-700',
-    },
-    {
-      id: 'expats',
-      title: 'Expatriés & Relocation',
-      members: '789 membres',
-      icon: MapPin,
-      color: 'bg-teal-50 text-teal-700',
-    },
-    {
-      id: 'culture',
-      title: 'Culture & Langues',
-      members: '1,050 membres',
-      icon: MessageSquare,
-      color: 'bg-purple-50 text-purple-700',
-    },
-    {
-      id: 'tech',
-      title: 'Technologie & Innovation',
-      members: '723 membres',
-      icon: Lightbulb,
-      color: 'bg-sky-50 text-sky-700',
-    },
-  ];
+  // Carrousel « Choisissez votre communauté » : communautés découvrables par le visiteur
+  const { data: communityPage, setData: setCommunityPage } = useApi<Paged<CommunitySummary>>('/community/communities', {
+    limit: 24,
+    viewer: user?.id,
+  });
+  const carouselCommunities = communityPage?.items ?? [];
+
+  // Experts & membres recommandés
+  const { data: recommendations, setData: setRecommendations } = useApi<{ communities: CommunitySummary[]; members: RecommendedMember[] }>(
+    '/community/recommendations',
+    { viewer: user?.id },
+  );
+  const experts = recommendations?.members ?? [];
+
+  // Activité récente (membre connecté)
+  const { data: activity = [] } = useApi<ActivityItem[]>(user ? '/community/activity' : null, { viewer: user?.id }, []);
+
+  // Rôles de modération (affichage des espaces dédiés)
+  const { data: moderation } = useApi<ModerationSummary>(user ? '/community/moderation/summary' : null, { viewer: user?.id });
+
+  // Messages non lus
+  const { data: unread, reload: reloadUnread } = useApi<{ unread: number }>(user ? '/community/conversations/unread' : null, { viewer: user?.id, route: route.name });
+  useEffect(() => {
+    window.addEventListener('qiao:refresh-counters', reloadUnread);
+    return () => window.removeEventListener('qiao:refresh-counters', reloadUnread);
+  }, [reloadUnread]);
+
+  // Events list
+  const { data: events = [] } = useApi<QiaoEvent[]>('/events', { placement: 'community' }, []);
+
+  // Visite de Community (indicateur d'adoption, une fois par jour et par membre)
+  useEffect(() => {
+    if (user) api.post('/community/visit').catch(() => undefined);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (route.name === 'search') setSearchQuery(route.query.get('q') ?? '');
+  }, [route.name, route.query]);
 
   // Carousel ref
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -172,39 +157,10 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
     }
   };
 
-  // Posts Feed (API : /community/posts, filtres appliqués côté serveur)
-  const {
-    data: feed,
-    setData: setFeed,
-    loading: postsLoading,
-    reload: reloadPosts,
-  } = useApi<{ items: PostItem[]; total: number }>('/community/posts', {
-    filter: activeTab,
-    viewer: user?.id,
-    q: appliedQuery || undefined,
-    community: selectedCommunity ?? undefined,
-    limit: showMorePosts ? undefined : 3,
-  });
-  const posts = feed?.items ?? [];
-  const totalPosts = feed?.total ?? 0;
-
-  const updatePost = useCallback(
-    (postId: string, patch: Partial<PostItem>) =>
-      setFeed((current) =>
-        current ? { ...current, items: current.items.map((p) => (p.id === postId ? { ...p, ...patch } : p)) } : current,
-      ),
-    [setFeed],
-  );
-
-  // Experts list
-  const { data: experts = [], setData: setExperts } = useApi<Expert[]>(
-    '/community/experts',
-    { viewer: user?.id },
-    [],
-  );
-
-  // Events list
-  const { data: events = [] } = useApi<QiaoEvent[]>('/events', { placement: 'community' }, []);
+  const runSearch = () => {
+    const q = searchQuery.trim();
+    navigateCommunity(q ? `search?q=${encodeURIComponent(q)}` : 'search');
+  };
 
   // Success Stories
   const successStories = [
@@ -224,7 +180,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
       fullText:
         'Une joint-venture sino-marocaine a vu le jour à Casablanca pour l’assemblage d’onduleurs photovoltaïques. QIAO a facilité la mise en relation avec le fonds d’investissement de Shenzhen et accompagné la constitution du dossier juridique bilingue.',
       image:
-        'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80',
+        'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 's3',
@@ -237,110 +193,20 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
     },
   ];
 
-  // Post Interaction Handlers
-  const handleToggleLike = (postId: string) =>
+  // Suivre un membre recommandé (relation distincte de l'adhésion à une communauté)
+  const handleToggleFollow = (member: RecommendedMember) =>
     requireAuth(async () => {
+      if (!member.handle) return;
       try {
-        const result = await api.post<{ liked: boolean; likes: number }>(`/community/posts/${postId}/like`);
-        updatePost(postId, { isLiked: result.liked, likes: result.likes });
+        const result = await api.post<{ following: boolean }>(`/community/members/${member.handle}/follow`);
+        setRecommendations((current) =>
+          current ? { ...current, members: current.members.map((m) => (m.id === member.id ? { ...m, isFollowing: result.following } : m)) } : current,
+        );
+        notify(result.following ? `Vous suivez ${member.fullName}.` : `Vous ne suivez plus ${member.fullName}.`);
       } catch (err) {
-        notify(err instanceof Error ? err.message : 'Action impossible.', 'error');
+        notify(errorMessage(err), 'error');
       }
-    }, 'Connectez-vous pour réagir aux publications.');
-
-  const handleToggleBookmark = (postId: string) =>
-    requireAuth(async () => {
-      try {
-        const result = await api.post<{ bookmarked: boolean }>(`/community/posts/${postId}/bookmark`);
-        updatePost(postId, { isBookmarked: result.bookmarked });
-        notify(result.bookmarked ? 'Publication enregistrée dans votre espace.' : 'Publication retirée de vos favoris.');
-      } catch (err) {
-        notify(err instanceof Error ? err.message : 'Action impossible.', 'error');
-      }
-    }, 'Connectez-vous pour enregistrer des publications.');
-
-  const handleShare = (postId: string) => {
-    const url = `${window.location.origin}${window.location.pathname}?tab=community#post-${postId}`;
-    navigator.clipboard?.writeText(url).catch(() => undefined);
-    setShareToast(true);
-    setTimeout(() => setShareToast(false), 2500);
-  };
-
-  const toggleComments = async (postId: string) => {
-    if (openComments[postId]) {
-      setOpenComments(({ [postId]: _closed, ...rest }) => rest);
-      return;
-    }
-    setOpenComments((current) => ({ ...current, [postId]: 'loading' }));
-    try {
-      const comments = await api.get<PostComment[]>(`/community/posts/${postId}/comments`);
-      setOpenComments((current) => ({ ...current, [postId]: comments }));
-    } catch (err) {
-      notify(err instanceof Error ? err.message : 'Chargement impossible.', 'error');
-      setOpenComments(({ [postId]: _failed, ...rest }) => rest);
-    }
-  };
-
-  const handleAddComment = (postId: string) =>
-    requireAuth(async () => {
-      const text = (commentDrafts[postId] ?? '').trim();
-      if (!text) return;
-      try {
-        const result = await api.post<{ comment: PostComment; commentsCount: number }>(`/community/posts/${postId}/comments`, { text });
-        setCommentDrafts((current) => ({ ...current, [postId]: '' }));
-        setOpenComments((current) => {
-          const list = current[postId];
-          return { ...current, [postId]: [...(Array.isArray(list) ? list : []), result.comment] };
-        });
-        const post = posts.find((p) => p.id === postId);
-        updatePost(postId, {
-          commentsCount: result.commentsCount,
-          comments: [...(post?.comments ?? []), result.comment].slice(-3),
-        });
-      } catch (err) {
-        notify(err instanceof Error ? err.message : 'Commentaire non publié.', 'error');
-      }
-    }, 'Connectez-vous pour commenter.');
-
-  const handleToggleConnect = (expertId: string) =>
-    requireAuth(async () => {
-      try {
-        const result = await api.post<{ connected: boolean }>(`/community/experts/${expertId}/connect`);
-        setExperts((current) => (current ?? []).map((e) => (e.id === expertId ? { ...e, connected: result.connected } : e)));
-        const expert = experts.find((e) => e.id === expertId);
-        notify(result.connected ? `Demande de connexion envoyée à ${expert?.name}.` : `Connexion avec ${expert?.name} retirée.`);
-      } catch (err) {
-        notify(err instanceof Error ? err.message : 'Action impossible.', 'error');
-      }
-    }, 'Connectez-vous pour vous connecter aux experts.');
-
-  const openNewPost = () => requireAuth(() => setNewPostModalOpen(true), 'Connectez-vous pour publier dans la communauté.');
-
-  // Submit new post
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPostContent.trim()) return;
-    setPublishing(true);
-    try {
-      await api.post('/community/posts', {
-        content: newPostContent,
-        category: newPostCategory,
-        tag: newPostTag || undefined,
-        community: newPostCommunity || undefined,
-      });
-      setNewPostContent('');
-      setNewPostModalOpen(false);
-      setActiveTab('Tout');
-      setSelectedCommunity(null);
-      setSearchQuery('');
-      notify('Votre publication est en ligne !');
-      reloadPosts();
-    } catch (err) {
-      notify(err instanceof Error ? err.message : 'Publication impossible.', 'error');
-    } finally {
-      setPublishing(false);
-    }
-  };
+    }, 'Connectez-vous pour suivre des membres.');
 
   const handleConnectRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -361,25 +227,64 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
     }
   };
 
-  const filteredPosts = posts;
   const visibleExperts = showAllExperts ? experts : experts.slice(0, 4);
-  const selectedCommunityTitle = categories.find((c) => c.id === selectedCommunity)?.title;
+  const isHome = route.name === 'home';
+
+  // Navigation interne de Community
+  const navItems = [
+    { id: 'home', label: "Fil d'actualité", icon: Home, route: 'home', active: isHome },
+    { id: 'communities', label: 'Communautés', icon: Compass, route: 'communities', active: ['communities', 'c'].includes(route.name) },
+    { id: 'experts', label: 'Experts', icon: BadgeCheck, route: 'experts', active: route.name === 'experts' },
+    ...(user
+      ? [
+          { id: 'messages', label: 'Messages', icon: Mail, route: 'messages', active: route.name === 'messages', count: unread?.unread },
+          { id: 'profile', label: 'Mon profil', icon: UserCircle, route: user.handle ? `member/${user.handle}` : 'settings', active: route.name === 'member' && route.params[0] === user.handle },
+          { id: 'drafts', label: 'Brouillons', icon: FilePen, route: 'drafts', active: route.name === 'drafts' },
+          { id: 'settings', label: 'Paramètres', icon: Settings2, route: 'settings', active: route.name === 'settings' },
+        ]
+      : []),
+    ...(moderation?.isModerator
+      ? [{ id: 'moderation', label: 'Modération', icon: ShieldAlert, route: 'moderation', active: route.name === 'moderation', count: moderation.pendingRequests }]
+      : []),
+    ...(moderation?.isAdmin ? [{ id: 'admin', label: 'Administration', icon: Activity, route: 'admin', active: route.name === 'admin' }] : []),
+  ];
+
+  const renderView = () => {
+    switch (route.name) {
+      case 'communities':
+        return <CommunityDirectory />;
+      case 'c':
+        return <CommunityDetailView slug={route.params[0]} section={route.params[1]} />;
+      case 'post':
+        return <PostDetailView postId={route.params[0]} />;
+      case 'member':
+        return <MemberProfileView handle={route.params[0]} />;
+      case 'experts':
+        return <ExpertDirectory />;
+      case 'messages':
+        return <MessagesView conversationId={route.params[0]} query={route.query} />;
+      case 'settings':
+        return <CommunitySettings section={route.params[0]} />;
+      case 'moderation':
+        return <ModerationPanel />;
+      case 'admin':
+        return <AdminPanel section={route.params[0]} />;
+      case 'search':
+        return <SearchResultsView query={route.query} />;
+      case 'drafts':
+        return <DraftsView />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased overflow-x-hidden pt-20 sm:pt-24 animate-in fade-in duration-300">
-      
-      {/* Toast Notification */}
-      {shareToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-in slide-in-from-bottom-3 duration-200">
-          <Check className="w-4 h-4 text-emerald-400" />
-          <span>Lien de la publication copié dans le presse-papiers !</span>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* 1. HERO SECTION ("Bienvenue dans QIAO Community")                         */}
       {/* ========================================================================= */}
-      <section className="relative overflow-hidden bg-[#071329] text-white py-16 sm:py-24 border-b border-slate-800">
+      <section className={`relative overflow-hidden bg-[#071329] text-white border-b border-slate-800 ${isHome ? 'py-16 sm:py-24' : 'py-8 sm:py-10'}`}>
         
         {/* Layered Panoramic Composite: Pagoda on Left + Red Suspension Bridge on Right */}
         <div className="absolute inset-0 z-0">
@@ -405,39 +310,38 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
         <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
           
           {/* Main Title */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15]">
+          <h1 className={`font-black text-white tracking-tight leading-[1.15] ${isHome ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-2xl sm:text-3xl'}`}>
             Bienvenue dans <br className="sm:hidden" />
             <span className="text-red-500">QIAO</span> Community
           </h1>
 
+          {isHome && (
+          <>
           {/* Subtitle */}
           <p className="mt-4 text-sm sm:text-base lg:text-lg text-slate-200 font-medium max-w-2xl mx-auto leading-relaxed">
             Le réseau qui connecte la Chine et l'Afrique du Nord. <br className="hidden sm:inline" />
             Échangez, collaborez et créez des opportunités ensemble.
           </p>
 
+          </>
+          )}
+
           {/* Search bar */}
-          <div className="mt-8 max-w-2xl mx-auto">
+          <div className={`${isHome ? 'mt-8' : 'mt-5'} max-w-2xl mx-auto`}>
             <div className="relative flex items-center bg-white rounded-full shadow-2xl p-1.5 sm:p-2 border border-white/20 focus-within:ring-4 focus-within:ring-red-500/20 transition-all">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setAppliedQuery(searchQuery.trim());
-                    document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
-                  }
+                  if (e.key === 'Enter') runSearch();
                 }}
-                placeholder="Rechercher des membres, entreprises, discussions..."
+                placeholder="Rechercher des membres, experts, communautés, discussions..."
                 className="w-full pl-5 pr-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 bg-transparent focus:outline-none"
               />
               <button
                 type="button"
-                onClick={() => {
-                  setAppliedQuery(searchQuery.trim());
-                  document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={runSearch}
                 className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shrink-0 shadow-md transition-transform active:scale-95 cursor-pointer"
                 title="Lancer la recherche"
                 aria-label="Rechercher"
@@ -445,6 +349,27 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
                 <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </button>
             </div>
+          </div>
+
+          {isHome && (
+          <>
+          {/* Actions principales */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              onClick={() => {
+                navigateCommunity('home');
+                setTimeout(() => window.dispatchEvent(new CustomEvent('qiao:compose', { detail: 'post' })), 50);
+              }}
+              className="px-5 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-red-600/40 transition-all cursor-pointer"
+            >
+              Créer une publication
+            </button>
+            <button
+              onClick={() => navigateCommunity('communities')}
+              className="px-5 py-2.5 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm transition-all cursor-pointer"
+            >
+              Découvrir les communautés
+            </button>
           </div>
 
           {/* 4 Stats in a row */}
@@ -457,7 +382,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
               </div>
               <div>
                 <div className="text-lg sm:text-xl font-black text-white leading-none">
-                  10,000+
+                  {formatCount(stats?.members)}
                 </div>
                 <div className="text-xs text-slate-300 mt-1 font-medium">
                   Membres actifs
@@ -472,7 +397,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
               </div>
               <div>
                 <div className="text-lg sm:text-xl font-black text-white leading-none">
-                  120+
+                  {formatCount(stats?.countries)}
                 </div>
                 <div className="text-xs text-slate-300 mt-1 font-medium">
                   Pays connectés
@@ -487,7 +412,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
               </div>
               <div>
                 <div className="text-lg sm:text-xl font-black text-white leading-none">
-                  850+
+                  {formatCount(stats?.companies)}
                 </div>
                 <div className="text-xs text-slate-300 mt-1 font-medium">
                   Entreprises
@@ -502,7 +427,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
               </div>
               <div>
                 <div className="text-lg sm:text-xl font-black text-white leading-none">
-                  300+
+                  {formatCount(stats?.experts)}
                 </div>
                 <div className="text-xs text-slate-300 mt-1 font-medium">
                   Experts
@@ -512,15 +437,61 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
 
           </div>
 
+          </>
+          )}
         </div>
       </section>
 
+      {/* ========================================================================= */}
+      {/* NAVIGATION INTERNE COMMUNITY                                              */}
+      {/* ========================================================================= */}
+      <nav className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => navigateCommunity(item.route)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                    item.active ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {item.label}
+                  {'count' in item && item.count ? (
+                    <span className="px-1.5 rounded-full bg-red-600 text-white text-[10px] font-bold">{item.count}</span>
+                  ) : null}
+                </button>
+              );
+            })}
+            {!user && (
+              <button
+                onClick={() => requireAuth(() => undefined, 'Connectez-vous ou créez votre compte QIAO pour participer à la communauté.')}
+                className="ml-auto px-4 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold whitespace-nowrap cursor-pointer"
+              >
+                Rejoindre QIAO Community
+              </button>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {!isHome && (
+        <section className="py-8 sm:py-10 bg-slate-50/70 border-b border-slate-200 min-h-[60vh]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{renderView()}</div>
+        </section>
+      )}
+
+      {isHome && (
+      <>
       {/* ========================================================================= */}
       {/* 2. SECTION: "Choisissez votre communauté"                                 */}
       {/* ========================================================================= */}
       <section className="py-12 sm:py-16 bg-slate-50/70 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Section Header */}
           <div className="text-center mb-8">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -535,35 +506,46 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
               ref={carouselRef}
               className="flex items-stretch gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1"
             >
-              {categories.map((cat) => {
-                const IconComponent = cat.icon;
-                const isSelected = selectedCommunity === cat.id;
+              {carouselCommunities.length === 0 && (
+                <div className="w-full py-6 flex items-center justify-center gap-2 text-sm text-slate-400">
+                  <Loader2 className="w-4 h-4 animate-spin text-red-600" /> Chargement des communautés...
+                </div>
+              )}
+              {carouselCommunities.map((community) => {
+                const isMember = community.membership.state === 'active';
 
                 return (
                   <button
-                    key={cat.id}
-                    onClick={() => {
-                      setSelectedCommunity(isSelected ? null : cat.id);
-                      setShowMorePosts(true);
-                      document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
+                    key={community.id}
+                    onClick={() => navigateCommunity(`c/${community.slug}`)}
                     className={`shrink-0 w-44 sm:w-48 bg-white border rounded-2xl p-4 text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-between shadow-2xs hover:shadow-md hover:-translate-y-0.5 ${
-                      isSelected
+                      isMember
                         ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/30'
                         : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 bg-slate-100 text-slate-800">
-                      <IconComponent className="w-6 h-6 text-slate-800" />
+                      <CommunityIcon name={community.icon} className="w-6 h-6 text-slate-800" />
                     </div>
 
                     <div className="flex-1 flex flex-col justify-center">
                       <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
-                        {cat.title}
+                        {community.name}
                       </h3>
                       <p className="text-[11px] text-slate-500 mt-1 font-medium">
-                        {cat.members}
+                        {formatCount(community.membersCount)} membre{community.membersCount > 1 ? 's' : ''}
                       </p>
+                      <div className="mt-1.5 flex justify-center">
+                        {isMember ? (
+                          <span className="text-[10px] font-bold text-emerald-700">✓ Membre</span>
+                        ) : community.membership.state === 'pending' ? (
+                          <span className="text-[10px] font-bold text-amber-700">Demande en attente</span>
+                        ) : community.membership.state === 'invited' ? (
+                          <span className="text-[10px] font-bold text-red-600">Invitation reçue</span>
+                        ) : community.visibility !== 'public' ? (
+                          <VisibilityBadge visibility={community.visibility} />
+                        ) : null}
+                      </div>
                     </div>
                   </button>
                 );
@@ -581,6 +563,15 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
             </button>
           </div>
 
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => navigateCommunity('communities')}
+              className="text-xs font-bold text-red-600 hover:text-red-700 transition-colors cursor-pointer inline-flex items-center gap-1"
+            >
+              Découvrir toutes les communautés <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
         </div>
       </section>
 
@@ -590,248 +581,15 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
       <section className="py-12 sm:py-16 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
+
             {/* LEFT COLUMN: Discussions & publications (8 cols) */}
-            <div id="community-feed" className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs scroll-mt-28">
-              
-              {/* Header row */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
-                <h2 className="text-base sm:text-lg font-black text-slate-900">
-                  Discussions & publications
-                </h2>
-
-                <div className="flex items-center gap-3 justify-between sm:justify-end">
-                  {/* Category Filter Pills */}
-                  <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
-                    {(['Tout', 'À la une', 'Questions', 'Offres', 'Actualités'] as const).map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                          activeTab === tab
-                            ? 'bg-red-50 text-red-600 font-bold'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                        }`}
-                      >
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* + Nouvelle publication Button */}
-                  <button
-                    onClick={openNewPost}
-                    className="px-4 py-2 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Nouvelle publication</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Active Search / Category Indicator */}
-              {(searchQuery || selectedCommunity) && (
-                <div className="mt-4 flex items-center justify-between bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs">
-                  <span className="text-slate-600">
-                    Filtre actif : <strong className="text-slate-900">{[selectedCommunityTitle, searchQuery].filter(Boolean).join(' · ')}</strong>
-                    <span className="text-slate-400"> — {totalPosts} publication{totalPosts > 1 ? 's' : ''}</span>
-                  </span>
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setAppliedQuery('');
-                      setSelectedCommunity(null);
-                    }}
-                    className="text-red-600 hover:underline font-semibold cursor-pointer"
-                  >
-                    Réinitialiser
-                  </button>
-                </div>
-              )}
-
-              {/* Feed List */}
-              <div className="divide-y divide-slate-100 mt-2">
-                {postsLoading && posts.length === 0 ? (
-                  <div className="py-12 flex items-center justify-center gap-2 text-sm text-slate-400">
-                    <Loader2 className="w-5 h-5 animate-spin text-red-600" /> Chargement des publications...
-                  </div>
-                ) : filteredPosts.length === 0 ? (
-                  <div className="py-12 text-center text-slate-400">
-                    <MessageSquare className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-                    <p className="text-sm font-medium">Aucune publication trouvée pour cette recherche.</p>
-                  </div>
-                ) : (
-                  filteredPosts.map((post) => (
-                    <article key={post.id} id={`post-${post.id}`} className="py-5 sm:py-6 first:pt-4">
-                      
-                      {/* Post Header: Avatar, Name, Time */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <Avatar src={post.avatar} name={post.author} className="w-10 h-10 border border-slate-200 shadow-2xs" />
-                          <div>
-                            <h3 className="text-sm font-bold text-slate-900 leading-tight">
-                              {post.author}
-                            </h3>
-                            <p className="text-[11px] text-slate-500 mt-0.5">
-                              {post.role} • {post.location}
-                            </p>
-                          </div>
-                        </div>
-
-                        <span className="text-xs text-slate-400 font-medium">
-                          {timeAgo(post.createdAt)}
-                        </span>
-                      </div>
-
-                      {/* Post Content */}
-                      <p className="mt-3 text-xs sm:text-sm text-slate-800 leading-relaxed font-normal">
-                        {post.content}
-                      </p>
-
-                      {/* Tags */}
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        {post.tags.map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Post Actions: Like, Comment, Share, Bookmark */}
-                      <div className="mt-4 flex items-center justify-between pt-2 text-slate-500 text-xs">
-                        <div className="flex items-center gap-4 sm:gap-6">
-                          
-                          {/* Like */}
-                          <button
-                            onClick={() => handleToggleLike(post.id)}
-                            className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
-                              post.isLiked ? 'text-red-600 font-bold' : 'hover:text-slate-900'
-                            }`}
-                          >
-                            <ThumbsUp className={`w-4 h-4 ${post.isLiked ? 'fill-red-600' : ''}`} />
-                            <span>{post.likes}</span>
-                          </button>
-
-                          {/* Comments */}
-                          <button
-                            onClick={() => toggleComments(post.id)}
-                            className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
-                              openComments[post.id] ? 'text-slate-900 font-bold' : 'hover:text-slate-900'
-                            }`}
-                          >
-                            <MessageSquare className="w-4 h-4" />
-                            <span>{post.commentsCount}</span>
-                          </button>
-
-                          {/* Partager */}
-                          <button
-                            onClick={() => handleShare(post.id)}
-                            className="flex items-center gap-1.5 hover:text-slate-900 transition-colors cursor-pointer"
-                          >
-                            <Share2 className="w-4 h-4" />
-                            <span className="hidden sm:inline">Partager</span>
-                          </button>
-                        </div>
-
-                        {/* Bookmark */}
-                        <button
-                          onClick={() => handleToggleBookmark(post.id)}
-                          className={`p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer ${
-                            post.isBookmarked ? 'text-red-600' : 'text-slate-400 hover:text-slate-700'
-                          }`}
-                          title="Enregistrer"
-                          aria-label="Enregistrer la publication"
-                        >
-                          <Bookmark className={`w-4 h-4 ${post.isBookmarked ? 'fill-red-600' : ''}`} />
-                        </button>
-                      </div>
-
-                      {/* Inline Comments thread (aperçu ou fil complet ouvert) */}
-                      {(() => {
-                        const thread = openComments[post.id];
-                        const comments = Array.isArray(thread) ? thread : post.comments;
-                        if (!thread && comments.length === 0) return null;
-                        return (
-                          <div className="mt-4 pt-3 border-t border-slate-100 space-y-2.5">
-                            {thread === 'loading' && (
-                              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Chargement des commentaires...
-                              </div>
-                            )}
-                            {comments.map((c) => (
-                              <div key={c.id} className="flex items-start gap-2.5 bg-slate-50 rounded-xl p-2.5 text-xs">
-                                <Avatar src={c.avatar} name={c.author} className="w-6 h-6 mt-0.5 !text-[9px]" />
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-bold text-slate-900">{c.author}</span>
-                                    <span className="text-[10px] text-slate-400">{timeAgo(c.createdAt)}</span>
-                                  </div>
-                                  <p className="text-slate-700 text-[11px] mt-0.5 leading-snug">{c.text}</p>
-                                </div>
-                              </div>
-                            ))}
-                            {!thread && post.commentsCount > comments.length && (
-                              <button
-                                onClick={() => toggleComments(post.id)}
-                                className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
-                              >
-                                Voir les {post.commentsCount} commentaires
-                              </button>
-                            )}
-                            {thread && thread !== 'loading' && (
-                              <form
-                                onSubmit={(e) => {
-                                  e.preventDefault();
-                                  handleAddComment(post.id);
-                                }}
-                                className="flex items-center gap-2"
-                              >
-                                <input
-                                  value={commentDrafts[post.id] ?? ''}
-                                  onChange={(e) => setCommentDrafts((current) => ({ ...current, [post.id]: e.target.value }))}
-                                  placeholder={user ? 'Écrire un commentaire...' : 'Connectez-vous pour commenter'}
-                                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-red-500"
-                                />
-                                <button
-                                  type="submit"
-                                  className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center cursor-pointer"
-                                  aria-label="Publier le commentaire"
-                                >
-                                  <Send className="w-3.5 h-3.5" />
-                                </button>
-                              </form>
-                            )}
-                          </div>
-                        );
-                      })()}
-
-                    </article>
-                  ))
-                )}
-              </div>
-
-              {/* Bottom "Voir plus de publications ⌵" */}
-              {(showMorePosts ? totalPosts > 3 : totalPosts > posts.length) && (
-                <div className="mt-6 pt-4 border-t border-slate-100 text-center">
-                  <button
-                    onClick={() => setShowMorePosts(!showMorePosts)}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer inline-flex items-center gap-1"
-                  >
-                    <span>
-                      {showMorePosts ? 'Voir moins de publications' : `Voir plus de publications (${totalPosts - posts.length}) ⌵`}
-                    </span>
-                  </button>
-                </div>
-              )}
-
+            <div className="lg:col-span-8">
+              <FeedSection showDiscover />
             </div>
 
             {/* RIGHT COLUMN: Sidebar (4 cols) */}
             <div className="lg:col-span-4 space-y-6">
-              
+
               {/* Widget 1: Experts & membres à découvrir */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-4">
@@ -839,7 +597,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
                     Experts & membres à découvrir
                   </h3>
                   <button
-                    onClick={() => setShowAllExperts(!showAllExperts)}
+                    onClick={() => (experts.length > 4 ? setShowAllExperts(!showAllExperts) : navigateCommunity('experts'))}
                     className="text-xs font-semibold text-red-600 hover:text-red-700 cursor-pointer"
                   >
                     {showAllExperts ? 'Réduire' : `Voir tout (${experts.length})`}
@@ -847,44 +605,83 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
                 </div>
 
                 <div className="space-y-4">
+                  {visibleExperts.length === 0 && <p className="text-xs text-slate-400">Aucune recommandation pour le moment.</p>}
                   {visibleExperts.map((expert) => (
                     <div key={expert.id} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <img
-                          src={expert.avatar}
-                          alt={expert.name}
-                          className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
-                        />
+                        <Avatar src={expert.avatarUrl} name={expert.fullName} className="w-10 h-10 border border-slate-200" />
                         <div className="min-w-0">
                           <h4 className="text-xs font-bold text-slate-900 truncate">
-                            {expert.name}
+                            <MemberName member={expert} />
                           </h4>
                           <p className="text-[10px] text-slate-500 truncate">
-                            {expert.role}
+                            {expert.headline}
                           </p>
-                          <div className="flex items-center gap-1 text-[10px] text-slate-600 mt-0.5">
-                            <span>{expert.flag}</span>
-                            <span>{expert.country}</span>
+                          <div className="flex items-center gap-1 text-[10px] text-slate-600 mt-0.5 truncate">
+                            <MapPin className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                            <span className="truncate">{expert.reason}</span>
                           </div>
                         </div>
                       </div>
 
                       <button
-                        onClick={() => handleToggleConnect(expert.id)}
+                        onClick={() => handleToggleFollow(expert)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0 ${
-                          expert.connected
+                          expert.isFollowing
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
                             : 'border border-blue-600 text-blue-600 hover:bg-blue-50'
                         }`}
                       >
-                        {expert.connected ? '✓ Connecté' : 'Se connecter'}
+                        {expert.isFollowing ? '✓ Suivi' : 'Suivre'}
                       </button>
                     </div>
                   ))}
                 </div>
+
+                <div className="mt-5 pt-3 border-t border-slate-100 text-center">
+                  <button
+                    onClick={() => navigateCommunity('experts')}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                  >
+                    Rechercher un expert (avocat, transitaire, traducteur...)
+                  </button>
+                </div>
               </div>
 
-              {/* Widget 2: Événements à venir */}
+              {/* Widget 2: Activité récente */}
+              {user && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      <Bell className="w-4 h-4 text-red-600" /> Activité récente
+                    </h3>
+                  </div>
+                  <div className="space-y-3">
+                    {activity.length === 0 && (
+                      <p className="text-xs text-slate-400">Rejoignez des communautés et participez : les réponses et nouveautés apparaîtront ici.</p>
+                    )}
+                    {activity.slice(0, 6).map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          const target = item.link ? routeFromLink(item.link) : null;
+                          if (target) navigateCommunity(target);
+                        }}
+                        className="w-full text-left flex items-start gap-2.5 group cursor-pointer"
+                      >
+                        <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${item.read ? 'bg-slate-300' : 'bg-red-600'}`} />
+                        <span className="min-w-0">
+                          <span className="block text-xs font-bold text-slate-900 leading-tight group-hover:text-red-600 transition-colors">{item.title}</span>
+                          <span className="block text-[11px] text-slate-500 truncate">{item.body}</span>
+                          <span className="block text-[10px] text-slate-400 mt-0.5">{timeAgo(item.createdAt, 'long')}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Widget 3: Événements à venir */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-slate-900">
@@ -1116,123 +913,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
 
         </div>
       </section>
-
-      {/* ========================================================================= */}
-      {/* 6. MODAL: Nouvelle Publication                                            */}
-      {/* ========================================================================= */}
-      {newPostModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative animate-in zoom-in-95 duration-200">
-            <button
-              onClick={() => setNewPostModalOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
-                <Plus className="w-4 h-4" />
-              </div>
-              <h3 className="text-base font-bold text-slate-900">
-                Créer une publication
-              </h3>
-            </div>
-
-            <form onSubmit={handleCreatePost} className="space-y-4">
-              <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <Avatar src={user?.avatarUrl ?? null} name={user?.fullName ?? ''} className="w-8 h-8" />
-                <div className="text-xs">
-                  <div className="font-bold text-slate-900">{user?.fullName}</div>
-                  <div className="text-slate-500">{user?.title ?? 'Membre QIAO'} • {user?.location ?? 'Afrique du Nord'}</div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Votre message / opportunité
-                </label>
-                <textarea
-                  rows={4}
-                  required
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                  placeholder="Partagez un besoin d'approvisionnement, une offre de partenariat, ou posez une question à la communauté..."
-                  className="w-full rounded-xl border border-slate-200 p-3 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Catégorie
-                  </label>
-                  <select
-                    value={newPostCategory}
-                    onChange={(e) => setNewPostCategory(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-800 bg-white focus:outline-none focus:border-red-500"
-                  >
-                    <option value="Business">Business</option>
-                    <option value="Questions">Questions</option>
-                    <option value="Offres">Offres</option>
-                    <option value="Actualités">Actualités</option>
-                    <option value="À la une">À la une</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Tag principal
-                  </label>
-                  <input
-                    type="text"
-                    value={newPostTag}
-                    onChange={(e) => setNewPostTag(e.target.value)}
-                    placeholder="ex: Import/Export"
-                    maxLength={40}
-                    className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-800 focus:outline-none focus:border-red-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Communauté (optionnel)
-                </label>
-                <select
-                  value={newPostCommunity}
-                  onChange={(e) => setNewPostCommunity(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-800 bg-white focus:outline-none focus:border-red-500"
-                >
-                  <option value="">Toutes les communautés</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setNewPostModalOpen(false)}
-                  className="px-4 py-2 rounded-full border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={publishing}
-                  className="px-5 py-2 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
-                >
-                  {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  <span>Publier</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      </>
       )}
 
       {/* ========================================================================= */}

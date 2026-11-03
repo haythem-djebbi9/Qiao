@@ -30,16 +30,28 @@ import {
   BookOpen,
   Share2,
   Loader2,
-  Trash2
+  Trash2,
+  Settings
 } from 'lucide-react';
 import { AppTab } from '../types';
 import type { PageFocus } from '../App';
 import { useApi } from '../hooks/useApi';
 import { api } from '../lib/api';
 import { AcademyItemType, Cart, Course, LearningPath } from '../lib/models';
+import { CheckoutModal, CheckoutResult } from './academy/CheckoutModal';
+import { resolveImage } from '../lib/assets';
+import { CourseOutline, LESSON_TYPE_LABELS, formatMinutes } from '../lib/academy';
+import { LessonTypeIcon } from './academy/ui';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useAppActions } from '../context/AppActionsContext';
+
+/** Formation sans leçon publiée : visible dans le catalogue, mais pas encore commandable. */
+const comingSoon = (course: Course) => course.lessonsCount === 0;
+
+const ComingSoonBadge: React.FC = () => (
+  <span className="px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold whitespace-nowrap">Bientôt disponible</span>
+);
 
 interface AcademyPageProps {
   onNavigate: (tab: AppTab) => void;
@@ -66,7 +78,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 }) => {
   const { user, requireAuth } = useAuth();
   const { notify } = useToast();
-  const { openLegal } = useAppActions();
+  const { openLegal, navigate } = useAppActions();
   const [searchQuery, setSearchQuery] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('all');
@@ -78,12 +90,31 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
   const [enrolled, setEnrolled] = useState<string[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  /** Paiement en cours : panier complet ou achat direct d'une formation / d'un parcours. */
+  const [checkoutFor, setCheckoutFor] = useState<{
+    lines: { title: string; price: number }[];
+    target: { kind: 'cart' } | { kind: 'item'; itemType: AcademyItemType; itemId: string };
+  } | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeCourseModal, setActiveCourseModal] = useState<Course | null>(null);
   const [activeParcoursModal, setActiveParcoursModal] = useState<LearningPath | null>(null);
   const [showAllPaths, setShowAllPaths] = useState(false);
   const [showAllNew, setShowAllNew] = useState(false);
   const [showCatalog, setShowCatalog] = useState(false);
+  const [outline, setOutline] = useState<CourseOutline | null>(null);
+
+  // Programme réel (modules et leçons publiés) de la formation ouverte.
+  useEffect(() => {
+    setOutline(null);
+    if (!activeCourseModal) return;
+    api
+      .get<CourseOutline>(`/academy/courses/${activeCourseModal.id}`)
+      .then(setOutline)
+      .catch(() => undefined);
+  }, [activeCourseModal]);
+
+  /** Lecteur de formation (Mon espace) : leçon par leçon, progression enregistrée. */
+  const openLearning = (courseId?: string) => navigate(courseId ? `dashboard/academy/${courseId}` : 'dashboard/academy');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -160,36 +191,26 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
     }
   };
 
-  const checkout = async () => {
-    setBusy('checkout');
-    try {
-      const result = await api.post<{ order: { reference: string; total: number }; cart: Cart }>('/academy/cart/checkout');
-      setCart(result.cart);
-      setCartOpen(false);
-      loadSummary();
-      notify(`Commande ${result.order.reference} validée (${result.order.total} TND) : vos formations sont accessibles dans votre espace.`);
-    } catch (err) {
-      notify(err instanceof Error ? err.message : 'Commande impossible.', 'error');
-    } finally {
-      setBusy(null);
-    }
+  // Paiement du panier : carte bancaire ou virement (fenêtre de paiement).
+  const checkout = () => {
+    setCartOpen(false);
+    setCheckoutFor({ lines: cart.items.map((item) => ({ title: item.title, price: item.price })), target: { kind: 'cart' } });
   };
 
-  const enroll = (itemType: AcademyItemType, itemId: string, title: string, onDone?: () => void) =>
+  const enroll = (itemType: AcademyItemType, itemId: string, title: string, price: number, onDone?: () => void) =>
     requireAuth(async () => {
-      setBusy(`enroll:${itemType}:${itemId}`);
-      try {
-        const result = await api.post<{ order: { reference: string }; cart: Cart }>('/academy/enroll', { itemType, itemId });
-        setCart(result.cart);
-        setEnrolled((current) => [...current, `${itemType}:${itemId}`]);
-        showToast(`Inscription validée à "${title}" !`);
-        onDone?.();
-      } catch (err) {
-        notify(err instanceof Error ? err.message : 'Inscription impossible.', 'error');
-      } finally {
-        setBusy(null);
-      }
+      onDone?.();
+      setCheckoutFor({ lines: [{ title, price }], target: { kind: 'item', itemType, itemId } });
     }, 'Connectez-vous pour vous inscrire à cette formation.');
+
+  const onCheckoutDone = (result: CheckoutResult) => {
+    setCart(result.cart);
+    loadSummary();
+    if (result.order.status === 'paid') {
+      setEnrolled((current) => [...current, ...result.order.items.map((item) => `${item.itemType}:${item.itemId}`)]);
+      showToast('Inscription validée : votre accès est ouvert dans votre espace.');
+    }
+  };
 
   const scrollToCatalog = () => document.getElementById('academy-catalog')?.scrollIntoView({ behavior: 'smooth' });
 
@@ -288,7 +309,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
               {cart.items.length === 0 && <p className="text-sm text-slate-500">Votre panier est vide.</p>}
               {cart.items.map((line) => (
                 <div key={line.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200">
-                  <img src={line.image} alt={line.title} className="w-16 h-12 rounded-lg object-cover shrink-0" />
+                  <img src={resolveImage(line.image)} alt={line.title} className="w-16 h-12 rounded-lg object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-bold text-slate-900 line-clamp-2">{line.title}</div>
                     <div className="text-[11px] text-slate-500">{line.subtitle}</div>
@@ -380,9 +401,19 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
           <div className="max-w-2xl">
             
             {/* Eyebrow Tag */}
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 mb-3.5">
-              <span className="w-5 h-[2px] bg-red-500" />
-              <span>QIAO ACADEMY</span>
+            <div className="flex flex-wrap items-center gap-3 mb-3.5">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">
+                <span className="w-5 h-[2px] bg-red-500" />
+                <span>QIAO ACADEMY</span>
+              </div>
+              {user?.role === 'admin' && (
+                <button
+                  onClick={() => navigate('dashboard/admin-academy/formations')}
+                  className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-[11px] font-bold text-white inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Settings className="w-3.5 h-3.5" /> Gérer les formations
+                </button>
+              )}
             </div>
 
             {/* Main Headline */}
@@ -645,7 +676,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                   {/* Card Image with Badges and Heart */}
                   <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                     <img
-                      src={course.image}
+                      src={resolveImage(course.image)}
                       alt={course.title}
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -694,7 +725,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                       {/* Instructor with Avatar */}
                       <div className="flex items-center gap-2 mb-3">
                         <img
-                          src={course.instructorImg}
+                          src={resolveImage(course.instructorImg)}
                           alt={course.instructor}
                           referrerPolicy="no-referrer"
                           className="w-6 h-6 rounded-full object-cover border border-slate-200"
@@ -706,11 +737,15 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
                       {/* Rating & Duration */}
                       <div className="flex items-center gap-3 text-xs text-slate-500 font-light mb-4">
-                        <div className="flex items-center gap-1 text-amber-500 font-semibold">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                          <span>{course.rating}</span>
-                          <span className="text-slate-400 font-normal">({course.reviewsCount})</span>
-                        </div>
+                        {course.reviewsCount > 0 ? (
+                          <div className="flex items-center gap-1 text-amber-500 font-semibold">
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            <span>{course.rating}</span>
+                            <span className="text-slate-400 font-normal">({course.reviewsCount})</span>
+                          </div>
+                        ) : (
+                          <span className="text-blue-600 font-semibold">Nouveauté</span>
+                        )}
                         <span>·</span>
                         <div className="flex items-center gap-1 text-slate-500">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -728,6 +763,9 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
                       {/* Cart icon button + Solid Red "Voir la formation" Button */}
                       <div className="flex items-center gap-2">
+                        {comingSoon(course) ? (
+                          <ComingSoonBadge />
+                        ) : (
                         <button
                           onClick={() => addToCart('course', course.id, course.title)}
                           disabled={isEnrolled('course', course.id) || busy === `cart:course:${course.id}`}
@@ -747,6 +785,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                             <ShoppingCart className="w-4 h-4 text-red-600" />
                           )}
                         </button>
+                        )}
                         <button
                           onClick={() => setActiveCourseModal(course)}
                           className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap"
@@ -803,7 +842,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                 {/* Photo */}
                 <div className="relative h-40 w-full overflow-hidden bg-slate-100">
                   <img
-                    src={item.image}
+                    src={resolveImage(item.image)}
                     alt={item.title}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -888,7 +927,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                   {/* Photo with Blue "Nouveau" Badge & Heart */}
                   <div className="relative h-40 w-full overflow-hidden bg-slate-100">
                     <img
-                      src={course.image}
+                      src={resolveImage(course.image)}
                       alt={course.title}
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -929,7 +968,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                       {/* Instructor */}
                       <div className="flex items-center gap-2 mb-2.5">
                         <img
-                          src={course.instructorImg}
+                          src={resolveImage(course.instructorImg)}
                           alt={course.instructor}
                           referrerPolicy="no-referrer"
                           className="w-5 h-5 rounded-full object-cover border border-slate-200"
@@ -941,11 +980,15 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
                       {/* Rating & Hours */}
                       <div className="flex items-center gap-2 text-xs text-slate-500 font-light mb-3">
-                        <div className="flex items-center gap-1 text-amber-500 font-semibold">
-                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                          <span>{course.rating}</span>
-                          <span className="text-slate-400 font-normal">({course.reviewsCount})</span>
-                        </div>
+                        {course.reviewsCount > 0 ? (
+                          <div className="flex items-center gap-1 text-amber-500 font-semibold">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            <span>{course.rating}</span>
+                            <span className="text-slate-400 font-normal">({course.reviewsCount})</span>
+                          </div>
+                        ) : (
+                          <span className="text-blue-600 font-semibold">Nouveauté</span>
+                        )}
                         <span>·</span>
                         <div className="flex items-center gap-1 text-slate-500">
                           <Clock className="w-3 h-3 text-slate-400" />
@@ -960,6 +1003,9 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                         {formatPrice(course.price)}
                       </div>
 
+                      {comingSoon(course) ? (
+                        <ComingSoonBadge />
+                      ) : (
                       <button
                         onClick={() => addToCart('course', course.id, course.title)}
                         disabled={isEnrolled('course', course.id) || busy === `cart:course:${course.id}`}
@@ -976,6 +1022,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                           <ShoppingCart className="w-4 h-4 text-red-600" />
                         )}
                       </button>
+                      )}
                     </div>
 
                   </div>
@@ -1218,6 +1265,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                 <li><span>Email : academy@qiao.global</span></li>
                 <li><span>Tél : +216 71 890 123 / +86 21 6888 1234</span></li>
                 <li><span>Bureaux : Tunis · Casablanca · Shanghai</span></li>
+                <li><button onClick={() => onNavigate('certificat')} className="hover:text-white transition-colors cursor-pointer">Vérifier un certificat</button></li>
               </ul>
             </div>
           </div>
@@ -1244,7 +1292,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
             {/* Modal Header */}
             <div className="relative h-48 bg-slate-900 overflow-hidden">
               <img
-                src={activeCourseModal.image}
+                src={resolveImage(activeCourseModal.image)}
                 alt={activeCourseModal.title}
                 className="w-full h-full object-cover opacity-50"
               />
@@ -1276,7 +1324,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                   <img
-                    src={activeCourseModal.instructorImg}
+                    src={resolveImage(activeCourseModal.instructorImg)}
                     alt={activeCourseModal.instructor}
                     className="w-10 h-10 rounded-full object-cover border border-slate-200"
                   />
@@ -1287,11 +1335,15 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                 </div>
 
                 <div className="flex items-center gap-3 text-xs">
-                  <div className="flex items-center gap-1 text-amber-500 font-bold">
-                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span>{activeCourseModal.rating}</span>
-                    <span className="text-slate-400 font-normal">({activeCourseModal.reviewsCount} avis)</span>
-                  </div>
+                  {activeCourseModal.reviewsCount > 0 ? (
+                    <div className="flex items-center gap-1 text-amber-500 font-bold">
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      <span>{activeCourseModal.rating}</span>
+                      <span className="text-slate-400 font-normal">({activeCourseModal.reviewsCount} avis)</span>
+                    </div>
+                  ) : (
+                    <span className="text-blue-600 font-bold">Nouvelle formation</span>
+                  )}
                   <span>·</span>
                   <div className="flex items-center gap-1 text-slate-600 font-medium">
                     <Clock className="w-3.5 h-3.5" />
@@ -1308,8 +1360,43 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                 </p>
               </div>
 
+              {/* Programme réel : modules et leçons publiés */}
+              {outline && outline.modules.length > 0 && (
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm mb-1">Programme de la formation</h4>
+                  <p className="text-[11px] text-slate-500 mb-3">
+                    {outline.modules.length} module{outline.modules.length > 1 ? 's' : ''} · {outline.lessonsCount} leçon{outline.lessonsCount > 1 ? 's' : ''}
+                    {outline.totalMinutes > 0 && ` · ${formatMinutes(outline.totalMinutes)} de contenu`}
+                  </p>
+                  <div className="space-y-2">
+                    {outline.modules.map((mod, idx) => (
+                      <div key={mod.id} className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-800">
+                        <div className="flex items-start gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-red-100 text-red-600 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                            {idx + 1}
+                          </span>
+                          <span className="pt-0.5 font-semibold">{mod.title}</span>
+                        </div>
+                        <ul className="mt-1.5 ml-7 space-y-1">
+                          {mod.lessons.map((lesson) => (
+                            <li key={lesson.id} className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                              <LessonTypeIcon type={lesson.type} className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span className="flex-1">{lesson.title}</span>
+                              <span className="text-slate-400">
+                                {LESSON_TYPE_LABELS[lesson.type]}
+                                {lesson.durationMinutes > 0 && ` · ${lesson.durationMinutes} min`}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Modules Syllabus */}
-              {activeCourseModal.modules && (
+              {(!outline || outline.modules.length === 0) && activeCourseModal.modules && (
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm mb-3">Programme des modules</h4>
                   <div className="space-y-2">
@@ -1331,7 +1418,12 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
               {/* Certification Included Guarantee */}
               <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 flex items-center gap-3 text-xs text-amber-900">
                 <Award className="w-5 h-5 text-amber-600 shrink-0" />
-                <span>Certification vérifiable QIAO Academy remise automatiquement à la validation des évaluations.</span>
+                <span>
+                  Certification vérifiable QIAO Academy remise automatiquement à la validation des évaluations.{' '}
+                  <button onClick={() => onNavigate('certificat')} className="font-bold underline hover:text-amber-700 cursor-pointer">
+                    Vérifier un certificat
+                  </button>
+                </span>
               </div>
 
             </div>
@@ -1354,13 +1446,15 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                   <button
                     onClick={() => {
                       setActiveCourseModal(null);
-                      onNavigate('dashboard');
+                      openLearning(activeCourseModal.id);
                     }}
-                    className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer flex items-center gap-1.5"
                   >
-                    Accéder à mon espace
+                    <Play className="w-3.5 h-3.5" /> Accéder à la formation
                   </button>
                 </div>
+              ) : comingSoon(activeCourseModal) ? (
+                <ComingSoonBadge />
               ) : (
               <div className="flex items-center gap-2">
                 <button
@@ -1374,7 +1468,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                   {inCart('course', activeCourseModal.id) ? 'Déjà dans le panier' : 'Ajouter au panier'}
                 </button>
                 <button
-                  onClick={() => enroll('course', activeCourseModal.id, activeCourseModal.title, () => setActiveCourseModal(null))}
+                  onClick={() => enroll('course', activeCourseModal.id, activeCourseModal.title, activeCourseModal.price, () => setActiveCourseModal(null))}
                   disabled={busy === `enroll:course:${activeCourseModal.id}`}
                   className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
                 >
@@ -1416,8 +1510,19 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                 <div className="font-semibold text-slate-900">Ce pack inclut :</div>
                 <div className="flex items-center gap-2 text-slate-700">
                   <BookOpen className="w-4 h-4 text-red-600" />
-                  <span>{activeParcoursModal.coursesCount} cours interactifs de haut niveau</span>
+                  <span>{activeParcoursModal.courses?.length || activeParcoursModal.coursesCount} cours interactifs de haut niveau</span>
                 </div>
+                {(activeParcoursModal.courses ?? []).length > 0 && (
+                  <ol className="ml-6 space-y-1 text-slate-600">
+                    {activeParcoursModal.courses!.map((course, index) => (
+                      <li key={course.id} className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full bg-red-100 text-red-600 text-[9px] font-bold flex items-center justify-center shrink-0">{index + 1}</span>
+                        <span className="flex-1">{course.title}</span>
+                        <span className="text-slate-400">{course.duration}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
                 <div className="flex items-center gap-2 text-slate-700">
                   <Clock className="w-4 h-4 text-red-600" />
                   <span>{activeParcoursModal.duration} de formation pratique et cas concrets</span>
@@ -1435,9 +1540,22 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                 <div className="text-xl font-bold text-red-600">{formatPrice(activeParcoursModal.price)}</div>
               </div>
               {isEnrolled('path', activeParcoursModal.id) ? (
-                <span className="px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" /> Parcours rejoint
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" /> Parcours rejoint
+                  </span>
+                  <button
+                    onClick={() => {
+                      setActiveParcoursModal(null);
+                      openLearning();
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer"
+                  >
+                    Accéder au parcours
+                  </button>
+                </div>
+              ) : activeParcoursModal.available === false ? (
+                <ComingSoonBadge />
               ) : (
                 <div className="flex items-center gap-2">
                   <button
@@ -1451,7 +1569,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                     {inCart('path', activeParcoursModal.id) ? 'Dans le panier' : 'Ajouter au panier'}
                   </button>
                   <button
-                    onClick={() => enroll('path', activeParcoursModal.id, activeParcoursModal.title, () => setActiveParcoursModal(null))}
+                    onClick={() => enroll('path', activeParcoursModal.id, activeParcoursModal.title, activeParcoursModal.price, () => setActiveParcoursModal(null))}
                     disabled={busy === `enroll:path:${activeParcoursModal.id}`}
                     className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
                   >
@@ -1465,6 +1583,9 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
         </div>
       )}
 
+      {checkoutFor && (
+        <CheckoutModal lines={checkoutFor.lines} target={checkoutFor.target} onClose={() => setCheckoutFor(null)} onDone={onCheckoutDone} />
+      )}
     </div>
   );
 };

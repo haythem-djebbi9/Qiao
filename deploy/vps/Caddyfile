@@ -1,0 +1,12 @@
+# HTTPS automatique (Let's Encrypt) dès que le domaine pointe vers le serveur.
+{
+	email {$ACME_EMAIL}
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	reverse_proxy app:4000
+}

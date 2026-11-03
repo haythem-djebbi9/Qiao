@@ -1,4 +1,6 @@
 /** Formes des données renvoyées par l'API NestJS. */
+import type { MemberSummary, PostView } from './community';
+import type { CertificateSummary } from './academy';
 
 export interface User {
   id: string;
@@ -12,7 +14,14 @@ export interface User {
   avatarUrl: string | null;
   language: string;
   verified: boolean;
+  handle: string | null;
+  role: 'user' | 'admin';
+  status: 'active' | 'suspended';
+  termsAcceptedAt: string | null;
   createdAt: string;
+  /** Présents dans la réponse de /auth/me. */
+  hasPassword?: boolean;
+  identities?: { id: string; provider: 'email' | 'wechat' | 'facebook'; displayName: string | null; linkedAt: string }[];
 }
 
 export interface AppNotification {
@@ -21,6 +30,9 @@ export interface AppNotification {
   body: string;
   type: string;
   link: string | null;
+  kind?: string | null;
+  targetType?: string | null;
+  targetId?: string | null;
   read: boolean;
   createdAt: string;
 }
@@ -51,12 +63,38 @@ export interface QiaoEvent {
   location: string;
   country: string;
   isOnline: boolean;
+  /** Sur place, en ligne ou hybride. */
+  format: EventFormat;
+  /** Tarif indicatif (aucun paiement en ligne). */
+  priceLabel: string | null;
   image: string;
   description: string;
   details: EventDetails | null;
+  /** Nombre de places (0 = illimité). */
   capacity: number;
+  /** Participants confirmés. */
   registrationsCount: number;
+  waitlistCount: number;
+  isFull: boolean;
+  registrationClosed: boolean;
   isRegistered: boolean;
+  myRegistrationStatus: RegistrationStatus | null;
+}
+
+export type EventFormat = 'onsite' | 'online' | 'hybrid';
+export type RegistrationStatus = 'confirmed' | 'waitlisted' | 'cancelled';
+
+/** Inscription du membre (Mon espace) : le lien de connexion n'est communiqué qu'aux participants confirmés. */
+export interface MyEventRegistration {
+  id: string;
+  badgeCode: string;
+  status: RegistrationStatus;
+  createdAt: string;
+  checkedInAt: string | null;
+  event: Omit<QiaoEvent, 'registrationsCount' | 'waitlistCount' | 'isFull' | 'registrationClosed' | 'isRegistered' | 'myRegistrationStatus'> & {
+    endDate: string | null;
+    onlineUrl: string | null;
+  };
 }
 
 export interface TrainingDomain {
@@ -90,6 +128,8 @@ export interface Course {
   description: string;
   modules: string[];
   sections: string[] | null;
+  /** Leçons publiées : à 0, la formation est annoncée « Bientôt disponible » et ne peut pas être commandée. */
+  lessonsCount?: number;
 }
 
 export interface LearningPath {
@@ -100,6 +140,10 @@ export interface LearningPath {
   price: number;
   image: string;
   description: string;
+  /** Formations publiées du parcours (vide pour un parcours sans formation rattachée). */
+  courses?: { id: string; title: string; duration: string; level: string }[];
+  /** Faux tant qu'aucune formation du parcours n'a de contenu en ligne : il ne peut pas encore être commandé. */
+  available?: boolean;
 }
 
 export type AcademyItemType = 'course' | 'path';
@@ -127,8 +171,27 @@ export interface Order {
   items: { itemType: AcademyItemType; itemId: string; title: string; price: number }[];
   total: number;
   currency: string;
-  status: string;
+  /** pending : en attente de paiement ; paid : payée (accès ouvert) ; cancelled : annulée. */
+  status: 'pending' | 'paid' | 'cancelled';
+  paymentMethod: 'card' | 'transfer' | 'free' | null;
+  /** Montant débité par carte (euros) et taux appliqué. */
+  charged: { amount: number; currency: string | null; rate: number | null } | null;
   createdAt: string;
+  paidAt: string | null;
+  cancelledAt: string | null;
+  adminNote: string | null;
+  /** Coordonnées du virement (commande en attente de virement uniquement). */
+  transfer: {
+    beneficiary: string;
+    bankName: string;
+    rib: string;
+    iban: string;
+    bic: string;
+    instructions: string;
+    amount: number;
+    currency: string;
+    reference: string;
+  } | null;
 }
 
 export interface Enrollment {
@@ -139,44 +202,23 @@ export interface Enrollment {
   image: string;
   progress: number;
   status: string;
+  /** Origine de l'accès : commande, accès offert par l'administration, formation d'un parcours suivi. */
+  source?: 'order' | 'admin' | 'path';
+  viaPathId?: string | null;
+  lastLessonId?: string | null;
+  lastActivityAt?: string | null;
+  completedAt?: string | null;
   createdAt: string;
+  /** Formation : certificat de réussite délivré au membre. */
+  certificate?: CertificateSummary | null;
+  /** Parcours : ses formations et la progression du membre dans chacune. */
+  courses?:
+    | { id: string; title: string; image: string; duration: string; progress: number; status: string | null; certificate?: CertificateSummary | null }[]
+    | null;
 }
 
-export interface PostComment {
-  id: string;
-  author: string;
-  avatar: string | null;
-  text: string;
-  createdAt: string;
-}
-
-export interface CommunityPost {
-  id: string;
-  author: string;
-  role: string;
-  location: string;
-  avatar: string | null;
-  content: string;
-  tags: string[];
-  category: string;
-  community: string | null;
-  likes: number;
-  commentsCount: number;
-  createdAt: string;
-  isLiked: boolean;
-  isBookmarked: boolean;
-  comments: PostComment[];
-}
-
-export interface Expert {
-  id: string;
-  name: string;
-  role: string;
-  country: string;
-  flag: string;
-  avatar: string;
-  connected: boolean;
-}
+/** Types QIAO Community : voir lib/community.ts. */
+export type { MemberSummary, PostView } from './community';
 
 export interface QiaoDocument {
   id: string;
@@ -341,12 +383,12 @@ export interface Dashboard {
   user: User;
   stats: Record<string, number>;
   appointments: Appointment[];
-  eventRegistrations: { id: string; badgeCode: string; createdAt: string; event: QiaoEvent }[];
+  eventRegistrations: MyEventRegistration[];
   enrollments: Enrollment[];
   orders: Order[];
   cart: Cart;
-  connections: (Expert & { connectedAt: string })[];
-  bookmarks: Omit<CommunityPost, 'isLiked' | 'isBookmarked' | 'comments'>[];
+  connections: (MemberSummary & { followedAt: string })[];
+  bookmarks: PostView[];
   downloads: { id: string; createdAt: string; document: QiaoDocument }[];
   applications: { id: string; status: string; createdAt: string; opportunity: Opportunity }[];
   companyRequests: { id: string; createdAt: string; company: { id: string; name: string; country: string } }[];

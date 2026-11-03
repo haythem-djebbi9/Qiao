@@ -51,7 +51,7 @@ export class DashboardController {
       this.academy.listEnrollments(user),
       this.academy.listOrders(user),
       this.academy.summary(user),
-      this.community.listConnections(user),
+      this.community.listFollowing(user),
       this.community.listBookmarks(user),
       this.documents.listDownloadsForUser(user),
       this.opportunities.listForUser(user),
