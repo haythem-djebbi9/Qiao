@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PlatformEvents } from '../platform/platform.services';
 import { User } from '../users/user.entity';
 import { Notification, NotificationType } from './notification.entity';
 
@@ -9,6 +10,7 @@ export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private readonly notifications: Repository<Notification>,
+    private readonly events: PlatformEvents,
   ) {}
 
   async notify(
@@ -17,16 +19,30 @@ export class NotificationsService {
     body: string,
     type: NotificationType = 'info',
     link: string | null = null,
+    extra: { kind?: string; targetType?: string; targetId?: string } = {},
   ): Promise<void> {
     if (!user) return;
-    await this.notifications.save(this.notifications.create({ user: { id: user.id } as User, title, body, type, link }));
+    await this.notifications.save(
+      this.notifications.create({
+        user: { id: user.id } as User,
+        title,
+        body,
+        type,
+        link,
+        kind: extra.kind ?? null,
+        targetType: extra.targetType ?? null,
+        targetId: extra.targetId ?? null,
+      }),
+    );
+    this.events.emit('notification.created', { userId: user.id, title, body, link, type, kind: extra.kind ?? null });
   }
 
-  async list(user: User) {
+  async list(user: User, page = 1) {
     const [items, unreadCount] = await Promise.all([
       this.notifications.find({
         where: { user: { id: user.id } },
         order: { createdAt: 'DESC' },
+        skip: (Math.max(1, page) - 1) * 30,
         take: 30,
       }),
       this.notifications.count({ where: { user: { id: user.id }, read: false } }),

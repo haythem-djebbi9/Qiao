@@ -265,7 +265,7 @@ export const caseStudiesData: CaseStudy[] = [
     company: 'GreenTech',
     tag: "CRÉATION D'ENTREPRISE",
     title: 'Création d’une société commune tuniso-chinoise dans les énergies renouvelables.',
-    image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=800&q=80',
     logoText: 'GreenTech',
     logoBg: 'bg-emerald-600',
     metrics: [

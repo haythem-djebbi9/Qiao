@@ -40,7 +40,7 @@ export class SearchController {
       this.services.find(),
       this.opportunities.find({ order: { publishedAt: 'DESC' } }),
       this.documents.find({ order: { publishedAt: 'DESC' } }),
-      this.events.find({ order: { startDate: 'ASC' } }),
+      this.events.find({ where: { status: 'published' }, order: { startDate: 'ASC' } }),
       this.courses.find({ order: { sortOrder: 'ASC' } }),
       this.companies.find(),
       this.articles.find({ order: { publishedAt: 'DESC' } }),
@@ -68,7 +68,7 @@ export class SearchController {
         .slice(0, LIMIT)
         .map((e) => ({ type: 'event' as const, id: e.id, title: e.title, subtitle: `${e.dateRange} ${e.monthYear} · ${e.location}` })),
       ...courses
-        .filter((c) => !c.trainingDomainId && matchesQuery(q, c.title, c.instructor, c.description))
+        .filter((c) => c.status === 'published' && !c.trainingDomainId && matchesQuery(q, c.title, c.instructor, c.description))
         .slice(0, LIMIT)
         .map((c) => ({ type: 'course' as const, id: c.id, title: c.title, subtitle: `${c.instructor} · ${c.price} TND` })),
       ...articles

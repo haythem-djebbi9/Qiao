@@ -334,3 +334,12 @@
 }
 
 
+
+/* Défilement horizontal sans barre visible (carrousels, barres d'onglets) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

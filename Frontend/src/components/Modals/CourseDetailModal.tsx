@@ -3,8 +3,10 @@ import { X, GraduationCap, Clock, Award, CheckCircle2, ArrowRight, Play, Loader2
 import { TrainingDomain } from '../../types';
 import { api } from '../../lib/api';
 import { Course } from '../../lib/models';
+import { CheckoutModal } from '../academy/CheckoutModal';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useAppActions } from '../../context/AppActionsContext';
 
 interface CourseDetailModalProps {
   domain: TrainingDomain | null;
@@ -17,12 +19,14 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
   onClose,
   onOpenCatalog,
 }) => {
-  const { requireAuth } = useAuth();
+  const { user, requireAuth } = useAuth();
   const { notify } = useToast();
+  const { navigate } = useAppActions();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
   const [enrolling, setEnrolling] = useState<string | null>(null);
   const [enrolled, setEnrolled] = useState<string[]>([]);
+  const [buying, setBuying] = useState<Course | null>(null);
 
   useEffect(() => {
     if (!domain) return;
@@ -34,23 +38,21 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
       .finally(() => setLoading(false));
   }, [domain, notify]);
 
+  // Formations déjà suivies par le membre (directement ou par un parcours).
+  useEffect(() => {
+    if (!domain || !user) return;
+    api
+      .get<{ enrolled: string[] }>('/academy/me')
+      .then((summary) => setEnrolled(summary.enrolled.filter((key) => key.startsWith('course:')).map((key) => key.slice('course:'.length))))
+      .catch(() => undefined);
+  }, [domain, user]);
+
   if (!domain) return null;
 
+  // Inscription = commande : fenêtre de paiement (carte bancaire ou virement ; ouverture immédiate si gratuite).
   const enroll = (course: Course) =>
     requireAuth(async () => {
-      setEnrolling(course.id);
-      try {
-        const { order } = await api.post<{ order: { reference: string } }>('/academy/enroll', {
-          itemType: 'course',
-          itemId: course.id,
-        });
-        setEnrolled((current) => [...current, course.id]);
-        notify(`Inscription validée à « ${course.title} » (commande ${order.reference}).`);
-      } catch (err) {
-        notify(err instanceof Error ? err.message : 'Inscription impossible.', 'error');
-      } finally {
-        setEnrolling(null);
-      }
+      setBuying(course);
     }, 'Connectez-vous pour vous inscrire à cette formation.');
 
   return (
@@ -123,9 +125,17 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                   </div>
 
                   {enrolled.includes(course.id) ? (
-                    <span className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shrink-0 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Inscrit
-                    </span>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        navigate(`dashboard/academy/${course.id}`);
+                      }}
+                      className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shrink-0 flex items-center gap-1 cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Inscrit · Accéder
+                    </button>
+                  ) : course.lessonsCount === 0 ? (
+                    <span className="px-3 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold shrink-0">Bientôt disponible</span>
                   ) : (
                     <button
                       onClick={() => enroll(course)}
@@ -174,6 +184,16 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
           </button>
         </div>
       </div>
+      {buying && (
+        <CheckoutModal
+          lines={[{ title: buying.title, price: buying.price }]}
+          target={{ kind: 'item', itemType: 'course', itemId: buying.id }}
+          onClose={() => setBuying(null)}
+          onDone={(result) => {
+            if (result.order.status === 'paid') setEnrolled((current) => [...current, buying.id]);
+          }}
+        />
+      )}
     </div>
   );
 };

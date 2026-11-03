@@ -34,3 +34,11 @@ export function isAllFilter(value: string | undefined): boolean {
   const v = normalize(value);
   return v === '' || v === 'all' || v.startsWith('tous') || v.startsWith('toutes');
 }
+
+const ACCENTED = 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿ';
+const PLAIN = 'aaaaaaceeeeiiiinooooouuuuyy';
+
+/** Expression SQL insensible à la casse et aux accents (sans extension PostgreSQL). */
+export function sqlUnaccent(expression: string): string {
+  return `translate(lower(${expression}), '${ACCENTED}', '${PLAIN}')`;
+}

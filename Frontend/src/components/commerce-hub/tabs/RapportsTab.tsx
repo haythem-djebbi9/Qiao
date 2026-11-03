@@ -105,7 +105,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
       publisher: 'QIAO Intelligence',
       date: 'Juin 2024',
       size: 'PDF - 3,8 MB',
-      image: 'https://images.unsplash.com/photo-1556742049-0a67c5574f73?auto=format&fit=crop&w=400&q=80',
+      image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=400&q=80',
     },
     {
       id: 'rep-3',
@@ -116,7 +116,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
       publisher: 'QIAO Intelligence',
       date: 'Mai 2024',
       size: 'PDF - 2,6 MB',
-      image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=400&q=80',
+      image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80',
     },
     {
       id: 'rep-4',
@@ -154,13 +154,13 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
       rank: 2,
       title: 'E-commerce in North Africa 2024',
       downloads: '9,8k téléchargements',
-      image: 'https://images.unsplash.com/photo-1556742049-0a67c5574f73?auto=format&fit=crop&w=200&q=80',
+      image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=200&q=80',
     },
     {
       rank: 3,
       title: 'Renewable Energy Opportunities',
       downloads: '7,6k téléchargements',
-      image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=200&q=80',
+      image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=200&q=80',
     },
     {
       rank: 4,

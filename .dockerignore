@@ -1,0 +1,11 @@
+.git
+.claude
+.kilo
+**/node_modules
+**/dist
+**/uploads
+**/.env
+**/.env.local
+**/*.log
+deploy
+*.md

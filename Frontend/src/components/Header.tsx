@@ -16,6 +16,7 @@ import {
   Calculator,
   Search,
   Bell,
+  Mail,
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { AppTab } from '../types';
@@ -74,6 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationList>({ items: [], unreadCount: 0 });
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const isLoggedIn = !!user;
   const t = NAV_LABELS[currentLang] ?? NAV_LABELS.FR;
 
@@ -82,16 +84,28 @@ export const Header: React.FC<HeaderProps> = ({
       .get<NotificationList>('/notifications')
       .then(setNotifications)
       .catch(() => undefined);
+    api
+      .get<{ unread: number }>('/community/conversations/unread')
+      .then((result) => setUnreadMessages(result.unread))
+      .catch(() => undefined);
   }, []);
 
   useEffect(() => {
     if (!user) {
       setNotifications({ items: [], unreadCount: 0 });
+      setUnreadMessages(0);
       return;
     }
     loadNotifications();
     const timer = setInterval(loadNotifications, NOTIFICATIONS_REFRESH_MS);
     return () => clearInterval(timer);
+  }, [user, loadNotifications]);
+
+  // Compteurs mis à jour dès qu'une conversation est lue dans Community.
+  useEffect(() => {
+    if (!user) return;
+    window.addEventListener('qiao:refresh-counters', loadNotifications);
+    return () => window.removeEventListener('qiao:refresh-counters', loadNotifications);
   }, [user, loadNotifications]);
 
   // Rafraîchit la cloche à chaque ouverture du menu (nouvelles actions de l'utilisateur).
@@ -768,6 +782,29 @@ export const Header: React.FC<HeaderProps> = ({
             </>
           ) : (
             <>
+              {/* Messagerie privée QIAO Community */}
+              <button
+                onClick={() => {
+                  setNotificationsOpen(false);
+                  setProfileDropdownOpen(false);
+                  onSelectTab('community/messages' as AppTab);
+                }}
+                className={`p-2 rounded-full transition-colors cursor-pointer relative ${
+                  isLight
+                    ? 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                    : 'text-white/85 hover:text-white hover:bg-white/10'
+                }`}
+                title={`Messages (${unreadMessages} non lu${unreadMessages > 1 ? 's' : ''})`}
+                aria-label="Messages"
+              >
+                <Mail className="w-4 h-4 sm:w-[17px] sm:h-[17px]" />
+                {unreadMessages > 0 && (
+                  <span className="absolute top-1 right-1 min-w-4 h-4 px-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-[#07152b]">
+                    {unreadMessages > 9 ? '9+' : unreadMessages}
+                  </span>
+                )}
+              </button>
+
               {/* Bell Notification with unread Badge */}
               <div className="relative">
                 <button

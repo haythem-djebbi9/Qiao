@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Query, UseGuards } from '@nestjs/common';
 import { CurrentUser, JwtAuthGuard } from '../../common/auth.guards';
 import { User } from '../users/user.entity';
 import { NotificationsService } from './notifications.service';
@@ -9,8 +9,8 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
-  list(@CurrentUser() user: User) {
-    return this.notificationsService.list(user);
+  list(@CurrentUser() user: User, @Query('page') page?: string) {
+    return this.notificationsService.list(user, Number(page) || 1);
   }
 
   @Patch('read-all')

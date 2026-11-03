@@ -1,0 +1,5 @@
+# Fichiers exécutés sous Linux : jamais de fin de ligne Windows, même depuis un poste Windows.
+*.sh text eol=lf
+Dockerfile text eol=lf
+Caddyfile text eol=lf
+*.yml text eol=lf

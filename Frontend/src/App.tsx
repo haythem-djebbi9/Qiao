@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ServicesSection } from './components/ServicesSection';
@@ -20,6 +20,7 @@ import { ContactPage } from './components/ContactPage';
 import { EventsPage } from './components/EventsPage';
 import { ResourcesPage } from './components/ResourcesPage';
 import { DashboardPage } from './components/DashboardPage';
+import { CertificateVerifyPage } from './components/academy/CertificateVerifyPage';
 
 // Modals
 import { ImportCalculatorModal } from './components/Modals/ImportCalculatorModal';
@@ -54,7 +55,11 @@ import {
 } from './context/AppActionsContext';
 import { useApi } from './hooks/useApi';
 import { api } from './lib/api';
-import { Opportunity } from './lib/models';
+import { Opportunity, User } from './lib/models';
+import { detectVisitorLocation } from './lib/geo';
+import { navigateCommunity, routeFromLink } from './lib/community';
+import { navigateDashboard } from './lib/payments';
+import { TermsGate } from './components/community/TermsGate';
 
 /** Élément à mettre en avant à l'arrivée sur une page (résultat de recherche). */
 export interface PageFocus {
@@ -62,7 +67,6 @@ export interface PageFocus {
   id: string;
 }
 
-const ORIENTATION_KEY = 'qiao.orientation';
 const LANGUAGE_KEY = 'qiao.language';
 
 function readStorage(key: string): string | null {
@@ -81,8 +85,20 @@ function writeStorage(key: string, value: string) {
   }
 }
 
+/** Messages affichés au retour d'une connexion WeChat / Facebook. */
+const OAUTH_ERRORS: Record<string, string> = {
+  cancelled: 'Connexion annulée.',
+  expired: 'La connexion a expiré, veuillez recommencer.',
+  state: 'Connexion refusée pour des raisons de sécurité. Veuillez recommencer.',
+  link_conflict: 'Cette identité est déjà liée à un autre compte QIAO.',
+  disabled: "Cette méthode de connexion n'est pas encore configurée.",
+  provider: 'Le fournisseur de connexion ne répond pas. Réessayez plus tard.',
+};
+
+const OAUTH_PARAMS = ['oauth_code', 'oauth_pending', 'oauth_error', 'oauth_linked', 'reset'];
+
 export default function App() {
-  const { user, openAuth, updateProfile } = useAuth();
+  const { user, initializing, openAuth, updateProfile, acceptSession, refreshUser } = useAuth();
   const { notify } = useToast();
 
   // Active Navigation Tracking - Default to evenements as requested
@@ -90,6 +106,7 @@ export default function App() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get('tab');
+      if (params.get('cv')) return 'community';
       if (tabParam) return tabParam as AppTab;
       const hash = window.location.hash.replace('#', '');
       if (hash && hash !== '') return hash as AppTab;
@@ -101,8 +118,10 @@ export default function App() {
 
   // App filters & interactive states
   const [currentLang, setCurrentLang] = useState(() => readStorage(LANGUAGE_KEY) ?? 'FR');
-  const [selectedOrientation, setSelectedOrientation] = useState<'china' | 'north-africa' | null>(
-    () => readStorage(ORIENTATION_KEY) as 'china' | 'north-africa' | null,
+  // Position du visiteur détectée automatiquement (compte, fuseau horaire, langue).
+  const visitorLocation = useMemo(
+    () => detectVisitorLocation(user ? { origin: user.origin, location: user.location } : null),
+    [user],
   );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -187,8 +206,51 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
+  // Retours de connexion externe (WeChat / Facebook) et liens de réinitialisation de mot de passe.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    if (!OAUTH_PARAMS.some((key) => params.has(key))) return;
+    const code = params.get('oauth_code');
+    const pending = params.get('oauth_pending');
+    const error = params.get('oauth_error');
+    const linked = params.get('oauth_linked');
+    const reset = params.get('reset');
+    OAUTH_PARAMS.forEach((key) => params.delete(key));
+    window.history.replaceState(null, '', url.toString());
+
+    if (code) {
+      api
+        .post<{ token: string; user: User }>('/auth/oauth/exchange', { code })
+        .then((session) => {
+          const signedIn = acceptSession(session);
+          notify(`Bienvenue ${signedIn.fullName.split(' ')[0]} : vous êtes connecté.`);
+        })
+        .catch((err) => notify(err instanceof Error ? err.message : 'Connexion impossible.', 'error'));
+    } else if (pending) {
+      openAuth('oauth', undefined, pending);
+    } else if (error) {
+      notify(OAUTH_ERRORS[error] ?? OAUTH_ERRORS.provider, 'error');
+    } else if (linked) {
+      notify(`Votre compte ${linked === 'wechat' ? 'WeChat' : 'Facebook'} est maintenant lié à votre compte QIAO.`);
+      refreshUser();
+      setActiveTab('community');
+      navigateCommunity('settings/securite', { replace: true });
+    } else if (reset) {
+      openAuth('reset', undefined, reset);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Handle navigation across tabs & dedicated pages
   const handleScrollToSection = (tab: AppTab | string) => {
+    // Liens internes de Community (notifications, recherche) : « community/post/<id> », « community/c/<slug> »...
+    if (tab === 'community' || tab.startsWith('community/')) {
+      setActiveTab('community');
+      navigateCommunity(routeFromLink(tab) ?? 'home');
+      return;
+    }
+
     if (tab === 'logistique') {
       setSelectedSectorId('logistique');
       setActiveTab('sector-detail');
@@ -266,8 +328,14 @@ export default function App() {
       return;
     }
 
-    if (tab === 'dashboard' && !user) {
-      openAuth('login', 'Connectez-vous pour accéder à votre espace membre.');
+    // Espace membre et ses sous-pages (« dashboard/prestations/<id> », liens des notifications de paiement).
+    if (tab === 'dashboard' || tab.startsWith('dashboard/')) {
+      if (!user) {
+        openAuth('login', 'Connectez-vous pour accéder à votre espace membre.');
+        return;
+      }
+      setActiveTab('dashboard');
+      navigateDashboard(tab === 'dashboard' ? '' : tab.slice('dashboard/'.length));
       return;
     }
 
@@ -287,6 +355,7 @@ export default function App() {
       targetTab === 'stories' ||
       targetTab === 'resources' ||
       targetTab === 'dashboard' ||
+      targetTab === 'certificat' ||
       targetTab === 'home'
     ) {
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -309,17 +378,21 @@ export default function App() {
   useEffect(() => {
     const url = new URL(window.location.href);
     url.searchParams.set('tab', activeTab);
+    if (activeTab !== 'community') url.searchParams.delete('cv');
+    if (activeTab !== 'dashboard') url.searchParams.delete('dv');
+    if (activeTab !== 'certificat') url.searchParams.delete('numero');
     url.hash = '';
     window.history.replaceState(null, '', url.toString());
   }, [activeTab]);
 
   // Une page protégée ne reste pas affichée après la déconnexion.
+  // (attend la restauration de la session : retour de la page de paiement, lien d'e-mail).
   useEffect(() => {
-    if (activeTab === 'dashboard' && !user) {
+    if (activeTab === 'dashboard' && !user && !initializing) {
       const timer = setTimeout(() => setActiveTab('home'), 300);
       return () => clearTimeout(timer);
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, initializing]);
 
   const handleOpenLogin = () => openAuth('login');
   const handleOpenRegister = () => openAuth('register');
@@ -345,18 +418,6 @@ export default function App() {
 
   const handleSelectCategory = (cat: string | null) => {
     setSelectedCategory(cat);
-  };
-
-  const handleSelectOrientation = (origin: 'china' | 'north-africa') => {
-    setSelectedOrientation(origin);
-    writeStorage(ORIENTATION_KEY, origin);
-    notify(
-      origin === 'china'
-        ? 'Parcours « Chine → Afrique du Nord » activé : implantation, distribution et partenaires locaux.'
-        : 'Parcours « Afrique du Nord → Chine » activé : sourcing, export et accès au marché chinois.',
-      'info',
-    );
-    handleScrollToSection('services');
   };
 
   const handleSearchHit = async (hit: SearchHit) => {
@@ -521,6 +582,8 @@ export default function App() {
           focus={focus?.type === 'event' ? focus : null}
           onFocusHandled={() => setFocus(null)}
         />
+      ) : activeTab === 'certificat' ? (
+        <CertificateVerifyPage onNavigate={handleScrollToSection} />
       ) : activeTab === 'resources' ? (
         <ResourcesPage
           onNavigate={handleScrollToSection}
@@ -548,8 +611,8 @@ export default function App() {
           </div>
 
           <Hero
-            selectedOrientation={selectedOrientation}
-            onSelectOrientation={handleSelectOrientation}
+            visitorLocation={visitorLocation}
+            onExploreOpportunities={() => handleScrollToSection('opportunites')}
             onSearch={handleSearch}
             onSelectCategory={(cat) => {
               setSelectedCategory(cat);
@@ -680,7 +743,9 @@ export default function App() {
         onClose={() => setIsVideoOpen(false)}
       />
 
-      <AuthModal defaultOrigin={selectedOrientation} />
+      <AuthModal defaultOrigin={visitorLocation.region} />
+
+      <TermsGate />
 
       <AppointmentModal
         isOpen={appointment.isOpen}

@@ -10,7 +10,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
+import { uploadsPath } from '../../common/uploads';
 import { CurrentUser, OptionalJwtAuthGuard } from '../../common/auth.guards';
 import { User } from '../users/user.entity';
 import { CreateContactDto } from './contact.dto';
@@ -27,7 +28,7 @@ export class ContactController {
   @UseInterceptors(
     FileInterceptor('attachment', {
       storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'contact'),
+        destination: uploadsPath('contact'),
         filename: (_req, file, callback) => callback(null, `${randomUUID()}${extname(file.originalname).toLowerCase()}`),
       }),
       limits: { fileSize: 10 * 1024 * 1024 },

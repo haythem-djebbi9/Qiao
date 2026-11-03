@@ -25,7 +25,10 @@ import {
   ChevronDown,
   Loader2,
   AlertCircle,
-  Ticket
+  Ticket,
+  Settings,
+  Monitor,
+  Hourglass
 } from 'lucide-react';
 import { AppTab } from '../types';
 import { Logo } from './Logo';
@@ -33,7 +36,8 @@ import type { PageFocus } from '../App';
 import { useApi } from '../hooks/useApi';
 import { api } from '../lib/api';
 import { resolveImage } from '../lib/assets';
-import { QiaoEvent } from '../lib/models';
+import { QiaoEvent, RegistrationStatus } from '../lib/models';
+import { EVENT_FORMAT_LABELS } from '../lib/events';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useAppActions } from '../context/AppActionsContext';
@@ -72,7 +76,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
 }) => {
   const { user } = useAuth();
   const { notify } = useToast();
-  const { openLegal } = useAppActions();
+  const { openLegal, navigate } = useAppActions();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'calendar' | 'organizers'>('cards');
@@ -81,7 +85,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
   const [registrationModalEvent, setRegistrationModalEvent] = useState<EventItemData | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteSuccess, setInviteSuccess] = useState(false);
-  const [registeredBadge, setRegisteredBadge] = useState<string | null>(null);
+  const [registeredBadge, setRegisteredBadge] = useState<{ code: string; status: RegistrationStatus } | null>(null);
   const [registrationForm, setRegistrationForm] = useState({ fullName: '', email: '', companyRole: '' });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -251,11 +255,11 @@ export const EventsPage: React.FC<EventsPageProps> = ({
     setSubmitting(true);
     setFormError(null);
     try {
-      const registration = await api.post<{ badgeCode: string }>(
+      const registration = await api.post<{ badgeCode: string; status: RegistrationStatus }>(
         `/events/${registrationModalEvent.id}/register`,
         registrationForm,
       );
-      setRegisteredBadge(registration.badgeCode);
+      setRegisteredBadge({ code: registration.badgeCode, status: registration.status });
       reloadEvents();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Inscription impossible.');
@@ -467,9 +471,19 @@ export const EventsPage: React.FC<EventsPageProps> = ({
           {/* Header Row: Title on Left, View all link & carousel controls on Right */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0a1c3d]">
-                Événements à la une
-              </h2>
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0a1c3d]">
+                  Événements à la une
+                </h2>
+                {user?.role === 'admin' && (
+                  <button
+                    onClick={() => navigate('dashboard/admin-events/evenements')}
+                    className="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] font-bold text-[#0a1c3d] inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Settings className="w-3.5 h-3.5" /> Gérer les événements
+                  </button>
+                )}
+              </div>
               {(selectedCategoryFilter || organizerFilter || searchQuery) && (
                 <p className="text-xs text-slate-500 mt-1">
                   {filteredEvents.length} événement{filteredEvents.length > 1 ? 's' : ''} · Filtré par :{' '}
@@ -564,8 +578,12 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                         </div>
                         <span className="px-2 py-0.5 rounded-full bg-[#e0f2fe] text-[#0369a1] text-[10px] font-bold">{ev.category}</span>
                         {ev.isRegistered && (
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                            Inscrit
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              ev.myRegistrationStatus === 'waitlisted' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}
+                          >
+                            {ev.myRegistrationStatus === 'waitlisted' ? "Liste d'attente" : 'Inscrit'}
                           </span>
                         )}
                       </button>
@@ -598,8 +616,20 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {ev.isRegistered && (
-                      <div className="absolute top-2.5 right-2.5 bg-emerald-600 text-white rounded-lg px-2 py-1 text-[10px] font-bold shadow-md z-10 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Inscrit
+                      <div
+                        className={`absolute top-2.5 right-2.5 ${
+                          ev.myRegistrationStatus === 'waitlisted' ? 'bg-amber-500' : 'bg-emerald-600'
+                        } text-white rounded-lg px-2 py-1 text-[10px] font-bold shadow-md z-10 flex items-center gap-1`}
+                      >
+                        {ev.myRegistrationStatus === 'waitlisted' ? (
+                          <>
+                            <Hourglass className="w-3 h-3" /> Liste d'attente
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-3 h-3" /> Inscrit
+                          </>
+                        )}
                       </div>
                     )}
                     
@@ -613,9 +643,16 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                   {/* Card Content */}
                   <div className="p-3.5 space-y-1.5">
                     {/* Category Tag (Light blue pill) */}
-                    <span className="inline-block px-2 py-0.5 rounded-full bg-[#e0f2fe] text-[#0369a1] text-[10px] font-bold">
-                      {ev.category}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="inline-block px-2 py-0.5 rounded-full bg-[#e0f2fe] text-[#0369a1] text-[10px] font-bold">
+                        {ev.category}
+                      </span>
+                      {ev.format !== 'onsite' && (
+                        <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">
+                          <Monitor className="w-2.5 h-2.5" /> {EVENT_FORMAT_LABELS[ev.format]}
+                        </span>
+                      )}
+                    </div>
 
                     {/* Event Title */}
                     <h3 className="text-sm font-extrabold text-[#0a1c3d] group-hover:text-[#e01a22] transition-colors leading-snug">
@@ -641,8 +678,8 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     En savoir plus <span>➔</span>
                   </span>
                   {ev.capacity > 0 && (
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      {Math.max(0, ev.capacity - ev.registrationsCount)} places
+                    <span className={`text-[10px] font-medium ${ev.isFull ? 'text-amber-700 font-bold' : 'text-slate-400'}`}>
+                      {ev.isFull ? 'Complet' : `${Math.max(0, ev.capacity - ev.registrationsCount)} places`}
                     </span>
                   )}
                 </div>
@@ -906,29 +943,60 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 {selectedEvent.description}
               </p>
 
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5" /> {selectedEvent.time}
+                </span>
+                <span className="flex items-center gap-1">
+                  {selectedEvent.format === 'onsite' ? <MapPin className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
+                  {EVENT_FORMAT_LABELS[selectedEvent.format]}
+                  {selectedEvent.format === 'hybrid' && ' (sur place ou à distance)'}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Ticket className="w-3.5 h-3.5" /> {selectedEvent.priceLabel ?? 'Gratuit'}
+                </span>
+                {selectedEvent.capacity > 0 && (
+                  <span className={`flex items-center gap-1 ${selectedEvent.isFull ? 'text-amber-700 font-semibold' : ''}`}>
+                    <Users className="w-3.5 h-3.5" />
+                    {selectedEvent.isFull
+                      ? `Complet · ${selectedEvent.waitlistCount} en liste d'attente`
+                      : `${selectedEvent.registrationsCount} inscrit(s) · ${Math.max(0, selectedEvent.capacity - selectedEvent.registrationsCount)} places restantes`}
+                  </span>
+                )}
+              </div>
+
               {selectedEvent.details && (
                 <div className="space-y-4">
+                  {(selectedEvent.details.organizer || selectedEvent.details.expectedAttendees || selectedEvent.details.venue) && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    {selectedEvent.details.organizer && (
                     <div>
                       <div className="text-[11px] font-bold text-slate-500 uppercase">Organisateur</div>
                       <div className="text-xs font-semibold text-slate-900 mt-0.5">
                         {selectedEvent.details.organizer}
                       </div>
                     </div>
+                    )}
+                    {selectedEvent.details.expectedAttendees && (
                     <div>
                       <div className="text-[11px] font-bold text-slate-500 uppercase">Participants attendus</div>
                       <div className="text-xs font-semibold text-slate-900 mt-0.5">
                         {selectedEvent.details.expectedAttendees}
                       </div>
                     </div>
+                    )}
+                    {selectedEvent.details.venue && (
                     <div className="sm:col-span-2">
                       <div className="text-[11px] font-bold text-slate-500 uppercase">Lieu de l'événement</div>
                       <div className="text-xs font-semibold text-slate-900 mt-0.5">
                         {selectedEvent.details.venue}
                       </div>
                     </div>
+                    )}
                   </div>
+                  )}
 
+                  {selectedEvent.details.focusSectors.length > 0 && (
                   <div>
                     <h4 className="font-extrabold text-[#0a1c3d] text-xs uppercase tracking-wider mb-2">
                       Secteurs d'activité ciblés
@@ -944,7 +1012,9 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                       ))}
                     </div>
                   </div>
+                  )}
 
+                  {selectedEvent.details.programHighlights.length > 0 && (
                   <div>
                     <h4 className="font-extrabold text-[#0a1c3d] text-xs uppercase tracking-wider mb-2">
                       Points forts du programme
@@ -958,16 +1028,8 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                       ))}
                     </ul>
                   </div>
+                  )}
                   <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {selectedEvent.time}
-                    </span>
-                    {selectedEvent.capacity > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" /> {selectedEvent.registrationsCount} inscrit(s) ·{' '}
-                        {Math.max(0, selectedEvent.capacity - selectedEvent.registrationsCount)} places restantes
-                      </span>
-                    )}
                     {selectedEvent.details.website && (
                       <a
                         href={selectedEvent.details.website}
@@ -992,12 +1054,18 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 Fermer
               </button>
 
-              {selectedEvent.isRegistered ? (
+              {selectedEvent.myRegistrationStatus === 'waitlisted' ? (
+                <span className="px-5 py-2.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 font-bold text-xs flex items-center gap-1.5">
+                  <Hourglass className="w-4 h-4" /> Vous êtes sur liste d'attente
+                </span>
+              ) : selectedEvent.isRegistered ? (
                 <span className="px-5 py-2.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" /> Vous êtes inscrit
                 </span>
               ) : isPast(selectedEvent) ? (
                 <span className="px-5 py-2.5 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">Événement terminé</span>
+              ) : selectedEvent.registrationClosed ? (
+                <span className="px-5 py-2.5 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">Inscriptions fermées</span>
               ) : (
                 <button
                   onClick={() => {
@@ -1007,7 +1075,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                   }}
                   className="px-5 py-2.5 rounded-lg bg-[#e01a22] hover:bg-[#c8102e] text-white font-bold text-xs shadow-md transition-all cursor-pointer"
                 >
-                  S'inscrire à cet événement
+                  {selectedEvent.isFull ? "Rejoindre la liste d'attente" : "S'inscrire à cet événement"}
                 </button>
               )}
             </div>
@@ -1037,15 +1105,31 @@ export const EventsPage: React.FC<EventsPageProps> = ({
 
             {registeredBadge ? (
               <div className="py-6 text-center space-y-2">
-                <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-                <h4 className="font-extrabold text-[#0a1c3d]">Demande d'accréditation confirmée</h4>
-                <p className="text-xs text-slate-600 max-w-xs mx-auto">
-                  Notre équipe va vous transmettre votre badge et les modalités de matchmaking B2B par email.
-                </p>
+                {registeredBadge.status === 'waitlisted' ? (
+                  <>
+                    <Hourglass className="w-12 h-12 text-amber-500 mx-auto" />
+                    <h4 className="font-extrabold text-[#0a1c3d]">Vous êtes sur liste d'attente</h4>
+                    <p className="text-xs text-slate-600 max-w-xs mx-auto">
+                      L'événement est complet. Si une place se libère, notre équipe confirmera votre inscription et vous serez prévenu.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                    <h4 className="font-extrabold text-[#0a1c3d]">Demande d'accréditation confirmée</h4>
+                    <p className="text-xs text-slate-600 max-w-xs mx-auto">
+                      {registrationModalEvent.format === 'onsite'
+                        ? 'Notre équipe va vous transmettre votre badge et les modalités de matchmaking B2B par email.'
+                        : user
+                          ? 'Le lien de connexion sera disponible dans votre espace QIAO, rubrique Événements.'
+                          : "Notre équipe vous transmettra le lien de connexion par email avant l'événement."}
+                    </p>
+                  </>
+                )}
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200">
                   <Ticket className="w-4 h-4 text-[#e01a22]" />
                   <span className="text-xs text-slate-500">N° de badge</span>
-                  <span className="font-mono font-bold text-[#0a1c3d]">{registeredBadge}</span>
+                  <span className="font-mono font-bold text-[#0a1c3d]">{registeredBadge.code}</span>
                 </div>
                 <div>
                   <button
@@ -1058,6 +1142,12 @@ export const EventsPage: React.FC<EventsPageProps> = ({
               </div>
             ) : (
               <form onSubmit={handleRegisterEventSubmit} className="space-y-3">
+                {registrationModalEvent.isFull && (
+                  <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-100 text-xs text-amber-800 font-medium">
+                    <Hourglass className="w-4 h-4 shrink-0" />
+                    <span>Cet événement est complet : votre demande sera placée sur liste d'attente.</span>
+                  </div>
+                )}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Nom complet</label>
                   <input
@@ -1104,7 +1194,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     className="w-full py-2.5 rounded-lg bg-[#e01a22] hover:bg-[#c8102e] text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    Valider mon inscription
+                    {registrationModalEvent.isFull ? "Rejoindre la liste d'attente" : 'Valider mon inscription'}
                   </button>
                 </div>
               </form>
