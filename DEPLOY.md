@@ -31,7 +31,7 @@ Supprimez les anciens enregistrements A, AAAA, ALIAS ou CNAME sur `@` et `www` (
 **Installation.** Dans hPanel › VPS › Web console, en root :
 
 ```bash
-export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a; apt-get -o DPkg::Lock::Timeout=300 update -y && apt-get -o DPkg::Lock::Timeout=300 install -y git; git clone https://github.com/haythem-djebbi9/Qiao.git /opt/qiao; nohup bash /opt/qiao/deploy/vps/install.sh qiao-china.io admin@qiao-china.io > /root/qiao-install.log 2>&1 &
+export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a; apt-get -o DPkg::Lock::Timeout=300 update -y; apt-get -o DPkg::Lock::Timeout=300 install -y git; git clone https://github.com/haythem-djebbi9/Qiao.git /opt/qiao; nohup bash /opt/qiao/deploy/vps/install.sh qiao-china.io admin@qiao-china.io > /root/qiao-install.log 2>&1 &
 tail -f /root/qiao-install.log
 ```
 
