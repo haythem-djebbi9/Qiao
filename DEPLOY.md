@@ -77,7 +77,7 @@ bash /opt/qiao/deploy/vps/set-secret.sh STRIPE_SECRET_KEY
 |---|---|---|
 | Stripe | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Commencez avec les clés de test (`sk_test_…`). Connect doit être activé |
 | E-mails | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Indispensable : sans SMTP, « mot de passe oublié » ne fonctionne pas pour les membres. Avec une boîte Hostinger : `smtp.hostinger.com`, port `465`, `SMTP_SECURE=true` |
-| Assistant SEO & GEO | `GEMINI_API_KEY` | Facultatif |
+| Gemini | `GEMINI_API_KEY` | Assistant SEO & GEO, et traduction automatique des contenus publiés depuis l'administration (formations, événements, opportunités…). Sans clé, ces nouveaux contenus restent en français |
 | Certificats | `ACADEMY_CERTIFICATE_FONT` | Facultatif : police pour les noms en chinois |
 | WeChat / Facebook | `WECHAT_APP_*`, `FACEBOOK_APP_*`, `WECHAT_OA_*` | Facultatif : voir `Backend/.env.example` |
 
@@ -137,6 +137,51 @@ gunzip -c /var/backups/qiao/base-AAAA-MM-JJ_HHMM.sql.gz | docker compose exec -T
 docker compose run --rm -T --no-deps --entrypoint "" -v /var/backups/qiao:/backups:ro app tar -C /data -xzf /backups/fichiers-AAAA-MM-JJ_HHMM.tar.gz
 docker compose up -d
 ```
+
+## Inscription avec Facebook et WeChat
+
+Les boutons apparaissent déjà dans la fenêtre de connexion ; ils s'activent dès que les identifiants sont enregistrés sur le serveur. Une identité n'est jamais fusionnée automatiquement avec un compte existant : le membre crée un compte ou lie le sien en confirmant son mot de passe.
+
+**Facebook.** Sur https://developers.facebook.com :
+
+1. *Mes apps › Créer une app*, puis le cas d'usage « Authentifier et demander des données aux utilisateurs avec Facebook Login ».
+2. Dans ce cas d'usage, *Personnaliser* : ajoutez l'autorisation `email` (`public_profile` est incluse).
+3. *Facebook Login › Paramètres*, « URI de redirection OAuth valides » : `https://qiao-china.io/api/auth/oauth/facebook/callback`
+4. *Paramètres de l'app › Général* :
+   - Domaines de l'app : `qiao-china.io`
+   - Politique de confidentialité : `https://qiao-china.io/confidentialite.html`
+   - Suppression des données (URL d'instructions) : `https://qiao-china.io/suppression-des-donnees.html`
+   - Conditions d'utilisation : `https://qiao-china.io/?legal=terms`
+   - Icône : `https://qiao-china.io/favicon.png` (à téléverser) ; catégorie : Entreprise et pages.
+5. Enregistrez les identifiants sur le serveur, depuis ce PC (le mot de passe de l'app ne s'affiche pas) :
+
+```bash
+ssh -t -i ~/.ssh/qiao_vps root@2.24.50.90 bash /opt/qiao/deploy/vps/set-secret.sh FACEBOOK_APP_ID
+ssh -t -i ~/.ssh/qiao_vps root@2.24.50.90 bash /opt/qiao/deploy/vps/set-secret.sh FACEBOOK_APP_SECRET
+```
+
+6. Testez avec votre propre compte Facebook, puis passez l'app en mode **Publié** (`Live`). Tant qu'elle reste en mode développement, seuls ses administrateurs et testeurs peuvent se connecter.
+
+**WeChat.** Sur https://open.weixin.qq.com (Open Platform, à ne pas confondre avec le compte officiel) :
+
+1. Créez un compte développeur et faites-le vérifier. WeChat demande des justificatifs d'entreprise, et la vérification peut être payante et longue.
+2. *Applications › Application de site web* (网站应用) : nom, logo, description et domaine.
+3. « Domaine de rappel d'autorisation » (授权回调域) : `qiao-china.io`, sans `https://` ni chemin.
+4. Une fois l'application approuvée, enregistrez `WECHAT_APP_ID` et `WECHAT_APP_SECRET` avec `set-secret.sh`, comme ci-dessus.
+
+Vérifiez d'abord les conditions auprès de WeChat : des intégrateurs indiquent qu'une entreprise vérifiée en Chine et un domaine déclaré à l'ICP sont nécessaires, ce qui peut bloquer une société étrangère et un serveur hors de Chine. Le visiteur scanne un QR code avec l'application WeChat : ce parcours convient à un ordinateur, pas à un navigateur sur le téléphone où WeChat est installé.
+
+## Traduction du site
+
+Le site est disponible en français, anglais, chinois et arabe (de droite à gauche). Après avoir modifié des textes dans le code :
+
+```bash
+cd Frontend
+node scripts/i18n/extract.mjs
+node scripts/i18n/translate.mjs
+```
+
+Committez ensuite `Frontend/public/i18n/*.json`. Détails et contrôle d'une page : [Frontend/scripts/i18n/README.md](Frontend/scripts/i18n/README.md).
 
 ## Modifier le schéma de la base
 

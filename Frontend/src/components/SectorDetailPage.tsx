@@ -77,6 +77,9 @@ import { SECTORS_DETAILS, SectorData } from '../data/sectorsData';
 import { Logo } from './Logo';
 import { api } from '../lib/api';
 import { CountryFlag } from './common/CountryFlag';
+import { SubSectorView } from './sectors/SubSectorView';
+import { useAppActions } from '../context/AppActionsContext';
+import { setQueryParams, useQueryParam } from '../lib/routes';
 
 interface SectorDetailPageProps {
   sectorId: string;
@@ -104,6 +107,9 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
 
   // Fallback to construction if sectorId not found
   const sector: SectorData = SECTORS_DETAILS[sectorId] || SECTORS_DETAILS['construction'];
+  const { openLegal, openOpportunities, contactUs } = useAppActions();
+  const subSectorId = useQueryParam('sub');
+  const activeSubSector = sector.subSectors.find((item) => item.id === subSectorId) ?? null;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -258,6 +264,8 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
     }
   };
 
+  const openSubSector = (id: string) => setQueryParams({ sub: id });
+
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -281,6 +289,19 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
       setSubmitError(err instanceof Error ? err.message : 'Envoi impossible.');
     }
   };
+
+  if (activeSubSector) {
+    return (
+      <SubSectorView
+        sector={sector}
+        subSector={activeSubSector}
+        onProject={() => {
+          setQueryParams({ sub: null });
+          setTimeout(handleScrollToForm, 60);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="w-full bg-white text-slate-900 min-h-screen font-sans antialiased selection:bg-red-500 selection:text-white">
@@ -533,7 +554,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
               {sector.subSectorsTitle}
             </h2>
             <button
-              onClick={handleScrollToOpportunities}
+              onClick={() => openSubSector(sector.subSectors[0].id)}
               className="inline-flex items-center gap-1 text-xs font-bold text-[#e01a22] hover:underline cursor-pointer"
             >
               <span>Voir tous les sous-secteurs</span>
@@ -544,9 +565,11 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
           {/* 6 Cards Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
             {sector.subSectors.map((sub) => (
-              <div
+              <button
+                type="button"
                 key={sub.id}
-                className="bg-white rounded-2xl overflow-hidden border border-slate-200/90 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col group"
+                onClick={() => openSubSector(sub.id)}
+                className="text-left bg-white rounded-2xl overflow-hidden border border-slate-200/90 shadow-xs hover:shadow-md hover:border-slate-400 transition-all duration-200 flex flex-col group cursor-pointer"
               >
                 {/* Image */}
                 <div className="h-32 w-full overflow-hidden relative bg-slate-100">
@@ -576,7 +599,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                     </p>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
 
@@ -597,7 +620,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                   Opportunités actuelles
                 </h3>
                 <button
-                  onClick={handleScrollToForm}
+                  onClick={() => openOpportunities({ sector: sector.id })}
                   className="text-xs font-bold text-[#e01a22] hover:underline cursor-pointer"
                 >
                   Voir toutes les opportunités →
@@ -608,7 +631,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                 {sector.opportunities.map((op) => (
                   <div
                     key={op.id}
-                    onClick={handleScrollToForm}
+                    onClick={() => openOpportunities({ id: `${sector.id}-${op.id}`, country: op.country })}
                     className="p-3 rounded-xl border border-slate-200/80 hover:border-slate-400 hover:bg-slate-50 transition-all flex items-center justify-between gap-3 group cursor-pointer shadow-2xs"
                   >
                     {/* Real Vector SVG Country Flag */}
@@ -643,9 +666,11 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
 
               <div className="space-y-3">
                 {sector.services.map((srv) => (
-                  <div
+                  <button
+                    type="button"
                     key={srv.id}
-                    className="flex items-start gap-3.5 p-2 rounded-xl hover:bg-slate-50 transition-colors"
+                    onClick={() => contactUs({ subject: 'Autre demande', message: `Bonjour, je souhaite en savoir plus sur le service « ${srv.title} » (${sector.title}).\n\nMon projet : ` })}
+                    className="w-full text-left flex items-start gap-3.5 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#0a1c3d] flex items-center justify-center shrink-0 border border-blue-100/80 mt-0.5">
                       {getServiceIcon(srv.iconName)}
@@ -658,7 +683,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                         {srv.description}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -954,11 +979,11 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-x-4 text-[11px] text-slate-500">
-                <button className="hover:underline">Confidentialité</button>
+                <button onClick={() => openLegal('privacy')} className="hover:underline cursor-pointer">Confidentialité</button>
                 <span>|</span>
-                <button className="hover:underline">Conditions d'utilisation</button>
+                <button onClick={() => openLegal('terms')} className="hover:underline cursor-pointer">Conditions d'utilisation</button>
                 <span>|</span>
-                <button className="hover:underline">Mentions légales</button>
+                <button onClick={() => openLegal('legal')} className="hover:underline cursor-pointer">Mentions légales</button>
               </div>
             </div>
 

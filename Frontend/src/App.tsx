@@ -20,6 +20,7 @@ import { ContactPage } from './components/ContactPage';
 import { EventsPage } from './components/EventsPage';
 import { ResourcesPage } from './components/ResourcesPage';
 import { DashboardPage } from './components/DashboardPage';
+import { OpportunitiesPage } from './components/opportunities/OpportunitiesPage';
 import { CertificateVerifyPage } from './components/academy/CertificateVerifyPage';
 
 // Modals
@@ -59,6 +60,8 @@ import { Opportunity, User } from './lib/models';
 import { detectVisitorLocation } from './lib/geo';
 import { navigateCommunity, routeFromLink } from './lib/community';
 import { navigateDashboard } from './lib/payments';
+import { opportunityRoute } from './lib/opportunities';
+import { setLanguage, toLanguage } from './i18n/runtime';
 import { TermsGate } from './components/community/TermsGate';
 
 /** Élément à mettre en avant à l'arrivée sur une page (résultat de recherche). */
@@ -137,23 +140,32 @@ export default function App() {
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
   const [applyOpportunity, setApplyOpportunity] = useState<Opportunity | null>(null);
-  const [legalKind, setLegalKind] = useState<LegalKind | null>(null);
+  // Adresse directe d'une page légale : ?legal=privacy, ?legal=terms, ?legal=data-deletion...
+  const [legalKind, setLegalKind] = useState<LegalKind | null>(() => {
+    const kind = new URLSearchParams(window.location.search).get('legal');
+    return kind === 'privacy' || kind === 'terms' || kind === 'legal' || kind === 'training-terms' || kind === 'data-deletion' ? kind : null;
+  });
   const [search, setSearch] = useState<{ isOpen: boolean; query: string }>({ isOpen: false, query: '' });
-  const [selectedSectorId, setSelectedSectorId] = useState<string>('sante');
+  const [selectedSectorId, setSelectedSectorId] = useState<string>(() => new URLSearchParams(window.location.search).get('sector') ?? 'sante');
 
   const { data: servicesData = [] } = useApi<ServiceItem[]>('/services', undefined, []);
 
-  // La langue du compte prime sur la préférence locale.
+  const applyLanguage = (code: string) => {
+    void setLanguage(toLanguage(code));
+    setCurrentLang(code);
+  };
+
+  // Le choix fait sur cet appareil prime ; sans choix, on reprend la langue du compte.
   useEffect(() => {
-    if (user?.language) setCurrentLang(user.language);
+    if (!user?.language) return;
+    const stored = readStorage(LANGUAGE_KEY);
+    if (!stored) applyLanguage(user.language);
+    else if (stored !== user.language) updateProfile({ language: stored }).catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.language]);
 
-  useEffect(() => {
-    document.documentElement.lang = currentLang.toLowerCase();
-  }, [currentLang]);
-
   const handleSelectLang = (code: string) => {
-    setCurrentLang(code);
+    applyLanguage(code);
     writeStorage(LANGUAGE_KEY, code);
     if (user) updateProfile({ language: code }).catch(() => undefined);
   };
@@ -356,6 +368,7 @@ export default function App() {
       targetTab === 'resources' ||
       targetTab === 'dashboard' ||
       targetTab === 'certificat' ||
+      targetTab === 'opportunites-pays' ||
       targetTab === 'home'
     ) {
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -374,16 +387,46 @@ export default function App() {
     }, 50);
   };
 
-  // Garde la barre d'adresse synchronisée pour pouvoir partager / recharger une page.
+  // Garde la barre d'adresse synchronisée : une page se partage, se recharge, et le bouton retour y ramène.
   useEffect(() => {
     const url = new URL(window.location.href);
+    const previousTab = url.searchParams.get('tab');
+    const previousSector = url.searchParams.get('sector');
     url.searchParams.set('tab', activeTab);
     if (activeTab !== 'community') url.searchParams.delete('cv');
     if (activeTab !== 'dashboard') url.searchParams.delete('dv');
     if (activeTab !== 'certificat') url.searchParams.delete('numero');
+    if (activeTab === 'sector-detail') {
+      url.searchParams.set('sector', selectedSectorId);
+    } else {
+      url.searchParams.delete('sector');
+      url.searchParams.delete('sub');
+    }
+    if (activeTab !== 'opportunites-pays') {
+      url.searchParams.delete('pays');
+      url.searchParams.delete('op');
+      url.searchParams.delete('secteur');
+    }
     url.hash = '';
-    window.history.replaceState(null, '', url.toString());
-  }, [activeTab]);
+    if (url.toString() === window.location.href) return;
+    const newPage = previousTab !== null && (previousTab !== activeTab || (activeTab === 'sector-detail' && previousSector !== selectedSectorId));
+    window.history[newPage ? 'pushState' : 'replaceState'](null, '', url.toString());
+  }, [activeTab, selectedSectorId]);
+
+  // Bouton retour du navigateur : la page de l'adresse redevient la page affichée.
+  useEffect(() => {
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (params.get('cv')) setActiveTab('community');
+      else if (tab) setActiveTab(tab as AppTab);
+      const sector = params.get('sector');
+      if (sector) setSelectedSectorId(sector);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   // Une page protégée ne reste pas affichée après la déconnexion.
   // (attend la restauration de la session : retour de la page de paiement, lien d'e-mail).
@@ -466,6 +509,10 @@ export default function App() {
     openDocument: (titleOrId: string) => setSelectedDocument(titleOrId),
     applyToOpportunity: (opportunity: Opportunity) => setApplyOpportunity(opportunity),
     openSearch: (query?: string) => setSearch({ isOpen: true, query: query ?? '' }),
+    openOpportunities: (target) => {
+      opportunityRoute(target);
+      setActiveTab('opportunites-pays');
+    },
   };
 
   // Filtered services based on search and orientation/category
@@ -515,6 +562,8 @@ export default function App() {
       {/* Conditional: Dedicated Intelligence Page, Academy Page, Secteurs Page, Sector Detail Page, OR Main Landing Page */}
       {activeTab === 'dashboard' && user ? (
         <DashboardPage onNavigate={handleScrollToSection} />
+      ) : activeTab === 'opportunites-pays' ? (
+        <OpportunitiesPage />
       ) : activeTab === 'intelligence' ? (
         <IntelligencePage
           onNavigate={handleScrollToSection}
@@ -803,7 +852,15 @@ export default function App() {
         onClose={() => setApplyOpportunity(null)}
       />
 
-      <LegalModal kind={legalKind} onClose={() => setLegalKind(null)} />
+      <LegalModal
+        kind={legalKind}
+        onClose={() => {
+          setLegalKind(null);
+          const url = new URL(window.location.href);
+          url.searchParams.delete('legal');
+          window.history.replaceState(null, '', url.toString());
+        }}
+      />
 
       <SearchModal
         isOpen={search.isOpen}

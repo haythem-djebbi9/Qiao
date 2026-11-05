@@ -22,7 +22,8 @@ interface ExternalProfile {
 }
 
 const PROVIDER_LABELS: Record<ExternalProvider, string> = { wechat: 'WeChat', facebook: 'Facebook' };
-const FACEBOOK_GRAPH = 'https://graph.facebook.com/v19.0';
+// Sans numéro de version : Meta sert la version courante de l'application, qui ne périme jamais.
+const FACEBOOK_GRAPH = 'https://graph.facebook.com';
 const STATE_TTL_MS = 10 * 60_000;
 const LOGIN_CODE_TTL_MS = 2 * 60_000;
 const PENDING_TTL_MS = 30 * 60_000;
@@ -132,7 +133,7 @@ export class OAuthService {
       );
     }
     return (
-      `https://www.facebook.com/v19.0/dialog/oauth?client_id=${credentials.id}&redirect_uri=${redirectUri}` +
+      `https://www.facebook.com/dialog/oauth?client_id=${credentials.id}&redirect_uri=${redirectUri}` +
       `&state=${state}&response_type=code&scope=email,public_profile`
     );
   }

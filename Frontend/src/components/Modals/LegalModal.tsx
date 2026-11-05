@@ -8,7 +8,11 @@ const CONTENT: Record<LegalKind, { title: string; sections: { heading: string; t
     sections: [
       {
         heading: 'Données collectées',
-        text: "QIAO collecte uniquement les informations que vous saisissez dans les formulaires (identité, coordonnées professionnelles, projet) ainsi que l'historique de vos actions sur la plateforme (inscriptions, téléchargements, candidatures).",
+        text: "QIAO collecte les informations que vous saisissez dans les formulaires (identité, coordonnées professionnelles, projet) ainsi que l'historique de vos actions sur la plateforme (inscriptions, téléchargements, candidatures).",
+      },
+      {
+        heading: 'Connexion avec Facebook ou WeChat',
+        text: "Si vous choisissez de vous inscrire ou de vous connecter avec Facebook ou WeChat, QIAO reçoit de ce service votre identifiant, votre nom et votre photo de profil, ainsi que votre adresse e-mail pour Facebook. Ces données servent uniquement à créer votre compte QIAO et à vous reconnaître à la connexion suivante. QIAO ne reçoit jamais votre mot de passe Facebook ou WeChat et ne publie rien en votre nom.",
       },
       {
         heading: 'Finalités',
@@ -20,7 +24,24 @@ const CONTENT: Record<LegalKind, { title: string; sections: { heading: string; t
       },
       {
         heading: 'Vos droits',
-        text: "Conformément au RGPD et aux lois tunisienne (loi 2004-63), marocaine (loi 09-08) et algérienne (loi 18-07), vous pouvez accéder, rectifier ou supprimer vos données en écrivant à privacy@qiao.tn.",
+        text: "Conformément au RGPD et aux lois tunisienne (loi 2004-63), marocaine (loi 09-08) et algérienne (loi 18-07), vous pouvez accéder à vos données, les rectifier ou les supprimer en écrivant à privacy@qiao-china.io.",
+      },
+    ],
+  },
+  'data-deletion': {
+    title: 'Suppression de vos données',
+    sections: [
+      {
+        heading: 'Demander la suppression',
+        text: "Écrivez à privacy@qiao-china.io depuis l'adresse e-mail de votre compte QIAO, avec pour objet « Suppression de mes données ». Si votre compte a été créé avec Facebook ou WeChat, indiquez le nom affiché sur ce compte.",
+      },
+      {
+        heading: 'Traitement de la demande',
+        text: "L'équipe QIAO confirme votre identité, supprime vos données et vous répond sous 30 jours. Les pièces que la loi impose de conserver, comme les factures, sont gardées pendant la durée légale.",
+      },
+      {
+        heading: "Retirer seulement l'accès de QIAO",
+        text: 'Dans Facebook, ouvrez Paramètres et confidentialité › Paramètres › Applications et sites web, puis supprimez QIAO. Sur QIAO, vous pouvez aussi délier Facebook ou WeChat dans Community › Paramètres › Comptes & sécurité.',
       },
     ],
   },

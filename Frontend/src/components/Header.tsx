@@ -142,6 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
     activeTab === 'secteurs' ||
     activeTab === 'commerce-hub' ||
     activeTab === 'about' ||
+    activeTab === 'certificat' ||
     activeTab === 'contact' ||
     activeTab === 'community' ||
     activeTab === 'academy' ||
@@ -160,8 +161,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   const languages = [
     { code: 'FR', label: 'Français', flag: '🇫🇷' },
-    { code: 'ZH', label: '中文 (Chinois)', flag: '🇨🇳' },
-    { code: 'AR', label: 'العربية (Arabe)', flag: '🇹🇳' },
+    { code: 'ZH', label: '中文', flag: '🇨🇳' },
+    { code: 'AR', label: 'العربية', flag: '🇹🇳' },
     { code: 'EN', label: 'English', flag: '🇬🇧' },
   ];
 
@@ -749,7 +750,7 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <span className="flex items-center gap-2">
                       <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
+                      <span translate="no">{lang.label}</span>
                     </span>
                     {currentLang === lang.code && <span className="text-red-600 font-bold">✓</span>}
                   </button>
@@ -975,7 +976,7 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <span className="flex items-center gap-2">
                     <span>{lang.flag}</span>
-                    <span>{lang.label}</span>
+                    <span translate="no">{lang.label}</span>
                   </span>
                   {currentLang === lang.code && <span className="text-red-600 font-bold">✓</span>}
                 </button>
@@ -986,7 +987,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => setLangDropdownOpen(!langDropdownOpen)}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
-              isScrolled
+              isLight
                 ? 'text-slate-700 border-slate-200 bg-slate-100'
                 : 'text-white border-white/20 bg-white/10'
             }`}
@@ -998,7 +999,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={`p-2 rounded-xl focus:outline-none ${
-              isScrolled ? 'text-slate-800 hover:bg-slate-100' : 'text-white hover:bg-white/10'
+              isLight ? 'text-slate-800 hover:bg-slate-100' : 'text-white hover:bg-white/10'
             }`}
             aria-label="Menu"
           >
@@ -1010,7 +1011,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Drawer Navigation Menu */}
       {mobileMenuOpen && (
         <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-2xl ${
-          isScrolled
+          isLight
             ? 'bg-white border-slate-200 text-slate-800'
             : 'bg-[#07152b] border-white/10 text-white'
         }`}>
@@ -1018,7 +1019,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('home')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.home}
@@ -1028,7 +1029,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`text-left px-3 py-2.5 rounded-xl font-semibold ${
                 activeTab === 'about'
                   ? 'text-red-500 bg-red-500/10'
-                  : isScrolled
+                  : isLight
                   ? 'hover:bg-slate-100 text-slate-800'
                   : 'hover:bg-white/10 text-white'
               }`}
@@ -1040,7 +1041,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`text-left px-3 py-2.5 rounded-xl font-semibold ${
                 activeTab === 'secteurs' || activeTab === 'sector-detail'
                   ? 'text-red-500 bg-red-500/10'
-                  : isScrolled
+                  : isLight
                   ? 'hover:bg-slate-100 text-slate-800'
                   : 'hover:bg-white/10 text-white'
               }`}
@@ -1050,7 +1051,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('services')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Services & Catalogue
@@ -1060,7 +1061,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`text-left px-3 py-2.5 rounded-xl font-semibold ${
                 activeTab === 'community'
                   ? 'text-red-500 bg-red-500/10'
-                  : isScrolled
+                  : isLight
                   ? 'hover:bg-slate-100 text-slate-800'
                   : 'hover:bg-white/10 text-white'
               }`}
@@ -1070,7 +1071,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('academy')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.academy}
@@ -1078,7 +1079,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('intelligence')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Intelligence
@@ -1086,7 +1087,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('partners')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Partenaires &amp; Réseau
@@ -1094,7 +1095,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('resources')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.resources}
@@ -1102,7 +1103,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('evenements')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.events}
@@ -1110,7 +1111,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('how-it-works')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Comment ça marche
@@ -1118,7 +1119,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('contact')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.contact}
@@ -1127,7 +1128,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Mobile Auth and Simulator Actions */}
           <div className={`pt-3 border-t flex flex-col gap-2 ${
-            isScrolled ? 'border-slate-200' : 'border-white/10'
+            isLight ? 'border-slate-200' : 'border-white/10'
           }`}>
             <button
               onClick={() => {
@@ -1135,7 +1136,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenCalculator?.();
               }}
               className={`w-full py-2.5 px-4 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border ${
-                isScrolled
+                isLight
                   ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
                   : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
               }`}
@@ -1149,7 +1150,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenSearch?.();
               }}
               className={`w-full py-2.5 px-4 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border ${
-                isScrolled
+                isLight
                   ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
                   : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
               }`}
@@ -1162,7 +1163,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   onClick={() => handleNavClick('dashboard')}
                   className={`py-2.5 text-xs font-medium rounded-xl border text-center ${
-                    isScrolled
+                    isLight
                       ? 'border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100'
                       : 'border-white/20 text-white bg-white/5 hover:bg-white/10'
                   }`}
@@ -1184,7 +1185,7 @@ export const Header: React.FC<HeaderProps> = ({
                     handleAuth('login');
                   }}
                   className={`py-2.5 text-xs font-medium rounded-xl border text-center ${
-                    isScrolled
+                    isLight
                       ? 'border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100'
                       : 'border-white/20 text-white bg-white/5 hover:bg-white/10'
                   }`}

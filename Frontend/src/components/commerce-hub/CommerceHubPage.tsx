@@ -653,9 +653,6 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'opportunites' && (
           <OpportunitesTab
             onSelectTab={setActiveCommerceTab}
-            onOpenOpportunityDetail={(id) => {
-              if (onOpenConsultation) onOpenConsultation();
-            }}
             onOpenSignUp={onOpenSignUp}
           />
         )}
