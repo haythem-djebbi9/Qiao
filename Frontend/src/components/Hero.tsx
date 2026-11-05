@@ -106,7 +106,7 @@ export const Hero: React.FC<HeroProps> = ({
               Le pont entre
             </span>
             <span className="block mt-1.5">
-              la <span className="text-red-500">Chine</span> &amp; <span className="text-sky-400">l'Afrique du Nord</span>
+              <span className="fr-only" translate="no">la </span><span className="text-red-500">Chine</span> &amp; <span className="text-sky-400">l'Afrique du Nord</span>
             </span>
           </h1>
 

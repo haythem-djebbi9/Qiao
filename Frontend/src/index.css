@@ -389,3 +389,8 @@ html[dir='rtl'] .lucide-arrow-up-right {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Mot propre à la phrase française, sans équivalent une fois le titre traduit. */
+html:not([lang='fr']) .fr-only {
+  display: none;
+}
