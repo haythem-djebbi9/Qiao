@@ -729,7 +729,7 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <Globe className={`w-3.5 h-3.5 ${isLight ? 'text-slate-700' : 'text-white'}`} />
-              <span className="font-semibold">{currentLang}</span>
+              <span translate="no" className="font-semibold">{currentLang}</span>
               <ChevronDown className="w-3 h-3 opacity-75" />
             </button>
             {langDropdownOpen && (
@@ -992,7 +992,7 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'text-white border-white/20 bg-white/10'
             }`}
           >
-            <span>{currentLang}</span>
+            <span translate="no">{currentLang}</span>
             <ChevronDown className="w-3 h-3" />
           </button>
 
