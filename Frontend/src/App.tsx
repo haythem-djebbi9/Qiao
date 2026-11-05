@@ -114,7 +114,7 @@ export default function App() {
       const hash = window.location.hash.replace('#', '');
       if (hash && hash !== '') return hash as AppTab;
     }
-    return 'evenements';
+    return 'home';
   });
   const [activeCommerceSubTab, setActiveCommerceSubTab] = useState<CommerceHubTab>('analyses');
   const [focus, setFocus] = useState<PageFocus | null>(null);
@@ -390,9 +390,11 @@ export default function App() {
   // Garde la barre d'adresse synchronisée : une page se partage, se recharge, et le bouton retour y ramène.
   useEffect(() => {
     const url = new URL(window.location.href);
-    const previousTab = url.searchParams.get('tab');
+    // L'accueil a une adresse sans paramètre.
+    const previousTab = url.searchParams.get('tab') ?? 'home';
     const previousSector = url.searchParams.get('sector');
-    url.searchParams.set('tab', activeTab);
+    if (activeTab === 'home') url.searchParams.delete('tab');
+    else url.searchParams.set('tab', activeTab);
     if (activeTab !== 'community') url.searchParams.delete('cv');
     if (activeTab !== 'dashboard') url.searchParams.delete('dv');
     if (activeTab !== 'certificat') url.searchParams.delete('numero');
@@ -409,7 +411,7 @@ export default function App() {
     }
     url.hash = '';
     if (url.toString() === window.location.href) return;
-    const newPage = previousTab !== null && (previousTab !== activeTab || (activeTab === 'sector-detail' && previousSector !== selectedSectorId));
+    const newPage = previousTab !== activeTab || (activeTab === 'sector-detail' && previousSector !== selectedSectorId);
     window.history[newPage ? 'pushState' : 'replaceState'](null, '', url.toString());
   }, [activeTab, selectedSectorId]);
 
@@ -417,9 +419,8 @@ export default function App() {
   useEffect(() => {
     const onPopState = () => {
       const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab');
       if (params.get('cv')) setActiveTab('community');
-      else if (tab) setActiveTab(tab as AppTab);
+      else setActiveTab((params.get('tab') as AppTab | null) ?? 'home');
       const sector = params.get('sector');
       if (sector) setSelectedSectorId(sector);
       window.scrollTo({ top: 0, behavior: 'instant' });
