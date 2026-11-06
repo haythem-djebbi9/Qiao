@@ -5,5 +5,6 @@ import { SeoService } from './seo.service';
 @Module({
   controllers: [SeoController],
   providers: [SeoService],
+  exports: [SeoService],
 })
 export class SeoModule {}

@@ -33,6 +33,8 @@ import { AnalysesTab } from './tabs/AnalysesTab';
 import { CommerceHubBottomBanner } from './components/CommerceHubBottomBanner';
 import { FlagIcon } from '../common/FlagIcon';
 import { useDownloads } from '../../hooks/useDownloads';
+import { useAppActions } from '../../context/AppActionsContext';
+import { slugify } from '../../lib/text';
 import ecommerceCargoShipImg from '../../assets/images/ecommerce_hero_cargo_ship_1790887696581.jpg';
 import reglementationHeroPortImg from '../../assets/images/reglementation_hero_port_1790896278386.jpg';
 import rapportsHeroReportsImg from '../../assets/images/rapports_hero_reports_1790896412608.jpg';
@@ -56,8 +58,20 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
   onNavigateTab,
   onOpenConsultation,
   onOpenSignUp,
+  focus,
+  onFocusHandled,
 }) => {
   const [activeCommerceTab, setActiveCommerceTab] = useState<CommerceHubTab>(initialTab);
+  const [focusCompanyId, setFocusCompanyId] = useState<string | null>(null);
+  const { openDocument, openArticle } = useAppActions();
+
+  // Recherche globale : l'entreprise choisie s'ouvre dans l'onglet Entreprises.
+  useEffect(() => {
+    if (focus?.type !== 'company') return;
+    setActiveCommerceTab('entreprises');
+    setFocusCompanyId(focus.id);
+    onFocusHandled?.();
+  }, [focus, onFocusHandled]);
   const [modalReportTitle, setModalReportTitle] = useState<string | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { downloadDocument } = useDownloads();
@@ -168,12 +182,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
                 <div className="flex items-start gap-2">
                   <div className="w-[3px] h-20 bg-red-600 rounded-full shadow-xs shrink-0 mt-0.5" />
                   <div className="text-[10px] sm:text-[11px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                    DES DONNÉES<br />
-                    AUX OPPORTUNITÉS<br />
-                    POUR UN PARTENARIAT<br />
-                    DURABLE<br />
-                    CHINE - AFRIQUE<br />
-                    DU NORD
+                    <span className="whitespace-pre-line">{'DES DONNÉES\nAUX OPPORTUNITÉS\nPOUR UN PARTENARIAT\nDURABLE\nCHINE - AFRIQUE\nDU NORD'}</span>
                   </div>
                 </div>
               </div>
@@ -286,12 +295,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
               {/* CONNECTER LES ENTREPRISES... overlay (middle-left) */}
               <div className="absolute top-4 sm:top-6 left-6 sm:left-10 text-left z-20 pointer-events-none hidden md:block">
                 <div className="text-[10.5px] sm:text-[11.5px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  CONNECTER<br />
-                  LES ENTREPRISES<br />
-                  CHINOISES ET<br />
-                  NORD-AFRICAINES<br />
-                  POUR UNE CROISSANCE<br />
-                  PARTAGÉE
+                  <span className="whitespace-pre-line">{'CONNECTER\nLES ENTREPRISES\nCHINOISES ET\nNORD-AFRICAINES\nPOUR UNE CROISSANCE\nPARTAGÉE'}</span>
                 </div>
                 <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
               </div>
@@ -352,8 +356,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
                       DES PONTS<br />
                       DES MARCHÉS<br />
                       DES PARTENARIATS<br />
-                      UN AVENIR<br />
-                      COMMUN
+                      <span className="whitespace-pre-line">{'UN AVENIR\nCOMMUN'}</span>
                     </>
                   ) : activeCommerceTab === 'analyses' ? (
                     <>
@@ -619,9 +622,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'flux-commerciaux' && (
           <FluxCommerciauxTab
             onSelectTab={setActiveCommerceTab}
-            onOpenReport={(title) => {
-              setActiveCommerceTab('rapports');
-            }}
+            onOpenReport={openDocument}
           />
         )}
 
@@ -637,12 +638,13 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'marches-ecommerce' && (
           <MarchesEcommerceTab
             onSelectTab={setActiveCommerceTab}
-            onOpenReport={(title) => setActiveCommerceTab('rapports')}
+            onOpenReport={openDocument}
           />
         )}
 
         {activeCommerceTab === 'entreprises' && (
           <EntreprisesTab
+            focusCompanyId={focusCompanyId}
             onSelectTab={setActiveCommerceTab}
             onOpenCompanyDetail={(name) => {
               setActiveCommerceTab('opportunites');
@@ -653,9 +655,6 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'opportunites' && (
           <OpportunitesTab
             onSelectTab={setActiveCommerceTab}
-            onOpenOpportunityDetail={(id) => {
-              if (onOpenConsultation) onOpenConsultation();
-            }}
             onOpenSignUp={onOpenSignUp}
           />
         )}
@@ -663,9 +662,8 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'reglementation' && (
           <ReglementationTab
             onSelectTab={setActiveCommerceTab}
-            onOpenDocDetail={(title) => {
-              setActiveCommerceTab('rapports');
-            }}
+            onOpenConsultation={onOpenConsultation}
+            onOpenDocDetail={openDocument}
           />
         )}
 
@@ -681,9 +679,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'analyses' && (
           <AnalysesTab
             onSelectTab={setActiveCommerceTab}
-            onOpenArticle={(title) => {
-              // open or highlight
-            }}
+            onOpenArticle={(title) => openArticle(slugify(title))}
           />
         )}
       </main>

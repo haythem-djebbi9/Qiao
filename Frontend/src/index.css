@@ -36,6 +36,52 @@
   }
 }
 
+/* Langues : polices adaptées ; l'espacement entre lettres casserait les liaisons de l'arabe. */
+html[lang='ar'] *,
+html[lang='ar'] ::before,
+html[lang='ar'] ::after {
+  font-family: 'Noto Sans Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: 0 !important;
+}
+
+html[lang='zh'] *,
+html[lang='zh'] ::before,
+html[lang='zh'] ::after {
+  font-family: 'Noto Sans SC', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+[translate='no'],
+[translate='no'] * {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+}
+
+/* Arabe : un élément étiré des deux côtés le reste, au lieu de voir ses deux positions échangées. */
+html[dir='rtl'] .left-0.right-0 {
+  left: 0;
+  right: 0;
+}
+html[dir='rtl'] .left-4.right-4 {
+  left: calc(var(--spacing) * 4);
+  right: calc(var(--spacing) * 4);
+}
+html[dir='rtl'] .left-5.right-5 {
+  left: calc(var(--spacing) * 5);
+  right: calc(var(--spacing) * 5);
+}
+html[dir='rtl'] .left-6.right-6 {
+  left: calc(var(--spacing) * 6);
+  right: calc(var(--spacing) * 6);
+}
+
+/* Arabe : les flèches indiquent le sens de lecture. */
+html[dir='rtl'] .lucide-arrow-right,
+html[dir='rtl'] .lucide-arrow-left,
+html[dir='rtl'] .lucide-chevron-right,
+html[dir='rtl'] .lucide-chevron-left,
+html[dir='rtl'] .lucide-arrow-up-right {
+  transform: scaleX(-1);
+}
+
 .font-chinese {
   font-family: 'Noto Sans SC', sans-serif;
 }
@@ -342,4 +388,9 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Mot propre à la phrase française, sans équivalent une fois le titre traduit. */
+html:not([lang='fr']) .fr-only {
+  display: none;
 }

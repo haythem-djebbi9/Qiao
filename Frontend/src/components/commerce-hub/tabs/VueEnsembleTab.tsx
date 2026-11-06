@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { CommerceHubTab } from '../../../types';
 import { BilateralTradeMap } from '../components/BilateralTradeMap';
+import { useAppActions } from '../../../context/AppActionsContext';
+import { slugify } from '../../../lib/text';
 
 interface VueEnsembleTabProps {
   onSelectTab: (tab: CommerceHubTab) => void;
@@ -170,6 +172,7 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
   onOpenOpportunityDetail,
 }) => {
   const [selectedYearRange, setSelectedYearRange] = useState('2020 - 2024');
+  const { openArticle } = useAppActions();
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -704,7 +707,7 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
               ].map((art, idx) => (
                 <div
                   key={idx}
-                  onClick={() => onSelectTab('analyses')}
+                  onClick={() => openArticle(slugify(art.title))}
                   className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
                 >
                   <img

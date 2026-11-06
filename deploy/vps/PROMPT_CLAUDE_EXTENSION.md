@@ -30,7 +30,7 @@ Déploie l'application QIAO sur mon VPS Hostinger. Je t'autorise à faire les ac
 2. Tape cette commande sur une seule ligne, puis Entrée :
 
 ```
-export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a; apt-get -o DPkg::Lock::Timeout=300 update -y && apt-get -o DPkg::Lock::Timeout=300 install -y git; git clone https://github.com/haythem-djebbi9/Qiao.git /opt/qiao; nohup bash /opt/qiao/deploy/vps/install.sh qiao-china.io admin@qiao-china.io > /root/qiao-install.log 2>&1 &
+export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a; apt-get -o DPkg::Lock::Timeout=300 update -y; apt-get -o DPkg::Lock::Timeout=300 install -y git; git clone https://github.com/haythem-djebbi9/Qiao.git /opt/qiao; nohup bash /opt/qiao/deploy/vps/install.sh qiao-china.io admin@qiao-china.io > /root/qiao-install.log 2>&1 &
 ```
 
 3. L'installation dure 5 à 15 minutes et continue même si la console se déconnecte. Toutes les 2 minutes environ, tape `tail -n 8 /root/qiao-install.log` jusqu'à voir la dernière ligne « Comptes créés » ou le mot « ERREUR ». Si la console se déconnecte, rouvre-la et continue.

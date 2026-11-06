@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { JoinedList } from '../../common/JoinedList';
 import {
   Package,
   TrendingUp,
@@ -21,6 +22,89 @@ import {
 } from 'lucide-react';
 import { CommerceHubTab } from '../../../types';
 import { NorthAfricaTargetMarketsMap } from '../components/NorthAfricaTargetMarketsMap';
+import { useAppActions } from '../../../context/AppActionsContext';
+import { slugify } from '../../../lib/text';
+
+const CHINA_TO_NA = 'Chine → Afrique du Nord';
+const NA_TO_CHINA = 'Afrique du Nord → Chine';
+
+/** Fiche de chaque produit suivi : sens des échanges, pays concernés et exigences de conformité. */
+const PRODUCT_DETAILS: Record<string, { direction: string; countries: string[]; summary: string; compliance: string }> = {
+  'Panneaux solaires': {
+    direction: CHINA_TO_NA,
+    countries: ['Maroc', 'Égypte', 'Tunisie', 'Algérie'],
+    summary: 'Les grands programmes solaires et l’autoconsommation des entreprises tirent les importations de modules chinois.',
+    compliance: 'Normes IEC 61215 et IEC 61730',
+  },
+  'Smartphones': {
+    direction: CHINA_TO_NA,
+    countries: ['Algérie', 'Maroc', 'Égypte', 'Tunisie', 'Libye'],
+    summary: 'Les marques chinoises dominent les ventes de smartphones dans la région, en import comme en assemblage local.',
+    compliance: 'Homologation des équipements télécoms dans chaque pays',
+  },
+  'Textile technique': {
+    direction: NA_TO_CHINA,
+    countries: ['Tunisie', 'Maroc'],
+    summary: 'Les ateliers tunisiens et marocains coproduisent des tissus techniques avec des partenaires chinois.',
+    compliance: 'Normes de composition et d’étiquetage textile',
+  },
+  'Huile d’olive': {
+    direction: NA_TO_CHINA,
+    countries: ['Tunisie', 'Maroc'],
+    summary: 'La demande chinoise en huile d’olive vierge extra progresse ; la Tunisie est l’un des premiers exportateurs mondiaux.',
+    compliance: 'Enregistrement du producteur auprès des douanes chinoises (GACC) et étiquetage en chinois',
+  },
+  'Matériel médical': {
+    direction: CHINA_TO_NA,
+    countries: ['Algérie', 'Égypte', 'Maroc', 'Tunisie'],
+    summary: 'Les nouveaux hôpitaux s’équipent en imagerie, laboratoire et consommables auprès de fabricants chinois certifiés.',
+    compliance: 'Enregistrement auprès de l’autorité sanitaire de chaque pays',
+  },
+  'Pièces automobiles': {
+    direction: CHINA_TO_NA,
+    countries: ['Maroc', 'Algérie', 'Égypte'],
+    summary: 'Les usines d’assemblage et le marché de l’entretien s’approvisionnent en pièces chinoises.',
+    compliance: 'Homologation et contrôle qualité à l’importation',
+  },
+  'Meubles modernes': {
+    direction: NA_TO_CHINA,
+    countries: ['Tunisie', 'Maroc'],
+    summary: 'Le mobilier artisanal et contemporain maghrébin trouve des acheteurs dans l’hôtellerie et la décoration haut de gamme.',
+    compliance: 'Traitement phytosanitaire du bois et certificat d’origine',
+  },
+  'Produits cosmétiques': {
+    direction: NA_TO_CHINA,
+    countries: ['Maroc', 'Tunisie', 'Égypte'],
+    summary: 'L’huile d’argan et les cosmétiques naturels du Maghreb séduisent les consommateurs chinois.',
+    compliance: 'Enregistrement des cosmétiques importés auprès de la NMPA chinoise',
+  },
+  'Batteries lithium': {
+    direction: CHINA_TO_NA,
+    countries: ['Maroc', 'Égypte', 'Tunisie'],
+    summary: 'Le stockage d’énergie et la mobilité électrique font progresser les importations de batteries.',
+    compliance: 'Tests UN 38.3 pour le transport et norme IEC 62133',
+  },
+  'Vêtements techniques': {
+    direction: NA_TO_CHINA,
+    countries: ['Tunisie', 'Maroc', 'Égypte'],
+    summary: 'Vêtements de travail et de sport techniques : une filière où le Maghreb allie proximité et savoir-faire.',
+    compliance: 'Normes de composition et d’étiquetage textile',
+  },
+  'Engrais agricoles': {
+    direction: NA_TO_CHINA,
+    countries: ['Maroc', 'Égypte', 'Tunisie', 'Algérie'],
+    summary: 'Les phosphates et engrais du Maghreb répondent aux besoins de l’agriculture chinoise et asiatique.',
+    compliance: 'Analyses de composition et certificat d’origine',
+  },
+  'Véhicules électriques': {
+    direction: CHINA_TO_NA,
+    countries: ['Maroc', 'Égypte', 'Algérie'],
+    summary: 'Les constructeurs chinois s’implantent dans la région, attirés par les incitations à la mobilité électrique.',
+    compliance: 'Homologation du véhicule dans chaque pays',
+  },
+};
+
+const scrollToProducts = () => document.getElementById('produits-a-fort-potentiel')?.scrollIntoView({ behavior: 'smooth' });
 
 interface ProduitsTabProps {
   onSelectTab: (tab: CommerceHubTab) => void;
@@ -34,12 +118,10 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
   const [direction, setDirection] = useState('Toutes les directions');
   const [country, setCountry] = useState('Tous les pays');
   const [category, setCategory] = useState('Toutes les catégories');
-  const [subCategory, setSubCategory] = useState('Toutes les sous-catégories');
   const [searchQuery, setSearchQuery] = useState('');
   const [volumeTab, setVolumeTab] = useState<'export' | 'import'>('export');
-  const [growthPeriod, setGrowthPeriod] = useState('2020 - 2024');
   const [selectedProductModal, setSelectedProductModal] = useState<string | null>(null);
-  const [downloadModalDoc, setDownloadModalDoc] = useState<string | null>(null);
+  const { openDocument, openArticle } = useAppActions();
 
   // 5 KPI Metrics matching screenshot
   const metrics = [
@@ -182,6 +264,25 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
     },
   ];
 
+  const categories = [...new Set(highPotentialProducts.map((prod) => prod.tag1))];
+  const filtersActive = direction !== 'Toutes les directions' || country !== 'Tous les pays' || category !== 'Toutes les catégories' || searchQuery.trim() !== '';
+  const resetFilters = () => {
+    setDirection('Toutes les directions');
+    setCountry('Tous les pays');
+    setCategory('Toutes les catégories');
+    setSearchQuery('');
+  };
+  const filteredProducts = highPotentialProducts.filter((prod) => {
+    const detail = PRODUCT_DETAILS[prod.name];
+    if (direction !== 'Toutes les directions' && detail?.direction !== direction) return false;
+    if (country !== 'Tous les pays' && !detail?.countries.includes(country)) return false;
+    if (category !== 'Toutes les catégories' && prod.tag1 !== category) return false;
+    const q = searchQuery.trim().toLowerCase();
+    if (q && ![prod.name, prod.tag1, prod.tag2].some((text) => text.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const productDetail = selectedProductModal ? PRODUCT_DETAILS[selectedProductModal] : undefined;
+
   // Useful Resources matching screenshot
   const usefulResources = [
     { title: 'Catalogue des produits prioritaires', size: 'PDF - 2,4 MB' },
@@ -224,7 +325,7 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
           
           {/* 4 Selects */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
             
             {/* 1. Direction commerciale */}
             <div>
@@ -232,7 +333,11 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
               <div className="relative">
                 <select
                   value={direction}
-                  onChange={(e) => setDirection(e.target.value)}
+                  onChange={(e) => {
+                    setDirection(e.target.value);
+                    if (e.target.value === CHINA_TO_NA) setVolumeTab('export');
+                    if (e.target.value === NA_TO_CHINA) setVolumeTab('import');
+                  }}
                   className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
                 >
                   <option>Toutes les directions</option>
@@ -273,31 +378,9 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
                   className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
                 >
                   <option>Toutes les catégories</option>
-                  <option>Machines & équipements</option>
-                  <option>Produits électroniques</option>
-                  <option>Textiles & habillement</option>
-                  <option>Produits chimiques</option>
-                  <option>Agroalimentaire</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* 4. Sous-catégorie */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1">Sous-catégorie</label>
-              <div className="relative">
-                <select
-                  value={subCategory}
-                  onChange={(e) => setSubCategory(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option>Toutes les sous-catégories</option>
-                  <option>Smartphones</option>
-                  <option>Panneaux solaires</option>
-                  <option>Batteries lithium</option>
-                  <option>Huile d'olive</option>
-                  <option>Véhicules électriques</option>
+                  {categories.map((name) => (
+                    <option key={name}>{name}</option>
+                  ))}
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
@@ -311,11 +394,13 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher un produit, HS code..."
+              onKeyDown={(e) => e.key === 'Enter' && scrollToProducts()}
+              placeholder="Rechercher un produit, une catégorie..."
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 pr-11 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <button
-              onClick={() => {}}
+              onClick={scrollToProducts}
+              aria-label="Rechercher"
               className="absolute right-1 top-1 bottom-1 px-3 bg-[#0a2559] hover:bg-blue-900 text-white rounded-lg flex items-center justify-center cursor-pointer transition-colors"
             >
               <Search className="w-3.5 h-3.5" />
@@ -432,15 +517,9 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Croissance des principaux produits
               </h3>
-              <select
-                value={growthPeriod}
-                onChange={(e) => setGrowthPeriod(e.target.value)}
-                className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 cursor-pointer"
-              >
-                <option>2020 - 2024</option>
-                <option>2022 - 2024</option>
-                <option>2023 - 2024</option>
-              </select>
+              <span className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700">
+                2020 - 2024
+              </span>
             </div>
 
             {/* Legend */}
@@ -636,7 +715,10 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
 
           <div className="pt-3 border-t border-slate-100 text-right">
             <button
-              onClick={() => {}}
+              onClick={() => {
+                resetFilters();
+                scrollToProducts();
+              }}
               className="text-xs font-semibold text-red-600 hover:text-red-700 inline-flex items-center gap-1 cursor-pointer"
             >
               <span>Voir tous les produits</span>
@@ -646,24 +728,25 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
         </div>
 
         {/* Right: Produits à fort potentiel (Grid of 8 cards) */}
-        <div id="produits-a-fort-potentiel" className="lg:col-span-8 bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+        <div id="produits-a-fort-potentiel" className="scroll-mt-24 lg:col-span-8 bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                 Produits à fort potentiel
               </h3>
-              <button
-                onClick={() => {}}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Voir plus</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              {filtersActive && (
+                <button
+                  onClick={resetFilters}
+                  className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Réinitialiser les filtres</span>
+                </button>
+              )}
             </div>
 
             {/* 4x2 Grid of 8 Product Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {highPotentialProducts.map((prod) => (
+              {filteredProducts.map((prod) => (
                 <div
                   key={prod.id}
                   onClick={() => setSelectedProductModal(prod.name)}
@@ -696,6 +779,14 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
                 </div>
               ))}
             </div>
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-8 text-xs text-slate-500">
+                <p>Aucun produit ne correspond à ces filtres.</p>
+                <button onClick={resetFilters} className="mt-2 font-semibold text-red-600 hover:underline cursor-pointer">
+                  Réinitialiser les filtres
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -739,7 +830,7 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
               {usefulResources.map((res, i) => (
                 <div
                   key={i}
-                  onClick={() => setDownloadModalDoc(res.title)}
+                  onClick={() => openDocument(res.title)}
                   className="flex items-center justify-between p-2 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -782,7 +873,7 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
               {latestArticles.map((art, idx) => (
                 <div
                   key={idx}
-                  onClick={() => onSelectTab('analyses')}
+                  onClick={() => openArticle(slugify(art.title))}
                   className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
                 >
                   <div className="w-11 h-9 rounded-lg overflow-hidden shrink-0 border border-slate-200">
@@ -824,25 +915,23 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
                 <h3 className="text-base font-bold text-slate-900">
                   Fiche produit : {selectedProductModal}
                 </h3>
-                <p className="text-xs text-slate-500">Flux d’import-export, tarifs douaniers et opportunités</p>
+                <p className="text-xs text-slate-500">{productDetail?.direction ?? 'Flux d’import-export'}</p>
               </div>
             </div>
             <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
-              <p>
-                Ce segment affiche une forte croissance annuelle moyenne (+35% à +68%) stimulée par les accords bilatéraux et la modernisation des filières industrielles.
-              </p>
+              {productDetail && <p>{productDetail.summary}</p>}
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1.5 text-[11px]">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Tarif douanier moyen :</span>
-                  <span className="font-bold text-slate-900">0% à 5% (selon pays)</span>
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-500 shrink-0">{productDetail?.direction === NA_TO_CHINA ? 'Pays producteurs :' : 'Principaux débouchés :'}</span>
+                  <span className="font-bold text-slate-900 text-right">{productDetail ? <JoinedList items={productDetail.countries} /> : 'Afrique du Nord'}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Principaux débouchés :</span>
-                  <span className="font-bold text-slate-900">Maroc, Algérie, Égypte</span>
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-500 shrink-0">Conformité requise :</span>
+                  <span className="font-bold text-slate-900 text-right">{productDetail?.compliance ?? 'Selon le pays de destination'}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Conformité requise :</span>
-                  <span className="font-bold text-slate-900">Certificat CE / Norme NM / Inspection douane</span>
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-500 shrink-0">Droits et taxes :</span>
+                  <span className="font-bold text-slate-900 text-right">Variables selon le pays et le code SH</span>
                 </div>
               </div>
             </div>
@@ -861,51 +950,6 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer shadow-xs"
               >
                 Voir les opportunités d'affaires
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 7. MODAL: RESOURCE DOWNLOAD                                               */}
-      {/* ========================================================================= */}
-      {downloadModalDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 text-center relative">
-            <button
-              onClick={() => setDownloadModalDoc(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
-              <Download className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">
-              Télécharger le document
-            </h3>
-            <p className="text-xs text-slate-600 mb-4 font-semibold">
-              « {downloadModalDoc} »
-            </p>
-            <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              Le document PDF haute résolution et les tableaux statistiques associés sont prêts pour le téléchargement.
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => setDownloadModalDoc(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => {
-                  alert(`Le téléchargement de « ${downloadModalDoc} » a débuté.`);
-                  setDownloadModalDoc(null);
-                }}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer shadow-xs"
-              >
-                Confirmer le téléchargement (PDF)
               </button>
             </div>
           </div>

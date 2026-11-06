@@ -22,7 +22,6 @@ import {
   Search,
 } from 'lucide-react';
 import { ServiceItem } from '../types';
-import { useAppActions } from '../context/AppActionsContext';
 
 interface ServicesSectionProps {
   services?: ServiceItem[];
@@ -49,7 +48,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   onClearSearch,
   onSearchEverywhere,
 }) => {
-  const { contactUs } = useAppActions();
+
   const [internalCategory, setInternalCategory] = useState<string>('Tous');
   const selectedCat = externalCategory || internalCategory;
 
@@ -247,14 +246,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             );
           })}
 
-          {/* 12th Card: Plus de services (demande de service sur-mesure) */}
+          {/* 12th Card: Plus de services : ouvre le catalogue complet */}
           <div
-            onClick={() =>
-              contactUs({
-                subject: 'Autre demande',
-                message: "Bonjour, je recherche un service qui n'apparaît pas dans votre catalogue : ",
-              })
-            }
+            onClick={onOpenAllServicesModal}
             className="group bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-200/60 hover:border-blue-300 hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-5 cursor-pointer transform hover:-translate-y-1"
           >
             <div>
