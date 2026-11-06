@@ -1,5 +1,6 @@
 import { HUB_OPPORTUNITIES } from '../data/hubOpportunities';
 import { SECTORS_DETAILS, SectorData } from '../data/sectorsData';
+import { SUB_SECTOR_DETAILS, subSectorOpportunityId } from '../data/subSectorDetails';
 import { Opportunity } from './models';
 import { setQueryParams } from './routes';
 import { normalize } from './text';
@@ -88,6 +89,33 @@ export const STATIC_OPPORTUNITIES: OpportunityEntry[] = [
         urgent: false,
         record: null,
       }),
+    ),
+  ),
+  // Opportunités propres à chaque sous-secteur (pages sous-secteurs).
+  ...Object.values(SECTORS_DETAILS).flatMap((sector) =>
+    sector.subSectors.flatMap((subSector) =>
+      (SUB_SECTOR_DETAILS[subSector.id]?.opportunities ?? []).map(
+        (item): OpportunityEntry => ({
+          id: subSectorOpportunityId(sector.id, subSector.id, item.id),
+          title: item.title,
+          type: item.type,
+          country: item.country,
+          countryCode: item.countryCode,
+          sectorLabel: subSector.title,
+          sector,
+          description: SUB_SECTOR_DETAILS[subSector.id].intro,
+          amount: null,
+          partner: null,
+          image: null,
+          from: null,
+          to: null,
+          deadline: null,
+          published: null,
+          verified: false,
+          urgent: false,
+          record: null,
+        }),
+      ),
     ),
   ),
   ...HUB_OPPORTUNITIES.map(

@@ -292,14 +292,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
 
   if (activeSubSector) {
     return (
-      <SubSectorView
-        sector={sector}
-        subSector={activeSubSector}
-        onProject={() => {
-          setQueryParams({ sub: null });
-          setTimeout(handleScrollToForm, 60);
-        }}
-      />
+      <SubSectorView sector={sector} subSector={activeSubSector} />
     );
   }
 
