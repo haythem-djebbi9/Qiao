@@ -168,12 +168,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
                 <div className="flex items-start gap-2">
                   <div className="w-[3px] h-20 bg-red-600 rounded-full shadow-xs shrink-0 mt-0.5" />
                   <div className="text-[10px] sm:text-[11px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                    DES DONNÉES<br />
-                    AUX OPPORTUNITÉS<br />
-                    POUR UN PARTENARIAT<br />
-                    DURABLE<br />
-                    CHINE - AFRIQUE<br />
-                    DU NORD
+                    <span className="whitespace-pre-line">{'DES DONNÉES\nAUX OPPORTUNITÉS\nPOUR UN PARTENARIAT\nDURABLE\nCHINE - AFRIQUE\nDU NORD'}</span>
                   </div>
                 </div>
               </div>
@@ -286,12 +281,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
               {/* CONNECTER LES ENTREPRISES... overlay (middle-left) */}
               <div className="absolute top-4 sm:top-6 left-6 sm:left-10 text-left z-20 pointer-events-none hidden md:block">
                 <div className="text-[10.5px] sm:text-[11.5px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  CONNECTER<br />
-                  LES ENTREPRISES<br />
-                  CHINOISES ET<br />
-                  NORD-AFRICAINES<br />
-                  POUR UNE CROISSANCE<br />
-                  PARTAGÉE
+                  <span className="whitespace-pre-line">{'CONNECTER\nLES ENTREPRISES\nCHINOISES ET\nNORD-AFRICAINES\nPOUR UNE CROISSANCE\nPARTAGÉE'}</span>
                 </div>
                 <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
               </div>
@@ -352,8 +342,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
                       DES PONTS<br />
                       DES MARCHÉS<br />
                       DES PARTENARIATS<br />
-                      UN AVENIR<br />
-                      COMMUN
+                      <span className="whitespace-pre-line">{'UN AVENIR\nCOMMUN'}</span>
                     </>
                   ) : activeCommerceTab === 'analyses' ? (
                     <>

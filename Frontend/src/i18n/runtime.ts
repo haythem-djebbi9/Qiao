@@ -78,7 +78,8 @@ function buildIndexes(dictionary: Record<string, string>) {
       const pieces = key.split(/\{\d+\}/);
       const order = [...key.matchAll(/\{(\d+)\}/g)].map((match) => Number(match[1]));
       if (pieces.join('').trim().length < 2) continue;
-      const pattern = new RegExp(`^${pieces.map(escapeRegExp).join('(.+?)')}$`, 'u');
+      // Une valeur peut être vide (marque du pluriel absente : « Messages (0 non lu) »).
+      const pattern = new RegExp(`^${pieces.map(escapeRegExp).join('(.*?)')}$`, 'u');
       const entry = { pattern, target: order.reduce((text, index, position) => text.replace(`{${index}}`, `\u0001${position}\u0001`), target) };
       const bucket = templateBucket(pieces[0]);
       templates.set(bucket, [...(templates.get(bucket) ?? []), entry]);

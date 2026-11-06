@@ -312,7 +312,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
           {/* Main Title */}
           <h1 className={`font-black text-white tracking-tight leading-[1.15] ${isHome ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-2xl sm:text-3xl'}`}>
             Bienvenue dans <br className="sm:hidden" />
-            <span className="text-red-500">QIAO</span> Community
+            <span className="text-red-500">QIAO</span> <span translate="no">Community</span>
           </h1>
 
           {isHome && (

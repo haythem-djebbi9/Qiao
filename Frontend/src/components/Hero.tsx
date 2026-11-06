@@ -294,7 +294,7 @@ export const Hero: React.FC<HeroProps> = ({
                     98%
                   </div>
                   <div className="text-[10px] sm:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
-                    Taux de<br />satisfaction
+                    <span className="whitespace-pre-line">{'Taux de\nsatisfaction'}</span>
                   </div>
                 </div>
 

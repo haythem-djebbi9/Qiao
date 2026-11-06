@@ -309,8 +309,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             {/* Script Calligraphy Right: "Des horizons plus proches" */}
             <div className="text-right select-none md:pt-4">
               <p className="font-['Caveat'] text-3xl sm:text-4xl lg:text-[42px] text-white font-bold leading-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
-                Des horizons<br />
-                plus proches
+                <span className="whitespace-pre-line">{'Des horizons\nplus proches'}</span>
               </p>
               <div className="w-16 h-1 bg-[#e01a22] rounded-full mt-2 ml-auto" />
             </div>
