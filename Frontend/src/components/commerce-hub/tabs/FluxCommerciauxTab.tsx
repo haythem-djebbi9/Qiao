@@ -37,122 +37,29 @@ interface FluxCommerciauxTabProps {
   onOpenReport?: (title: string) => void;
 }
 
+/** Part de chaque pays dans les exportations chinoises vers l'Afrique du Nord. */
+const COUNTRY_SHARES = [
+  { country: 'Maroc', pct: '35%', color: '#2563eb' },
+  { country: 'Algérie', pct: '28%', color: '#38bdf8' },
+  { country: 'Égypte', pct: '20%', color: '#f97316' },
+  { country: 'Tunisie', pct: '12%', color: '#ec4899' },
+  { country: 'Libye', pct: '5%', color: '#ef4444' },
+];
+
 export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
   onSelectTab,
   onOpenReport,
 }) => {
-  const [period, setPeriod] = useState('2020 - 2024');
-  const [fluxType, setFluxType] = useState('Tous les flux');
-  const [country, setCountry] = useState('Tous les pays');
-  const [category, setCategory] = useState('Toutes les catégories');
   const [countryTab, setCountryTab] = useState<'export' | 'import' | 'total'>('export');
-  const [chartPeriod, setChartPeriod] = useState('2020 - 2024');
-
-  const handleResetFilters = () => {
-    setPeriod('2020 - 2024');
-    setFluxType('Tous les flux');
-    setCountry('Tous les pays');
-    setCategory('Toutes les catégories');
-  };
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const selectedShare = COUNTRY_SHARES.find((item) => item.country === selectedCountry);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       
-      {/* ========================================================================= */}
-      {/* 1. FILTER BAR (MATCHING SCREENSHOT)                                       */}
-      {/* ========================================================================= */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-end">
-          
-          {/* Période */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Période</label>
-            <div className="relative">
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option>2020 - 2024</option>
-                <option>2023 - 2024</option>
-                <option>2018 - 2024</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Flux */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Flux</label>
-            <div className="relative">
-              <select
-                value={fluxType}
-                onChange={(e) => setFluxType(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option>Tous les flux</option>
-                <option>Exportations (Chine → Afrique du Nord)</option>
-                <option>Importations (Afrique du Nord → Chine)</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Pays d'Afrique du Nord */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Pays d'Afrique du Nord</label>
-            <div className="relative">
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option>Tous les pays</option>
-                <option>Maroc</option>
-                <option>Algérie</option>
-                <option>Tunisie</option>
-                <option>Égypte</option>
-                <option>Libye</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Catégorie de produits */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Catégorie de produits</label>
-            <div className="relative">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option>Toutes les catégories</option>
-                <option>Machines & équipements</option>
-                <option>Électronique & High-Tech</option>
-                <option>Hydrocarbures & Énergie</option>
-                <option>Produits agricoles</option>
-                <option>Textiles & Habillement</option>
-                <option>Produits chimiques</option>
-                <option>Véhicules & Automobile</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Reset Button */}
-          <div>
-            <button
-              onClick={handleResetFilters}
-              className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-              <span>Réinitialiser les filtres</span>
-            </button>
-          </div>
-
-        </div>
-      </div>
+      <p className="text-xs text-slate-500">
+        Données consolidées 2020 - 2024, tous pays d’Afrique du Nord et toutes catégories de produits confondus.
+      </p>
 
       {/* ========================================================================= */}
       {/* 2. FOUR METRIC CARDS (ROW 1)                                              */}
@@ -261,10 +168,15 @@ export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
                   egypt: 'Égypte',
                   libya: 'Libye',
                 };
-                if (mapNames[c]) setCountry(mapNames[c]);
+                if (mapNames[c]) setSelectedCountry(mapNames[c]);
               }}
             />
           </div>
+          {selectedShare && (
+            <p className="mt-2 text-xs text-slate-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+              <strong>{selectedShare.country}</strong>{' : '}{`${selectedShare.pct} des exportations chinoises vers l’Afrique du Nord.`}
+            </p>
+          )}
 
           {/* Bottom row: Legend on left, Action Button on right */}
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-3">
@@ -297,17 +209,9 @@ export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
               <h3 className="text-base font-bold text-[#0f2c69] tracking-tight">
                 Évolution des échanges
               </h3>
-              <div className="relative">
-                <select
-                  value={chartPeriod}
-                  onChange={(e) => setChartPeriod(e.target.value)}
-                  className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1 pr-7 text-xs font-semibold text-[#0f2c69] shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option>2020 - 2024</option>
-                  <option>2018 - 2024</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-[#0f2c69] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <span className="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs font-semibold text-[#0f2c69] shadow-2xs">
+                2020 - 2024
+              </span>
             </div>
 
             {/* Subtitle & CAGR Badge */}
@@ -608,14 +512,12 @@ export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
 
               {/* Legend List */}
               <div className="space-y-1.5 text-xs flex-1">
-                {[
-                  { country: 'Maroc', pct: '35%', color: '#2563eb' },
-                  { country: 'Algérie', pct: '28%', color: '#38bdf8' },
-                  { country: 'Égypte', pct: '20%', color: '#f97316' },
-                  { country: 'Tunisie', pct: '12%', color: '#ec4899' },
-                  { country: 'Libye', pct: '5%', color: '#ef4444' },
-                ].map((item) => (
-                  <div key={item.country} className="flex items-center justify-between">
+                {COUNTRY_SHARES.map((item) => (
+                  <div
+                    key={item.country}
+                    onClick={() => setSelectedCountry(item.country)}
+                    className={`flex items-center justify-between rounded-md px-1 cursor-pointer ${selectedCountry === item.country ? 'bg-blue-50 ring-1 ring-blue-200' : 'hover:bg-slate-50'}`}
+                  >
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <span className="text-slate-700 font-medium">{item.country}</span>

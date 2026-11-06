@@ -864,11 +864,6 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 ✕
               </a>
 
-              {/* Language Dropdown FR */}
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-300 text-xs font-bold text-slate-700 bg-white">
-                <span>FR</span>
-                <ChevronDown className="w-3 h-3 text-slate-500" />
-              </div>
             </div>
           </div>
 

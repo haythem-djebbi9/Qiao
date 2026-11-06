@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { api } from '../../../lib/api';
 import {
   Building2,
   TrendingUp,
@@ -38,6 +39,8 @@ interface Company {
   id: string;
   name: string;
   type: string;
+  /** Activités pour le filtre « Type d'entreprise ». */
+  kinds?: string[];
   country: string;
   countryCode: 'CN' | 'MA' | 'DZ' | 'TN' | 'EG' | 'LY';
   city: string;
@@ -55,13 +58,90 @@ interface Company {
   contactEmail?: string;
 }
 
+/** Fiche entreprise telle que la renvoie l'API /companies/:id. */
+interface ApiCompany {
+  id: string;
+  name: string;
+  origin: string;
+  businessType?: string;
+  country: string;
+  countryCode: Company['countryCode'];
+  city: string;
+  sector: string;
+  badges?: string[];
+  rating?: number;
+  description: string;
+  turnover?: string;
+  employees?: string;
+  founded?: string;
+  certifications?: string[];
+  mainProducts?: string[];
+  contactEmail?: string;
+  logoColor?: string;
+}
+
+const fromApi = (co: ApiCompany): Company => ({
+  id: co.id,
+  name: co.name,
+  type: co.origin,
+  kinds: co.businessType ? [co.businessType] : [],
+  country: co.country,
+  countryCode: co.countryCode,
+  city: co.city,
+  sector: co.sector,
+  badges: co.badges ?? [],
+  logo: (
+    <span className="font-black text-sm tracking-tight" style={{ color: co.logoColor ?? '#0a1c3d' }}>
+      {co.name}
+    </span>
+  ),
+  verified: true,
+  rating: co.rating ?? 0,
+  description: co.description,
+  turnover: co.turnover,
+  employees: co.employees,
+  founded: co.founded,
+  certifications: co.certifications,
+  mainProducts: co.mainProducts,
+  contactEmail: co.contactEmail,
+});
+
 interface EntreprisesTabProps {
+  /** Entreprise à ouvrir dès l'affichage (résultat de la recherche globale). */
+  focusCompanyId?: string | null;
   onSelectTab: (tab: CommerceHubTab) => void;
   onOpenCompanyDetail?: (companyName: string) => void;
   onOpenSignUp?: () => void;
 }
 
+/** Catégorie du filtre → secteurs et badges des entreprises qui en relèvent. */
+const SECTOR_KEYWORDS: Record<string, string[]> = {
+  'E-commerce': ['E-commerce', 'Marketplace'],
+  'Distribution & Retail': ['Distribution', 'Retail', 'Grande distribution'],
+  'Mode & Textile': ['Mode & Textile'],
+  'Électronique & High-Tech': ['Technologie', 'Électroménager', 'High-Tech', 'Télécoms'],
+  'Automobile & Mobilité': ['Automobile'],
+  'Logistique & Transport': ['Logistique'],
+};
+
+const TURNOVER_RANGES: Record<string, [number, number]> = {
+  '< 10 M USD': [0, 10e6],
+  '10 M - 50 M USD': [10e6, 50e6],
+  '50 M - 200 M USD': [50e6, 200e6],
+  '> 200 M USD': [200e6, Infinity],
+};
+
+/** « 130 Mds USD » → 130e9 ; « 45 M USD » → 45e6. */
+const turnoverInUsd = (label?: string) => {
+  const match = label?.match(/([\d,.]+)\s*(Mds|M)/);
+  if (!match) return null;
+  return parseFloat(match[1].replace(',', '.')) * (match[2] === 'Mds' ? 1e9 : 1e6);
+};
+
+const scrollToFeatured = () => document.getElementById('entreprises-en-vedette')?.scrollIntoView({ behavior: 'smooth' });
+
 export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
+  focusCompanyId,
   onSelectTab,
   onOpenCompanyDetail,
   onOpenSignUp,
@@ -74,10 +154,42 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
   const [featuredTab, setFeaturedTab] = useState<'toutes' | 'chinoises' | 'nord-africaines' | 'startups' | 'distributeurs' | 'fabricants'>('toutes');
   const [selectedModalCompany, setSelectedModalCompany] = useState<Company | null>(null);
 
+  const openCompany = (id: string) => {
+    const local = featuredCompanies.find((c) => c.id === id);
+    if (local) {
+      setSelectedModalCompany(local);
+      return;
+    }
+    api
+      .get<ApiCompany>(`/companies/${id}`)
+      .then((co) => setSelectedModalCompany(fromApi(co)))
+      .catch(() => undefined);
+  };
+
+  useEffect(() => {
+    if (focusCompanyId) openCompany(focusCompanyId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusCompanyId]);
+
+  const filtersActive =
+    selectedCountry !== 'Tous les pays' ||
+    companyType !== 'Tous les types' ||
+    sector !== 'Toutes les catégories' ||
+    turnover !== 'Tous les chiffres' ||
+    searchQuery.trim() !== '';
+  const resetFilters = () => {
+    setSelectedCountry('Tous les pays');
+    setCompanyType('Tous les types');
+    setSector('Toutes les catégories');
+    setTurnover('Tous les chiffres');
+    setSearchQuery('');
+  };
+
   // 10 Featured Companies exactly matching screenshot
   const featuredCompanies: Company[] = [
     {
       id: 'alibaba',
+      kinds: ['Marketplaces', 'Exportateurs'],
       name: 'Alibaba Group',
       type: 'Chinoise',
       country: 'Chine',
@@ -119,6 +231,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'jd',
+      kinds: ['Retailers', 'Marketplaces'],
       name: 'JD.COM',
       type: 'Chinoise',
       country: 'Chine',
@@ -148,6 +261,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'shein',
+      kinds: ['Retailers', 'Exportateurs'],
       name: 'SHEIN',
       type: 'Chinoise',
       country: 'Chine',
@@ -174,6 +288,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'huawei',
+      kinds: ['Fabricants', 'Exportateurs'],
       name: 'HUAWEI',
       type: 'Chinoise',
       country: 'Chine',
@@ -207,6 +322,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'zte',
+      kinds: ['Fabricants', 'Exportateurs'],
       name: 'ZTE',
       type: 'Chinoise',
       country: 'Chine',
@@ -233,6 +349,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'haier',
+      kinds: ['Fabricants', 'Exportateurs'],
       name: 'Haier',
       type: 'Chinoise',
       country: 'Chine',
@@ -259,6 +376,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'ouedkniss',
+      kinds: ['Marketplaces'],
       name: 'Ouedkniss',
       type: 'Nord-Africaine',
       country: 'Algérie',
@@ -285,6 +403,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'jumia',
+      kinds: ['Marketplaces', 'Retailers'],
       name: 'Jumia',
       type: 'Nord-Africaine',
       country: 'Maroc',
@@ -314,6 +433,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'mytek',
+      kinds: ['Distributeurs', 'Importateurs', 'Retailers'],
       name: 'Mytek',
       type: 'Nord-Africaine',
       country: 'Tunisie',
@@ -340,6 +460,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
     },
     {
       id: 'carrefour',
+      kinds: ['Retailers', 'Distributeurs', 'Importateurs'],
       name: 'Carrefour',
       type: 'Nord-Africaine',
       country: 'Égypte',
@@ -376,6 +497,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
   // Recently added companies (Table on left-bottom)
   const newCompanies = [
     {
+      id: 'anker',
       name: 'ANKER',
       native: '安克创新',
       country: 'Chine',
@@ -386,6 +508,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
       logo: <span className="font-black text-blue-600 text-xs tracking-tight">ANKER</span>,
     },
     {
+      id: 'infinix',
       name: 'infinix',
       native: '传音Infinix',
       country: 'Chine',
@@ -396,6 +519,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
       logo: <div className="bg-slate-900 text-white font-bold text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5"><span>infinix</span><span className="w-1 h-1 rounded-full bg-emerald-400" /></div>,
     },
     {
+      id: 'lc-waikiki-tunisie',
       name: 'LC WAIKIKI',
       native: 'LC Waikiki Tunisie',
       country: 'Tunisie',
@@ -406,6 +530,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
       logo: <span className="font-black text-[#002b49] text-[10px] tracking-tight">LC WAIKIKI</span>,
     },
     {
+      id: 'chery-algerie',
       name: 'CHERY',
       native: 'Chery Algérie',
       country: 'Algérie',
@@ -416,6 +541,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
       logo: <div className="border border-red-500 rounded-full px-1.5 text-[9px] font-black text-red-600">CHERY</div>,
     },
     {
+      id: 'spinneys-egypt',
       name: 'Spinneys',
       native: 'Spinneys Egypt',
       country: 'Égypte',
@@ -516,6 +642,19 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
       if (selectedCountry === 'Tunisie' && c.countryCode !== 'TN') return false;
       if (selectedCountry === 'Égypte' && c.countryCode !== 'EG') return false;
       if (selectedCountry === 'Libye' && c.countryCode !== 'LY') return false;
+    }
+
+    if (companyType !== 'Tous les types' && !c.kinds?.includes(companyType)) return false;
+
+    if (sector !== 'Toutes les catégories') {
+      const keywords = SECTOR_KEYWORDS[sector] ?? [sector];
+      if (![c.sector, ...c.badges].some((label) => keywords.includes(label))) return false;
+    }
+
+    if (turnover !== 'Tous les chiffres') {
+      const usd = turnoverInUsd(c.turnover);
+      const [min, max] = TURNOVER_RANGES[turnover] ?? [0, Infinity];
+      if (usd === null || usd < min || usd >= max) return false;
     }
 
     if (searchQuery.trim()) {
@@ -638,24 +777,27 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && scrollToFeatured()}
               placeholder="Rechercher une entreprise, un mot-clé..."
               className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-10 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <button
-              onClick={() => {}}
+              onClick={scrollToFeatured}
+              aria-label="Rechercher"
               className="absolute right-1 top-1 bottom-1 px-2.5 bg-[#0c2448] hover:bg-[#081a36] text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
             >
               <Search className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Filtres avancés Button */}
+          {/* Réinitialiser les filtres */}
           <button
-            onClick={() => {}}
-            className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
+            onClick={resetFilters}
+            disabled={!filtersActive}
+            className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-default"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
-            <span>Filtres avancés</span>
+            <span>Réinitialiser les filtres</span>
           </button>
 
         </div>
@@ -761,7 +903,7 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
         <div className="lg:col-span-8 space-y-6">
           
           {/* Section: Entreprises en vedette */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs">
+          <div id="entreprises-en-vedette" className="scroll-mt-24 bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs">
             
             {/* Header + Tabs */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -769,7 +911,10 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
                 Entreprises en vedette
               </h2>
               <button
-                onClick={() => {}}
+                onClick={() => {
+                  resetFilters();
+                  setFeaturedTab('toutes');
+                }}
                 className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer self-start sm:self-auto"
               >
                 <span>Voir toutes les entreprises</span>
@@ -850,6 +995,20 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
                 </div>
               ))}
             </div>
+            {filteredFeatured.length === 0 && (
+              <div className="text-center py-8 text-xs text-slate-500">
+                <p>Aucune entreprise ne correspond à ces filtres.</p>
+                <button
+                  onClick={() => {
+                    resetFilters();
+                    setFeaturedTab('toutes');
+                  }}
+                  className="mt-2 font-semibold text-red-600 hover:underline cursor-pointer"
+                >
+                  Réinitialiser les filtres
+                </button>
+              </div>
+            )}
 
           </div>
 
@@ -863,13 +1022,6 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                     Nouvelles entreprises ajoutées
                   </h3>
-                  <button
-                    onClick={() => {}}
-                    className="text-[11px] font-semibold text-red-600 hover:text-red-700 flex items-center gap-0.5 cursor-pointer"
-                  >
-                    <span>Voir toutes</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -881,12 +1033,11 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
                         <th className="py-2 text-left">Secteur</th>
                         <th className="py-2 text-left">Type</th>
                         <th className="py-2 text-left">Date d'ajout</th>
-                        <th className="py-2 text-center w-6"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {newCompanies.map((comp) => (
-                        <tr key={comp.name} className="hover:bg-slate-50/70 transition-colors">
+                        <tr key={comp.name} onClick={() => openCompany(comp.id)} className="hover:bg-slate-50/70 transition-colors cursor-pointer">
                           <td className="py-2.5 font-bold text-slate-800">
                             {comp.logo}
                           </td>
@@ -904,14 +1055,6 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
                           </td>
                           <td className="py-2.5 text-slate-400 text-[10.5px]">
                             {comp.date}
-                          </td>
-                          <td className="py-2.5 text-center">
-                            <button
-                              onClick={() => {}}
-                              className="w-5 h-5 rounded-full bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors cursor-pointer ml-auto"
-                            >
-                              <ArrowRight className="w-3 h-3" />
-                            </button>
                           </td>
                         </tr>
                       ))}
@@ -984,13 +1127,6 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Répartition des entreprises par pays
               </h3>
-              <button
-                onClick={() => {}}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-0.5 cursor-pointer"
-              >
-                <span>Voir plus</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
             </div>
 
             {/* Interactive North Africa Countries Graphic Map */}
@@ -1202,15 +1338,15 @@ export const EntreprisesTab: React.FC<EntreprisesTabProps> = ({
             <div className="grid grid-cols-3 gap-2.5 mb-4 text-center">
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                 <span className="text-[10px] text-slate-400 font-bold block uppercase">Chiffre d'affaires</span>
-                <span className="text-xs font-black text-slate-900">{selectedModalCompany.turnover || 'Confidential'}</span>
+                <span className="text-xs font-black text-slate-900">{selectedModalCompany.turnover || 'Non communiqué'}</span>
               </div>
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                 <span className="text-[10px] text-slate-400 font-bold block uppercase">Effectif</span>
-                <span className="text-xs font-black text-slate-900">{selectedModalCompany.employees || '1 000+'}</span>
+                <span className="text-xs font-black text-slate-900">{selectedModalCompany.employees || 'Non communiqué'}</span>
               </div>
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                 <span className="text-[10px] text-slate-400 font-bold block uppercase">Fondation</span>
-                <span className="text-xs font-black text-slate-900">{selectedModalCompany.founded || '2000'}</span>
+                <span className="text-xs font-black text-slate-900">{selectedModalCompany.founded || 'Non communiqué'}</span>
               </div>
             </div>
 

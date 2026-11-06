@@ -444,6 +444,15 @@ export const TechHumanSection: React.FC<TechHumanSectionProps> = ({
                     </div>
                   </div>
 
+                  {/* Région choisie : un clic sur une épingle affiche ce que QIAO y apporte. */}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-[4%] z-30 w-[86%] text-center bg-slate-950/80 border border-sky-500/30 rounded-xl px-3 py-2 text-[11px] leading-snug text-sky-50 pointer-events-none">
+                    {activePin === 'na' ? (
+                      <span><strong className="text-sky-300">Afrique du Nord</strong> : Maroc, Algérie, Tunisie, Égypte et Libye, leurs marchés, partenaires et opportunités.</span>
+                    ) : (
+                      <span><strong className="text-red-300">Chine</strong> : fournisseurs, industriels et investisseurs partenaires de QIAO.</span>
+                    )}
+                  </div>
+
                   {/* China Location Pin (Red) with Pulsing Beacon */}
                   <div
                     onClick={() => setActivePin('cn')}

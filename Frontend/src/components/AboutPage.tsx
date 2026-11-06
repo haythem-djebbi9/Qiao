@@ -496,7 +496,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               </p>
             </div>
             <button
-              onClick={() => onNavigate('about')}
+              onClick={() => onNavigate('how-it-works')}
               className="text-[#e01a22] hover:text-[#b81b21] font-semibold text-xs sm:text-sm flex items-center gap-1.5 transition-colors cursor-pointer self-start sm:self-auto"
             >
               <span>Découvrir notre approche</span>
@@ -938,13 +938,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                     Des experts passionnés, à votre service.
                   </p>
                 </div>
-                <button
-                  onClick={() => onNavigate('contact')}
-                  className="text-[#e01a22] hover:text-[#b81b21] font-semibold text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>Voir toute l’équipe</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
               </div>
 
               {/* 5 Team Member Cards */}

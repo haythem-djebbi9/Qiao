@@ -282,7 +282,7 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonialsData.slice(0, 3).map((item) => (
+            {[0, 1, 2].map((offset) => testimonialsData[(activeTestimonialIndex + offset) % testimonialsData.length]).map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between"

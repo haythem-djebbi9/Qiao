@@ -35,6 +35,26 @@ interface OpportunitesTabProps {
 
 type OpportunityItem = HubOpportunity;
 
+/** Fourchettes du filtre « Montant d'investissement », en USD. */
+const AMOUNT_RANGES: Record<string, [number, number]> = {
+  '100k - 500k USD': [1e5, 5e5],
+  '500k - 2M USD': [5e5, 2e6],
+  '1M - 5M USD': [1e6, 5e6],
+  '2M - 10M USD': [2e6, 1e7],
+};
+
+/** « 500 000 – 2 M USD » → [500 000, 2 000 000] ; « 1 – 5 M USD » → [1 M, 5 M]. */
+const amountRange = (label: string): [number, number] | null => {
+  const parts = label.replace(/USD/g, '').split('–').map((part) => part.trim());
+  if (parts.length !== 2) return null;
+  const millions = parts.map((part) => /M/.test(part));
+  const values = parts.map((part) => parseFloat(part.replace(/M/g, '').replace(/\s/g, '').replace(',', '.')));
+  if (values.some(Number.isNaN)) return null;
+  const min = values[0] * (millions[0] || (millions[1] && values[0] < 1000) ? 1e6 : 1);
+  const max = values[1] * (millions[1] ? 1e6 : 1);
+  return [min, max];
+};
+
 export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
   onSelectTab,
   onOpenOpportunityDetail,
@@ -44,10 +64,9 @@ export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
   const [targetCountry, setTargetCountry] = useState('Tous les pays');
   const [sector, setSector] = useState('Toutes les catégories');
   const [investmentAmount, setInvestmentAmount] = useState('Tous les montants');
-  const [status, setStatus] = useState('Tous les statuts');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedModalOpp, setSelectedModalOpp] = useState<OpportunityItem | null>(null);
-  const { openOpportunities } = useAppActions();
+  const { openOpportunities, navigate } = useAppActions();
 
   // 5 Main Opportunities matching the user screenshot
   const opportunitiesList = HUB_OPPORTUNITIES;
@@ -62,6 +81,11 @@ export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
     }
     if (sector !== 'Toutes les catégories' && !opp.sector.toLowerCase().includes(sector.toLowerCase())) {
       return false;
+    }
+    if (investmentAmount !== 'Tous les montants') {
+      const range = amountRange(opp.amount);
+      const [min, max] = AMOUNT_RANGES[investmentAmount] ?? [0, Infinity];
+      if (!range || range[0] >= max || range[1] <= min) return false;
     }
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
@@ -115,7 +139,7 @@ export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
       {/* 1. FILTER BAR (MATCHING SCREENSHOT)                                       */}
       {/* ========================================================================= */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-end">
           
           {/* Type d'opportunité */}
           <div>
@@ -199,26 +223,6 @@ export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
                 <option>500k - 2M USD</option>
                 <option>1M - 5M USD</option>
                 <option>2M - 10M USD</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Statut */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Statut
-            </label>
-            <div className="relative">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option>Tous les statuts</option>
-                <option>Actives</option>
-                <option>Vérifiées QIAO</option>
-                <option>Urgentes</option>
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -371,6 +375,8 @@ export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
                 setOppType('Toutes les opportunités');
                 setTargetCountry('Tous les pays');
                 setSector('Toutes les catégories');
+                setInvestmentAmount('Tous les montants');
+                setSearchQuery('');
               }}
               className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors cursor-pointer"
             >
@@ -532,7 +538,7 @@ export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
                     Success stories
                   </h3>
                   <button
-                    onClick={() => onSelectTab('analyses')}
+                    onClick={() => navigate('stories')}
                     className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
                   >
                     <span>Voir toutes les success stories</span>
@@ -558,23 +564,16 @@ export const OpportunitesTab: React.FC<OpportunitesTabProps> = ({
                       Une entreprise tunisienne a conclu un partenariat avec un fabricant chinois pour la distribution de véhicules électriques.
                     </p>
                     <button
-                      onClick={() => onSelectTab('analyses')}
+                      onClick={() => navigate('stories')}
                       className="text-xs font-bold text-red-600 hover:text-red-700 inline-flex items-center gap-1 pt-1 cursor-pointer"
                     >
-                      <span>Lire l'histoire</span>
+                      <span>Lire d'autres histoires</span>
                       <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Carousel indicator dots (1 red, 3 light blue) */}
-              <div className="flex items-center justify-center gap-1.5 pt-3">
-                <span className="w-2 h-2 rounded-full bg-red-600" />
-                <span className="w-2 h-2 rounded-full bg-sky-200" />
-                <span className="w-2 h-2 rounded-full bg-sky-200" />
-                <span className="w-2 h-2 rounded-full bg-sky-200" />
-              </div>
             </div>
 
           </div>

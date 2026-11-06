@@ -73,7 +73,8 @@ import {
   Image as ImageIcon,
   Palette,
 } from 'lucide-react';
-import { SECTORS_DETAILS, SectorData } from '../data/sectorsData';
+import { SECTORS_DETAILS, SectorData, SectorService } from '../data/sectorsData';
+import { SectorServiceModal } from './sectors/SectorServiceModal';
 import { Logo } from './Logo';
 import { api } from '../lib/api';
 import { CountryFlag } from './common/CountryFlag';
@@ -104,6 +105,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
     message: '',
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [openService, setOpenService] = useState<SectorService | null>(null);
 
   // Fallback to construction if sectorId not found
   const sector: SectorData = SECTORS_DETAILS[sectorId] || SECTORS_DETAILS['construction'];
@@ -487,7 +489,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                 {sector.overviewDescription}
               </p>
               <button
-                onClick={onOpenAppointment}
+                onClick={() => onNavigate('about')}
                 className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 text-xs font-bold text-[#0a1c3d] hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <span>{sector.overviewButtonText}</span>
@@ -662,7 +664,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                   <button
                     type="button"
                     key={srv.id}
-                    onClick={() => contactUs({ subject: 'Autre demande', message: `Bonjour, je souhaite en savoir plus sur le service « ${srv.title} » (${sector.title}).\n\nMon projet : ` })}
+                    onClick={() => setOpenService(srv)}
                     className="w-full text-left flex items-start gap-3.5 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#0a1c3d] flex items-center justify-center shrink-0 border border-blue-100/80 mt-0.5">
@@ -735,10 +737,10 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
 
                   {/* Link */}
                   <button
-                    onClick={onOpenAppointment}
+                    onClick={() => onNavigate('stories')}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#e01a22] hover:underline mt-3.5 cursor-pointer"
                   >
-                    <span>Lire l'histoire complète</span>
+                    <span>Voir d'autres histoires de succès</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -995,15 +997,10 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                 <a href="https://x.com" target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-black text-white flex items-center justify-center hover:opacity-90 font-bold text-xs">
                   𝕏
                 </a>
-                {/* FR Language */}
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded border border-slate-300 text-xs font-semibold text-slate-700">
-                  <span>FR</span>
-                  <ChevronDown className="w-3 h-3" />
-                </div>
               </div>
 
               <div className="text-[11px] text-slate-500">
-                © 2024 QIAO. Tous droits réservés.
+                © {new Date().getFullYear()} QIAO. Tous droits réservés.
               </div>
 
               {/* Cursive handwritten slogan */}
@@ -1015,6 +1012,17 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
           </div>
         </div>
       </footer>
+
+      <SectorServiceModal
+        service={openService}
+        sectorTitle={sector.title}
+        icon={openService ? getServiceIcon(openService.iconName) : null}
+        onClose={() => setOpenService(null)}
+        onRequest={(srv) => {
+          setOpenService(null);
+          contactUs({ subject: 'Autre demande', message: `Bonjour, je souhaite demander le service « ${srv.title} » (${sector.title}).\n\nMon projet : ` });
+        }}
+      />
 
     </div>
   );

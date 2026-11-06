@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { JoinedList } from '../common/JoinedList';
 import { ArrowLeft, Ban, Briefcase, Building2, CalendarDays, Flag, Languages, Lock, Mail, MapPin, Pencil, ShieldCheck, UserCheck, UserPlus } from 'lucide-react';
 import { ServiceRequestModal } from '../payments/ServiceRequestModal';
 import { api, ApiError } from '../../lib/api';
@@ -162,12 +163,12 @@ export const MemberProfileView: React.FC<{ handle: string }> = ({ handle }) => {
             )}
             {(profile.city || profile.country) && (
               <span className="inline-flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" /> {[profile.city, profile.country].filter(Boolean).join(', ')}
+                <MapPin className="w-3.5 h-3.5" /> <JoinedList items={[profile.city, profile.country]} />
               </span>
             )}
             {profile.languages && profile.languages.length > 0 && (
               <span className="inline-flex items-center gap-1">
-                <Languages className="w-3.5 h-3.5" /> {profile.languages.map((l) => LANGUAGE_LABELS[l] ?? l).join(', ')}
+                <Languages className="w-3.5 h-3.5" /> <JoinedList items={profile.languages.map((l) => LANGUAGE_LABELS[l] ?? l)} />
               </span>
             )}
             <span className="inline-flex items-center gap-1">
@@ -240,7 +241,7 @@ export const MemberProfileView: React.FC<{ handle: string }> = ({ handle }) => {
               <dl className="mt-3 space-y-1.5 text-xs text-slate-600">
                 {profile.expert.countriesServed.length > 0 && (
                   <div className="flex gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" /> Intervient en : {profile.expert.countriesServed.join(', ')}
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" /> Intervient en : <JoinedList items={profile.expert.countriesServed} />
                   </div>
                 )}
                 {profile.expert.yearsExperience !== null && (

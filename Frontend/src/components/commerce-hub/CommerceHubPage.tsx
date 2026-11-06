@@ -33,6 +33,8 @@ import { AnalysesTab } from './tabs/AnalysesTab';
 import { CommerceHubBottomBanner } from './components/CommerceHubBottomBanner';
 import { FlagIcon } from '../common/FlagIcon';
 import { useDownloads } from '../../hooks/useDownloads';
+import { useAppActions } from '../../context/AppActionsContext';
+import { slugify } from '../../lib/text';
 import ecommerceCargoShipImg from '../../assets/images/ecommerce_hero_cargo_ship_1790887696581.jpg';
 import reglementationHeroPortImg from '../../assets/images/reglementation_hero_port_1790896278386.jpg';
 import rapportsHeroReportsImg from '../../assets/images/rapports_hero_reports_1790896412608.jpg';
@@ -56,8 +58,20 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
   onNavigateTab,
   onOpenConsultation,
   onOpenSignUp,
+  focus,
+  onFocusHandled,
 }) => {
   const [activeCommerceTab, setActiveCommerceTab] = useState<CommerceHubTab>(initialTab);
+  const [focusCompanyId, setFocusCompanyId] = useState<string | null>(null);
+  const { openDocument, openArticle } = useAppActions();
+
+  // Recherche globale : l'entreprise choisie s'ouvre dans l'onglet Entreprises.
+  useEffect(() => {
+    if (focus?.type !== 'company') return;
+    setActiveCommerceTab('entreprises');
+    setFocusCompanyId(focus.id);
+    onFocusHandled?.();
+  }, [focus, onFocusHandled]);
   const [modalReportTitle, setModalReportTitle] = useState<string | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { downloadDocument } = useDownloads();
@@ -608,9 +622,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'flux-commerciaux' && (
           <FluxCommerciauxTab
             onSelectTab={setActiveCommerceTab}
-            onOpenReport={(title) => {
-              setActiveCommerceTab('rapports');
-            }}
+            onOpenReport={openDocument}
           />
         )}
 
@@ -626,12 +638,13 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'marches-ecommerce' && (
           <MarchesEcommerceTab
             onSelectTab={setActiveCommerceTab}
-            onOpenReport={(title) => setActiveCommerceTab('rapports')}
+            onOpenReport={openDocument}
           />
         )}
 
         {activeCommerceTab === 'entreprises' && (
           <EntreprisesTab
+            focusCompanyId={focusCompanyId}
             onSelectTab={setActiveCommerceTab}
             onOpenCompanyDetail={(name) => {
               setActiveCommerceTab('opportunites');
@@ -649,9 +662,8 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'reglementation' && (
           <ReglementationTab
             onSelectTab={setActiveCommerceTab}
-            onOpenDocDetail={(title) => {
-              setActiveCommerceTab('rapports');
-            }}
+            onOpenConsultation={onOpenConsultation}
+            onOpenDocDetail={openDocument}
           />
         )}
 
@@ -667,9 +679,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'analyses' && (
           <AnalysesTab
             onSelectTab={setActiveCommerceTab}
-            onOpenArticle={(title) => {
-              // open or highlight
-            }}
+            onOpenArticle={(title) => openArticle(slugify(title))}
           />
         )}
       </main>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../../../lib/api';
 import {
   FileText,
   Search,
@@ -28,6 +29,25 @@ interface RapportsTabProps {
   onOpenReportModal?: (reportTitle: string) => void;
 }
 
+/** Type choisi dans le filtre → badges des rapports correspondants. */
+const REPORT_TYPES: Record<string, string[]> = {
+  'Rapports phares': ['Rapport phare'],
+  'Études de marché': ['Étude de marché'],
+  'Études sectorielles': ['Étude sectorielle', 'Analyse secteur'],
+  'Rapports techniques': ['Rapport technique'],
+};
+
+/** Pays et secteur couverts par chaque rapport. */
+const REPORT_SCOPE: Record<string, { countries: string[]; sector: string }> = {
+  'rep-1': { countries: ['Chine', 'Tunisie', 'Algérie', 'Maroc', 'Égypte', 'Libye'], sector: 'Commerce & échanges' },
+  'rep-2': { countries: ['Maroc', 'Algérie', 'Tunisie', 'Égypte'], sector: 'E-commerce' },
+  'rep-3': { countries: ['Maroc', 'Égypte', 'Tunisie', 'Algérie'], sector: 'Énergie & Industrie' },
+  'rep-4': { countries: ['Chine', 'Maroc', 'Tunisie', 'Algérie', 'Égypte'], sector: 'Cosmétiques & Mode' },
+  'rep-5': { countries: ['Chine', 'Maroc', 'Égypte', 'Tunisie', 'Algérie'], sector: 'Logistique & Transport' },
+};
+
+const scrollToReports = () => document.getElementById('derniers-rapports')?.scrollIntoView({ behavior: 'smooth' });
+
 export const RapportsTab: React.FC<RapportsTabProps> = ({
   onSelectTab,
   onOpenReportModal,
@@ -39,7 +59,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
-  const [downloadModalReport, setDownloadModalReport] = useState<string | null>(null);
+  const [newsletterError, setNewsletterError] = useState<string | null>(null);
 
   // 4 KPI metrics matching screenshot
   const metrics = [
@@ -191,30 +211,56 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
   // Upcoming studies matching screenshot
   const upcomingStudies = [
     {
-      date: 'Sept. 2024',
+      date: 'Prochainement',
       title: 'Le marché automobile en Afrique du Nord',
     },
     {
-      date: 'Oct. 2024',
+      date: 'Prochainement',
       title: 'L’agroalimentaire : opportunités et défis',
     },
     {
-      date: 'Nov. 2024',
+      date: 'Prochainement',
       title: 'L’intelligence artificielle dans le e-commerce',
     },
     {
-      date: 'Déc. 2024',
+      date: 'Prochainement',
       title: 'Guide d’investissement Chine – Afrique du Nord',
     },
   ];
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsletterEmail.trim()) return;
-    setNewsletterSuccess(true);
-    setTimeout(() => setNewsletterSuccess(false), 4000);
-    setNewsletterEmail('');
+    setNewsletterError(null);
+    try {
+      await api.post('/newsletter/subscribe', { email: newsletterEmail.trim(), topic: 'reports', source: 'hub-rapports' });
+      setNewsletterSuccess(true);
+      setNewsletterEmail('');
+    } catch (err) {
+      setNewsletterError(err instanceof Error ? err.message : 'Inscription impossible.');
+    }
   };
+
+  const reportYears = [...new Set(mainReports.map((report) => report.date.match(/\d{4}/)?.[0]).filter(Boolean))] as string[];
+  const filtersActive =
+    reportType !== 'Tous les types' || countryRegion !== 'Tous les pays' || sector !== 'Toutes les catégories' || year !== 'Toutes les années' || searchQuery.trim() !== '';
+  const resetFilters = () => {
+    setReportType('Tous les types');
+    setCountryRegion('Tous les pays');
+    setSector('Toutes les catégories');
+    setYear('Toutes les années');
+    setSearchQuery('');
+  };
+  const filteredReports = mainReports.filter((report) => {
+    const scope = REPORT_SCOPE[report.id];
+    if (reportType !== 'Tous les types' && !(REPORT_TYPES[reportType] ?? []).includes(report.badge)) return false;
+    if (countryRegion !== 'Tous les pays' && !scope?.countries.includes(countryRegion)) return false;
+    if (sector !== 'Toutes les catégories' && scope?.sector !== sector) return false;
+    if (year !== 'Toutes les années' && !report.date.includes(year)) return false;
+    const q = searchQuery.trim().toLowerCase();
+    if (q && ![report.title, report.description, report.badge].some((text) => text.toLowerCase().includes(q))) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -298,11 +344,9 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
                   className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
                 >
                   <option>Toutes les années</option>
-                  <option>2024</option>
-                  <option>2023</option>
-                  <option>2022</option>
-                  <option>2021</option>
-                  <option>2020</option>
+                  {reportYears.map((value) => (
+                    <option key={value}>{value}</option>
+                  ))}
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
@@ -316,11 +360,13 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && scrollToReports()}
               placeholder="Rechercher un rapport, une étude..."
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 pr-11 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <button
-              onClick={() => {}}
+              onClick={scrollToReports}
+              aria-label="Rechercher"
               className="absolute right-1 top-1 bottom-1 px-3 bg-[#0a2559] hover:bg-blue-900 text-white rounded-lg flex items-center justify-center cursor-pointer transition-colors"
             >
               <Search className="w-3.5 h-3.5" />
@@ -473,19 +519,21 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Top pays couverts
               </h3>
-              <button
-                onClick={() => onSelectTab('pays' as any)}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Voir tous les pays</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+
             </div>
 
             {/* List with progress bars */}
             <div className="space-y-2.5">
               {topCountries.map((c, idx) => (
-                <div key={idx} className="flex items-center gap-2.5">
+                <div
+                  key={idx}
+                  onClick={() => {
+                    setCountryRegion(c.name);
+                    scrollToReports();
+                  }}
+                  className="flex items-center gap-2.5 cursor-pointer rounded-lg hover:bg-slate-50"
+                  title={`Voir les rapports : ${c.name}`}
+                >
                   <FlagIcon country={c.name} size="sm" />
                   <span className="text-xs font-semibold text-slate-800 w-16 truncate">{c.name}</span>
                   <span className="text-xs font-black text-slate-900 w-6 text-right shrink-0">{c.count}</span>
@@ -506,7 +554,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
       {/* ========================================================================= */}
       {/* 4. ROW 2: DERNIERS RAPPORTS ET ÉTUDES (LEFT) & SIDEBAR (RIGHT)            */}
       {/* ========================================================================= */}
-      <div id="derniers-rapports" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div id="derniers-rapports" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left: Derniers rapports et études (approx 8 cols) */}
         <div className="lg:col-span-8 space-y-4">
@@ -515,7 +563,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
               Derniers rapports et études
             </h2>
             <button
-              onClick={() => {}}
+              onClick={resetFilters}
               className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
             >
               <span>Voir tous les rapports</span>
@@ -524,7 +572,15 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
           </div>
 
           <div className="space-y-3">
-            {mainReports.map((report) => (
+            {filteredReports.length === 0 && (
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 text-center text-xs text-slate-500">
+                <p>Aucun rapport ne correspond à ces filtres.</p>
+                <button onClick={resetFilters} className="mt-2 font-semibold text-red-600 hover:underline cursor-pointer">
+                  Réinitialiser les filtres
+                </button>
+              </div>
+            )}
+            {filteredReports.map((report) => (
               <div
                 key={report.id}
                 className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
@@ -570,7 +626,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
 
                 {/* Download Button */}
                 <button
-                  onClick={() => setDownloadModalReport(report.title)}
+                  onClick={() => onOpenReportModal?.(report.title)}
                   className="px-4 py-2 rounded-xl border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50/50 text-slate-800 hover:text-red-600 text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0 self-end sm:self-center"
                 >
                   <Download className="w-3.5 h-3.5 text-red-600" />
@@ -590,20 +646,14 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Rapports les plus consultés
               </h3>
-              <button
-                onClick={() => {}}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Voir plus</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
+
             </div>
 
             <div className="space-y-3">
               {popularReports.map((p) => (
                 <div
                   key={p.rank}
-                  onClick={() => setDownloadModalReport(p.title)}
+                  onClick={() => onOpenReportModal?.(p.title)}
                   className="flex items-center justify-between gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -634,13 +684,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Organisations contributrices
               </h3>
-              <button
-                onClick={() => {}}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Voir tous les partenaires</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
+
             </div>
 
             {/* Grid of partner organisation badges */}
@@ -648,7 +692,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
               {contributingOrgs.map((org, i) => (
                 <div
                   key={i}
-                  className="bg-slate-50 border border-slate-200/70 rounded-xl p-2 flex flex-col items-center justify-center hover:bg-white hover:border-slate-300 transition-all cursor-pointer h-14"
+                  className="bg-slate-50 border border-slate-200/70 rounded-xl p-2 flex flex-col items-center justify-center h-14"
                   title={org.name}
                 >
                   <Globe className="w-4 h-4 text-blue-700 mb-0.5" />
@@ -671,7 +715,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
             <p className="text-[11px] text-slate-500 mb-3 leading-snug">
               Recevez nos derniers rapports et analyses directement par email.
             </p>
-            <form onSubmit={handleSubscribe} className="flex gap-2">
+            <form id="alertes-publications" onSubmit={handleSubscribe} className="scroll-mt-24 flex gap-2">
               <input
                 type="email"
                 required
@@ -687,6 +731,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
                 S'abonner
               </button>
             </form>
+            {newsletterError && <div className="text-[11px] text-red-600 font-semibold mt-2">{newsletterError}</div>}
             {newsletterSuccess && (
               <div className="text-[11px] text-emerald-600 font-bold mt-2">
                 ✓ Merci ! Vous êtes bien inscrit aux alertes publications.
@@ -710,6 +755,8 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
           {upcomingStudies.map((u, idx) => (
             <div
               key={idx}
+              onClick={() => document.getElementById('alertes-publications')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              title="Être prévenu de la parution"
               className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-md transition-all flex items-start gap-3 group cursor-pointer"
             >
               <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
@@ -727,51 +774,6 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
           ))}
         </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* 6. MODAL: REPORT DOWNLOAD                                                 */}
-      {/* ========================================================================= */}
-      {downloadModalReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 text-center relative">
-            <button
-              onClick={() => setDownloadModalReport(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
-              <Download className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">
-              Télécharger le rapport
-            </h3>
-            <p className="text-xs text-slate-600 mb-4 font-semibold">
-              « {downloadModalReport} »
-            </p>
-            <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              Le rapport PDF complet haute résolution et les tableaux de données statistiques sont prêts.
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => setDownloadModalReport(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => {
-                  alert(`Le téléchargement de « ${downloadModalReport} » a débuté.`);
-                  setDownloadModalReport(null);
-                }}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer shadow-xs"
-              >
-                Confirmer le téléchargement (PDF)
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

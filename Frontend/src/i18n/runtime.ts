@@ -88,7 +88,10 @@ function buildIndexes(dictionary: Record<string, string>) {
 }
 
 function matchTemplate(text: string): string | null {
-  const buckets = [templates.get(templateBucket(text)), templates.get('')];
+  // Un modèle est rangé sous ses 5 premiers caractères fixes, ou moins s'il en a moins (« « {0} » téléchargé » sous « « ») :
+  // on cherche donc sous chaque début du texte, du plus long au plus court.
+  const folded5 = templateBucket(text);
+  const buckets = [5, 4, 3, 2, 1, 0].map((length) => templates.get(folded5.slice(0, length)));
   for (const bucket of buckets) {
     for (const { pattern, target } of bucket ?? []) {
       const match = text.match(pattern);
