@@ -10,3 +10,6 @@ GUIDE_UTILISATION.md
 
 # Liste de travail de la traduction, régénérée par scripts/i18n/extract.mjs.
 Frontend/scripts/i18n/source-strings.json
+
+# Comptes de démonstration de la version en ligne, avec leurs mots de passe : jamais dans le dépôt public.
+COMPTES_DEMO.txt

@@ -1,4 +1,4 @@
-// Crée les comptes de démonstration de la version déployée, trois par rôle, par l'API et avec des mots de passe aléatoires.
+// Crée les comptes de démonstration de la version déployée : trois par rôle membre et un administrateur, par l'API et avec des mots de passe aléatoires.
 // Écrit une ligne « rôle | e-mail | mot de passe » par compte créé ; un compte existant n'est pas modifié.
 // Les profils experts de démonstration ne sont pas affichés dans l'annuaire public.
 // Usage (dans le conteneur) : node Backend/scripts/deploy/create-demo-accounts.mjs qiao-china.io [membres|admins|tous]
@@ -79,7 +79,8 @@ if (PART === 'admins' || PART === 'tous') {
   const login = await call('POST', '/auth/login', null, { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD });
   const adminToken = login.json?.token;
   if (!adminToken) throw new Error(`Connexion administrateur impossible : ${login.status}`);
-  for (const n of N) {
+  // Un seul administrateur de démonstration : il voit les données de tous les membres.
+  for (const n of [1]) {
     const created = await createAccount('Démo - administrateur', {
       fullName: `Administrateur Démo ${n}`,
       email: `demo.admin${n}@${DOMAIN}`,
