@@ -42,6 +42,22 @@ const BATCH_SIZE = 25;
 const MAX_STRINGS_PER_RUN = 300;
 const MAX_SOURCE_LENGTH = 6000;
 
+/** Clés des contenus du site qui ne sont pas du texte affiché (identifiants, images, icônes). */
+const NON_TEXT_KEYS = new Set(['id', 'image', 'heroBg', 'formBg', 'iconName', 'countryCode', 'code', 'hidden', 'icon', 'url']);
+
+/** Textes d'un contenu du site (document JSON), sans les identifiants, images ni adresses. */
+function collectStrings(value: unknown, into: Set<string>, key = '') {
+  if (NON_TEXT_KEYS.has(key)) return;
+  if (typeof value === 'string') {
+    const text = value.replace(/[\s  ]+/g, ' ').trim();
+    if (/\p{L}{2}/u.test(text) && !/^(https?:|\/|academy-file:|data:)/.test(text) && text.length <= MAX_SOURCE_LENGTH) into.add(text);
+  } else if (Array.isArray(value)) {
+    for (const item of value) collectStrings(item, into);
+  } else if (value && typeof value === 'object') {
+    for (const [childKey, child] of Object.entries(value)) collectStrings(child, into, childKey);
+  }
+}
+
 const normalize = (text: string) => text.replace(/[\s  ]+/g, ' ').trim();
 const hashOf = (text: string) => createHash('sha256').update(text).digest('hex');
 const FRONTEND_DIST = process.env.FRONTEND_DIST ?? join(__dirname, '..', '..', '..', '..', 'Frontend', 'dist');
@@ -93,7 +109,37 @@ export class I18nService implements OnApplicationBootstrap, OnModuleDestroy {
         }
       }
     }
+    // Contenus du site modifiés depuis l'administration (secteurs, sous-secteurs...).
+    const contents: { data: unknown }[] = await this.dataSource.query('SELECT "data" FROM "site_contents"').catch(() => []);
+    for (const { data } of contents) collectStrings(data, texts);
     return [...texts];
+  }
+
+  /**
+   * Textes publiés par l'administration qui ne sont pas dans les dictionnaires du site, avec leur traduction
+   * enregistrée s'il y en a une : l'administration complète ou corrige elle-même les traductions.
+   */
+  async adminTexts(language: SiteLanguage) {
+    const dictionary = this.staticDictionary(language);
+    const saved = new Map(
+      (await this.translations.find({ where: { language }, select: { source: true, target: true } })).map((row) => [row.source, row.target]),
+    );
+    return (await this.catalogTexts())
+      .filter((text) => !dictionary[text])
+      .map((source) => ({ source, target: saved.get(source) ?? null }))
+      .sort((a, b) => Number(a.target !== null) - Number(b.target !== null) || a.source.localeCompare(b.source, 'fr'));
+  }
+
+  async saveTranslation(language: SiteLanguage, source: string, target: string) {
+    const text = normalize(source);
+    const value = target.trim();
+    if (!text) return { saved: false };
+    if (!value) {
+      await this.translations.delete({ language, sourceHash: hashOf(text) });
+      return { saved: true, removed: true };
+    }
+    await this.translations.upsert([{ language, sourceHash: hashOf(text), source: text, target: value }], ['language', 'sourceHash']);
+    return { saved: true };
   }
 
   private staticDictionary(language: SiteLanguage): Record<string, string> {

@@ -19,6 +19,7 @@ import { EventsModule } from './modules/events/events.module';
 import { SeoModule } from './modules/seo/seo.module';
 import { HealthController } from './modules/health/health.controller';
 import { I18nModule } from './modules/i18n/i18n.module';
+import { SiteAdminModule } from './modules/site-admin/site-admin.module';
 import { NewsletterModule } from './modules/newsletter/newsletter.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
@@ -86,6 +87,7 @@ const FRONTEND_DIST = process.env.FRONTEND_DIST ?? join(__dirname, '..', '..', '
     EventsModule,
     SeoModule,
     I18nModule,
+    SiteAdminModule,
     AcademyModule,
     CommunityModule,
     PaymentsModule,

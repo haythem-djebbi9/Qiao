@@ -9,5 +9,6 @@ import { I18nService } from './i18n.service';
   imports: [TypeOrmModule.forFeature([ContentTranslation]), SeoModule],
   controllers: [I18nController],
   providers: [I18nService],
+  exports: [I18nService],
 })
 export class I18nModule {}

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useSiteContentVersion } from '../../lib/siteContent';
 import { ArrowLeft, ArrowRight, BadgeCheck, CheckCircle2, Globe, Handshake, Search, Target } from 'lucide-react';
 import { useAppActions } from '../../context/AppActionsContext';
 import { useApi } from '../../hooks/useApi';
@@ -167,7 +168,9 @@ export const OpportunitiesPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const { data: records, loading } = useApi<Opportunity[]>('/opportunities', undefined, []);
 
-  const all = useMemo(() => [...(records ?? []).map(fromRecord), ...STATIC_OPPORTUNITIES], [records]);
+  const contentVersion = useSiteContentVersion();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const all = useMemo(() => [...(records ?? []).map(fromRecord), ...STATIC_OPPORTUNITIES], [records, contentVersion]);
   const country = OPPORTUNITY_COUNTRIES.find((item) => normalize(item.name) === normalize(countryParam));
   const heading = country?.heading ?? 'Toutes les opportunités';
   const selected = opportunityId ? all.find((entry) => entry.id === opportunityId) ?? null : null;

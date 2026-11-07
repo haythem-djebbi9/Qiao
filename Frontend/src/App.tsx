@@ -61,6 +61,7 @@ import { detectVisitorLocation } from './lib/geo';
 import { navigateCommunity, routeFromLink } from './lib/community';
 import { navigateDashboard } from './lib/payments';
 import { opportunityRoute } from './lib/opportunities';
+import { loadSiteContent, useSiteContentVersion } from './lib/siteContent';
 import { setLanguage, toLanguage } from './i18n/runtime';
 import { TermsGate } from './components/community/TermsGate';
 
@@ -121,6 +122,11 @@ export default function App() {
 
   // App filters & interactive states
   const [currentLang, setCurrentLang] = useState(() => readStorage(LANGUAGE_KEY) ?? 'FR');
+  // Contenus modifiés depuis l'administration (secteurs, sous-secteurs) : chargés au démarrage, re-rendu à chaque mise à jour.
+  useSiteContentVersion();
+  useEffect(() => {
+    void loadSiteContent();
+  }, []);
   // Position du visiteur détectée automatiquement (compte, fuseau horaire, langue).
   const visitorLocation = useMemo(
     () => detectVisitorLocation(user ? { origin: user.origin, location: user.location } : null),

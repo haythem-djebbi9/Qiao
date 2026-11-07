@@ -26,7 +26,9 @@ import {
   BookOpen,
   CalendarCog,
   Monitor,
+  LayoutTemplate,
 } from 'lucide-react';
+import { SiteAdminView } from './admin/SiteAdminView';
 import { api } from '../lib/api';
 import { Dashboard } from '../lib/models';
 import { formatDate, initials, timeAgo } from '../lib/text';
@@ -61,7 +63,8 @@ type Section =
   | 'profile'
   | 'admin-paiements'
   | 'admin-academy'
-  | 'admin-events';
+  | 'admin-events'
+  | 'admin-site';
 
 const SECTIONS: { id: Section; label: string; icon: React.ElementType; adminOnly?: boolean }[] = [
   { id: 'overview', label: "Vue d'ensemble", icon: Bell },
@@ -77,6 +80,7 @@ const SECTIONS: { id: Section; label: string; icon: React.ElementType; adminOnly
   { id: 'admin-paiements', label: 'Admin : paiements & litiges', icon: Gavel, adminOnly: true },
   { id: 'admin-academy', label: 'Admin : QIAO Academy', icon: BookOpen, adminOnly: true },
   { id: 'admin-events', label: 'Admin : Événements', icon: CalendarCog, adminOnly: true },
+  { id: 'admin-site', label: 'Admin : Contenus du site', icon: LayoutTemplate, adminOnly: true },
 ];
 
 const Empty: React.FC<{ text: string; action?: { label: string; onClick: () => void } }> = ({ text, action }) => (
@@ -174,7 +178,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   };
 
   // Vues qui chargent leurs propres données (sans attendre le tableau de bord).
-  const standalone = ['prestations', 'admin-paiements', 'admin-academy', 'admin-events'].includes(section) || playerOpen;
+  const standalone = ['prestations', 'admin-paiements', 'admin-academy', 'admin-events', 'admin-site'].includes(section) || playerOpen;
   const stats = data?.stats ?? {};
   const statCards = [
     { label: 'Rendez-vous à venir', value: stats.appointments ?? 0, icon: CalendarCheck, section: 'appointments' as Section },
@@ -258,6 +262,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             {section === 'admin-paiements' && <PaymentsAdminView selectedId={routeId} />}
             {section === 'admin-academy' && <AcademyAdminView route={route.slice(1)} />}
             {section === 'admin-events' && <EventsAdminView route={route.slice(1)} />}
+            {section === 'admin-site' && <SiteAdminView />}
 
             {data && section === 'overview' && (
               <>

@@ -7,7 +7,7 @@ export class I18nController {
 
   /** Traductions des contenus publiés par l'administration. */
   @Get(':language')
-  @Header('Cache-Control', 'public, max-age=300')
+  @Header('Cache-Control', 'public, max-age=60')
   dictionary(@Param('language') language: string) {
     if (!SITE_LANGUAGES.includes(language as SiteLanguage)) throw new NotFoundException('Langue inconnue.');
     return this.i18n.dictionary(language as SiteLanguage);

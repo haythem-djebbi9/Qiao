@@ -21,7 +21,7 @@ export const SectorServiceModal: React.FC<SectorServiceModalProps> = ({ service,
   }, [service, onClose]);
 
   if (!service) return null;
-  const detail = SECTOR_SERVICE_DETAILS[service.title];
+  const detail = service.detail ?? SECTOR_SERVICE_DETAILS[service.title];
 
   return (
     <div

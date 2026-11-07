@@ -24,6 +24,8 @@ import energieBessImg from '../assets/images/energie_bess_bess_1791122068768.jpg
 import industrieRobotImg from '../assets/images/industrie_robot_arm_card_1791221523303.jpg';
 import santeDoctorImg from '../assets/images/sante_doctor_microscope_card_1791221540419.jpg';
 
+import type { SectorServiceDetail } from './sectorServiceDetails';
+
 export interface SubSector {
   id: string;
   title: string;
@@ -45,6 +47,8 @@ export interface SectorService {
   title: string;
   description: string;
   iconName: string;
+  /** Fiche détaillée propre à ce service (sinon la fiche commune du même titre). */
+  detail?: SectorServiceDetail;
 }
 
 export interface SectorSuccessStory {
@@ -56,6 +60,8 @@ export interface SectorSuccessStory {
 
 export interface SectorData {
   id: string;
+  /** Masqué par l'administration : absent de la page Secteurs, du menu et des opportunités. */
+  hidden?: boolean;
   tag: string;
   title: string;
   subTitle: string;

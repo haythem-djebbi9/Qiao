@@ -65,45 +65,21 @@ export function fromRecord(record: Opportunity): OpportunityEntry {
   };
 }
 
-/** Opportunités présentées sur les pages secteurs et dans le Commerce Hub. */
-export const STATIC_OPPORTUNITIES: OpportunityEntry[] = [
-  ...Object.values(SECTORS_DETAILS).flatMap((sector) =>
-    sector.opportunities.map(
-      (item): OpportunityEntry => ({
-        id: `${sector.id}-${item.id}`,
-        title: item.title,
-        type: item.type,
-        country: item.country,
-        countryCode: item.countryCode,
-        sectorLabel: sector.title,
-        sector,
-        description: null,
-        amount: null,
-        partner: null,
-        image: null,
-        from: null,
-        to: null,
-        deadline: null,
-        published: null,
-        verified: false,
-        urgent: false,
-        record: null,
-      }),
-    ),
-  ),
-  // Opportunités propres à chaque sous-secteur (pages sous-secteurs).
-  ...Object.values(SECTORS_DETAILS).flatMap((sector) =>
-    sector.subSectors.flatMap((subSector) =>
-      (SUB_SECTOR_DETAILS[subSector.id]?.opportunities ?? []).map(
+/** Opportunités présentées sur les pages secteurs et dans le Commerce Hub (secteurs masqués exclus). */
+function buildStaticOpportunities(): OpportunityEntry[] {
+  const visibleSectors = Object.values(SECTORS_DETAILS).filter((sector) => !sector.hidden);
+  return [
+    ...visibleSectors.flatMap((sector) =>
+      sector.opportunities.map(
         (item): OpportunityEntry => ({
-          id: subSectorOpportunityId(sector.id, subSector.id, item.id),
+          id: `${sector.id}-${item.id}`,
           title: item.title,
           type: item.type,
           country: item.country,
           countryCode: item.countryCode,
-          sectorLabel: subSector.title,
+          sectorLabel: sector.title,
           sector,
-          description: SUB_SECTOR_DETAILS[subSector.id].intro,
+          description: null,
           amount: null,
           partner: null,
           image: null,
@@ -117,30 +93,64 @@ export const STATIC_OPPORTUNITIES: OpportunityEntry[] = [
         }),
       ),
     ),
-  ),
-  ...HUB_OPPORTUNITIES.map(
-    (item): OpportunityEntry => ({
-      id: item.id,
-      title: item.title,
-      type: item.badge,
-      country: item.toCountry,
-      countryCode: countryCodeOf(item.toCountry),
-      sectorLabel: item.sector,
-      sector: null,
-      description: item.description,
-      amount: item.amount,
-      partner: item.partnerType,
-      image: item.image,
-      from: item.fromCountry,
-      to: item.toCountry,
-      deadline: null,
-      published: null,
-      verified: false,
-      urgent: false,
-      record: null,
-    }),
-  ),
-];
+    // Opportunités propres à chaque sous-secteur (pages sous-secteurs).
+    ...visibleSectors.flatMap((sector) =>
+      sector.subSectors.flatMap((subSector) =>
+        (SUB_SECTOR_DETAILS[subSector.id]?.opportunities ?? []).map(
+          (item): OpportunityEntry => ({
+            id: subSectorOpportunityId(sector.id, subSector.id, item.id),
+            title: item.title,
+            type: item.type,
+            country: item.country,
+            countryCode: item.countryCode,
+            sectorLabel: subSector.title,
+            sector,
+            description: SUB_SECTOR_DETAILS[subSector.id].intro,
+            amount: null,
+            partner: null,
+            image: null,
+            from: null,
+            to: null,
+            deadline: null,
+            published: null,
+            verified: false,
+            urgent: false,
+            record: null,
+          }),
+        ),
+      ),
+    ),
+    ...HUB_OPPORTUNITIES.map(
+      (item): OpportunityEntry => ({
+        id: item.id,
+        title: item.title,
+        type: item.badge,
+        country: item.toCountry,
+        countryCode: countryCodeOf(item.toCountry),
+        sectorLabel: item.sector,
+        sector: null,
+        description: item.description,
+        amount: item.amount,
+        partner: item.partnerType,
+        image: item.image,
+        from: item.fromCountry,
+        to: item.toCountry,
+        deadline: null,
+        published: null,
+        verified: false,
+        urgent: false,
+        record: null,
+      }),
+    ),
+  ];
+}
+
+export const STATIC_OPPORTUNITIES: OpportunityEntry[] = buildStaticOpportunities();
+
+/** Recalcule la liste après le chargement des contenus modifiés par l'administration. */
+export function rebuildStaticOpportunities() {
+  STATIC_OPPORTUNITIES.splice(0, STATIC_OPPORTUNITIES.length, ...buildStaticOpportunities());
+}
 
 /** Ouvre la page des opportunités : une opportunité, un pays, un secteur, ou toutes. */
 export function opportunityRoute(target: { id?: string; country?: string; sector?: string } = {}) {
