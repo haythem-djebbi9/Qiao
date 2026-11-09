@@ -43,7 +43,11 @@ const MAX_STRINGS_PER_RUN = 300;
 const MAX_SOURCE_LENGTH = 6000;
 
 /** Clés des contenus du site qui ne sont pas du texte affiché (identifiants, images, icônes). */
-const NON_TEXT_KEYS = new Set(['id', 'image', 'heroBg', 'formBg', 'iconName', 'countryCode', 'code', 'hidden', 'icon', 'url']);
+const NON_TEXT_KEYS = new Set([
+  'id', 'image', 'heroBg', 'formBg', 'iconName', 'countryCode', 'code', 'hidden', 'icon', 'url',
+  // Paramètres du site : coordonnées et liens, jamais traduits.
+  'email', 'phone', 'whatsapp', 'mapsUrl', 'linkedin', 'facebook', 'x', 'youtube',
+]);
 
 /** Textes d'un contenu du site (document JSON), sans les identifiants, images ni adresses. */
 function collectStrings(value: unknown, into: Set<string>, key = '') {

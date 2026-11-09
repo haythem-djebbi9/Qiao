@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { siteSettings, telHref } from '../lib/siteSettings';
 import {
   Clock,
   ShieldCheck,
@@ -41,6 +42,7 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
   onScrollToSection,
   showOnlyFooter = false,
 }) => {
+  const settings = siteSettings();
   const [formData, setFormData] = useState({
     fullName: '',
     company: '',
@@ -434,57 +436,24 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            {/* Shanghai */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-red-500/40 transition-colors">
-              <div className="flex items-center gap-2 font-bold text-white text-sm mb-1.5">
-                <FlagIcon country="CN" size="sm" /> <span>Shanghai, Chine</span>
+            {settings.offices.map((office) => (
+              <div key={office.name} className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-red-500/40 transition-colors">
+                <div className="flex items-center gap-2 font-bold text-white text-sm mb-1.5">
+                  <FlagIcon country={office.countryCode} size="sm" /> <span>{office.city}</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  {office.address.map((line, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && <br />}
+                      {line}
+                    </React.Fragment>
+                  ))}
+                </p>
+                <div className="mt-2 text-slate-400 font-mono text-[10px]" translate="no">
+                  {office.phone}
+                </div>
               </div>
-              <p className="text-slate-400 text-[11px] leading-relaxed">
-                Pudong Lujiazui Financial Center, Tower 2, Level 28
-              </p>
-              <div className="mt-2 text-slate-400 font-mono text-[10px]">
-                +86 21 8039 4500
-              </div>
-            </div>
-
-            {/* Tunis */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-red-500/40 transition-colors">
-              <div className="flex items-center gap-2 font-bold text-white text-sm mb-1.5">
-                <FlagIcon country="TN" size="sm" /> <span>Tunis, Tunisie</span>
-              </div>
-              <p className="text-slate-400 text-[11px] leading-relaxed">
-                Les Berges du Lac 2, Immeuble QIAO Bridge, 4ème étage
-              </p>
-              <div className="mt-2 text-slate-400 font-mono text-[10px]">
-                +216 70 123 456
-              </div>
-            </div>
-
-            {/* Alger */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-red-500/40 transition-colors">
-              <div className="flex items-center gap-2 font-bold text-white text-sm mb-1.5">
-                <FlagIcon country="DZ" size="sm" /> <span>Alger, Algérie</span>
-              </div>
-              <p className="text-slate-400 text-[11px] leading-relaxed">
-                Quartier d'Affaires Bab Ezzouar, Bâtiment C, 5ème étage
-              </p>
-              <div className="mt-2 text-slate-400 font-mono text-[10px]">
-                +213 23 92 10 40
-              </div>
-            </div>
-
-            {/* Casablanca */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-red-500/40 transition-colors">
-              <div className="flex items-center gap-2 font-bold text-white text-sm mb-1.5">
-                <FlagIcon country="MA" size="sm" /> <span>Casablanca, Maroc</span>
-              </div>
-              <p className="text-slate-400 text-[11px] leading-relaxed">
-                Casablanca Finance City, Tour CFC, 12ème étage
-              </p>
-              <div className="mt-2 text-slate-400 font-mono text-[10px]">
-                +212 522 98 70 00
-              </div>
-            </div>
+            ))}
           </div>
         </div>
           </>
@@ -582,14 +551,14 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-white shrink-0" />
-                <a href="mailto:contact@qiao.tn" className="hover:text-white transition-colors">
-                  contact@qiao.tn
+                <a href={`mailto:${settings.email}`} className="hover:text-white transition-colors" translate="no">
+                  {settings.email}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-white shrink-0" />
-                <a href="tel:+21670123456" className="hover:text-white transition-colors">
-                  +216 70 123 456
+                <a href={telHref(settings.phone)} className="hover:text-white transition-colors" translate="no">
+                  {settings.phone}
                 </a>
               </div>
               <div className="flex items-center gap-2.5 text-[11px] text-slate-400">
@@ -605,7 +574,7 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
             <div className="flex items-center gap-2.5 pt-1">
               {/* LinkedIn */}
               <a
-                href="https://linkedin.com"
+                href={siteSettings().social.linkedin}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
@@ -616,7 +585,7 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
 
               {/* Facebook */}
               <a
-                href="https://facebook.com"
+                href={siteSettings().social.facebook}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
@@ -627,7 +596,7 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
 
               {/* YouTube */}
               <a
-                href="https://youtube.com"
+                href={siteSettings().social.youtube}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
@@ -638,7 +607,7 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
 
               {/* X / Twitter */}
               <a
-                href="https://x.com"
+                href={siteSettings().social.x}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"

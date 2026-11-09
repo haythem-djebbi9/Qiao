@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
   MapPin,
@@ -837,7 +838,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
             {/* Socials & Language dropdown button */}
             <div className="flex items-center gap-3">
               <a
-                href="https://linkedin.com"
+                href={siteSettings().social.linkedin}
                 target="_blank"
                 rel="noreferrer"
                 className="w-7 h-7 rounded-md bg-[#0a66c2] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
@@ -846,7 +847,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 <Linkedin className="w-4 h-4 fill-current" />
               </a>
               <a
-                href="https://youtube.com"
+                href={siteSettings().social.youtube}
                 target="_blank"
                 rel="noreferrer"
                 className="w-7 h-7 rounded-md bg-[#ff0000] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
@@ -855,7 +856,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 <Youtube className="w-4 h-4 fill-current" />
               </a>
               <a
-                href="https://x.com"
+                href={siteSettings().social.x}
                 target="_blank"
                 rel="noreferrer"
                 className="w-7 h-7 rounded-md bg-black text-white flex items-center justify-center hover:opacity-90 transition-opacity font-bold text-xs"

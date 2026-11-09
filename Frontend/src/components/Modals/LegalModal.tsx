@@ -1,4 +1,5 @@
 import React from 'react';
+import { DEFAULT_SITE_SETTINGS, siteSettings } from '../../lib/siteSettings';
 import { ShieldCheck, X } from 'lucide-react';
 import { LegalKind } from '../../context/AppActionsContext';
 
@@ -91,6 +92,13 @@ interface LegalModalProps {
   onClose: () => void;
 }
 
+/** Ligne « Contact » des mentions légales : celle d'origine tant que les coordonnées n'ont pas changé. */
+const contactLine = (text: string) => {
+  const s = siteSettings();
+  if (s.email === DEFAULT_SITE_SETTINGS.email && s.phone === DEFAULT_SITE_SETTINGS.phone) return text;
+  return `${s.email} — ${s.phone} (${s.hours}).`;
+};
+
 export const LegalModal: React.FC<LegalModalProps> = ({ kind, onClose }) => {
   if (!kind) return null;
   const content = CONTENT[kind];
@@ -117,7 +125,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ kind, onClose }) => {
           {content.sections.map((section) => (
             <div key={section.heading}>
               <h4 className="font-bold text-slate-900 mb-1">{section.heading}</h4>
-              <p>{section.text}</p>
+              <p>{kind === 'legal' && section.heading === 'Contact' ? contactLine(section.text) : section.text}</p>
             </div>
           ))}
           <p className="text-xs text-slate-400">Dernière mise à jour : octobre 2026.</p>

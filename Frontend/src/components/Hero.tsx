@@ -23,6 +23,8 @@ import { FlagIcon } from './common/FlagIcon';
 
 interface HeroProps {
   onSearch?: (query: string) => void;
+  /** Catégories qui ont au moins un service : les raccourcis sans service sont masqués. */
+  availableCategories?: string[];
   onSelectCategory?: (cat: string) => void;
   /** Position détectée automatiquement (compte, fuseau horaire ou langue). */
   visitorLocation: VisitorLocation;
@@ -34,6 +36,7 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({
+  availableCategories,
   onSearch,
   onSelectCategory,
   visitorLocation,
@@ -197,7 +200,9 @@ export const Hero: React.FC<HeroProps> = ({
 
               {/* Service Categories Icons Row with Outline Icons */}
               <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1 scrollbar-none pt-0.5">
-                {categories.map((cat) => {
+                {categories
+                  .filter((cat) => cat.name === 'Plus' || !availableCategories || availableCategories.includes(cat.name))
+                  .map((cat) => {
                   const Icon = cat.icon;
                   const isSelected = activeCategory === cat.name;
                   return (

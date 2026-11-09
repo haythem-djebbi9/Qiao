@@ -25,6 +25,8 @@ import { ServiceItem } from '../types';
 
 interface ServicesSectionProps {
   services?: ServiceItem[];
+  /** Catégories de tout le catalogue (gérées par l'administration via les services). */
+  categories?: string[];
   onSelectService: (service: ServiceItem) => void;
   onOpenAllServicesModal?: () => void;
   onOpenCalculator?: () => void;
@@ -38,6 +40,7 @@ interface ServicesSectionProps {
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({
   services = [],
+  categories: catalogCategories,
   onSelectService,
   onOpenAllServicesModal,
   onOpenCalculator,
@@ -54,14 +57,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
 
   const categories = [
     'Tous',
-    'Business',
-    'Logistique',
-    'Juridique',
-    'Traduction',
-    'Recrutement',
-    'Immobilier',
-    'Santé',
-    'Tourisme',
+    ...(catalogCategories?.length ? catalogCategories : ['Business', 'Logistique', 'Juridique', 'Traduction', 'Recrutement', 'Immobilier', 'Santé', 'Tourisme']),
   ];
 
   const handleCategoryClick = (cat: string) => {

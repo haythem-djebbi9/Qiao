@@ -193,6 +193,48 @@ const number = (key: string, label: string): Field => ({ key, label, type: 'numb
 const image = (key: string, label: string): Field => ({ key, label, type: 'image' });
 const choice = (key: string, label: string, values: string[]): Field => ({ key, label, type: 'select', options: values.map((value) => ({ value, label: value })) });
 
+/** Coordonnées, réseaux sociaux et bureaux affichés sur tout le site (page Contact, pieds de page, mentions légales). */
+export const SETTINGS_FIELDS: Field[] = [
+  {
+    key: 'contact',
+    label: 'Coordonnées principales',
+    type: 'group',
+    fields: [
+      { key: 'email', label: 'E-mail de contact', type: 'text', required: true },
+      { key: 'phone', label: 'Téléphone', type: 'text' },
+      { key: 'whatsapp', label: 'WhatsApp Business', type: 'text' },
+      { key: 'hours', label: 'Horaires', type: 'text' },
+    ],
+  },
+  {
+    key: 'social',
+    label: 'Réseaux sociaux (adresse complète de chaque page)',
+    type: 'group',
+    fields: [
+      { key: 'linkedin', label: 'LinkedIn', type: 'text' },
+      { key: 'facebook', label: 'Facebook', type: 'text' },
+      { key: 'x', label: 'X (Twitter)', type: 'text' },
+      { key: 'youtube', label: 'YouTube', type: 'text' },
+    ],
+  },
+  {
+    key: 'offices',
+    label: 'Bureaux (le premier est le siège)',
+    type: 'list',
+    itemTitle: (item) => String(item.name ?? ''),
+    newItem: () => ({ name: '', city: '', countryCode: 'TN', address: [], phone: '', mapsUrl: '', image: '' }),
+    fields: [
+      { key: 'name', label: 'Nom (ex. Tunis (Siège social))', type: 'text', required: true },
+      { key: 'city', label: 'Ville, pays', type: 'text' },
+      { key: 'countryCode', label: 'Drapeau', type: 'select', options: COUNTRY_CODES },
+      { key: 'address', label: 'Adresse', type: 'lines' },
+      { key: 'phone', label: 'Téléphone du bureau', type: 'text' },
+      { key: 'mapsUrl', label: 'Lien Google Maps', type: 'text' },
+      { key: 'image', label: 'Photo', type: 'image' },
+    ],
+  },
+];
+
 /** Collections gérées par l'API /site-admin/collections. */
 export const COLLECTIONS: { id: string; label: string; titleField: string; subtitle: (row: Record<string, unknown>) => string; fields: Field[] }[] = [
   {
@@ -202,10 +244,11 @@ export const COLLECTIONS: { id: string; label: string; titleField: string; subti
     subtitle: (row) => String(row.category ?? ''),
     fields: [
       text('title', 'Titre', true),
-      text('category', 'Catégorie', true),
+      text('category', 'Catégorie du catalogue (une nouvelle catégorie crée un nouveau filtre)', true),
       area('description', 'Description'),
-      lines('details', 'Détails du service'),
+      lines('details', 'Sous-services (affichés dans la fiche du service)'),
       image('image', 'Image'),
+      choice('iconName', 'Icône', ['Briefcase', 'Building2', 'Ship', 'Scale', 'Languages', 'Users', 'Truck', 'Building', 'HeartPulse', 'Plane', 'GraduationCap']),
       yes('isNew', 'Afficher « Nouveau »'),
       choice('accentColor', 'Couleur', ['blue', 'red']),
       number('sortOrder', 'Ordre d’affichage'),

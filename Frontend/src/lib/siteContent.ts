@@ -72,6 +72,9 @@ export function currentSector(id: string): SectorContent | null {
   return saved ? structuredClone(saved) : originalSector(id);
 }
 
+/** Document enregistré par l'administration pour une clé (ex. « site:settings »), s'il existe. */
+export const contentOverride = (key: string) => overrides[key];
+
 export const isSectorModified = (id: string) => Boolean(overrides[`sector:${id}`]);
 export const isOriginalSector = (id: string) => Boolean(ORIGINAL_SECTORS[id]);
 

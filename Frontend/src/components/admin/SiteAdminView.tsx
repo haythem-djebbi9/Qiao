@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Building2, ExternalLink, FileText, Globe2, Inbox, Layers, Loader2, Newspaper, Plus, Save, Search, Target, Trash2, Undo2, Wrench } from 'lucide-react';
+import { ArrowLeft, Settings, Building2, ExternalLink, FileText, Globe2, Inbox, Layers, Loader2, Newspaper, Plus, Save, Search, Target, Trash2, Undo2, Wrench } from 'lucide-react';
 import { api } from '../../lib/api';
 import { slugify } from '../../lib/text';
 import { SECTOR_SERVICE_DETAILS } from '../../data/sectorServiceDetails';
+import { DEFAULT_SITE_SETTINGS, SiteSettings, siteSettings } from '../../lib/siteSettings';
+import { contentOverride, loadSiteContent } from '../../lib/siteContent';
 import { SectorContent, allSectorIds, currentSector, isOriginalSector, isSectorModified, resetSector, saveSector, useSiteContentVersion } from '../../lib/siteContent';
 import { useToast } from '../../context/ToastContext';
 import { SchemaForm, inputClass } from './SchemaForm';
-import { COLLECTIONS, SECTOR_FIELDS } from './siteAdminSchemas';
+import { COLLECTIONS, SECTOR_FIELDS, SETTINGS_FIELDS } from './siteAdminSchemas';
 
-type Tab = 'secteurs' | (typeof COLLECTIONS)[number]['id'] | 'demandes' | 'traductions';
+type Tab = 'secteurs' | (typeof COLLECTIONS)[number]['id'] | 'parametres' | 'demandes' | 'traductions';
 const TAB_ICONS: Record<string, React.ElementType> = {
   secteurs: Layers,
   services: Wrench,
@@ -17,6 +19,7 @@ const TAB_ICONS: Record<string, React.ElementType> = {
   documents: FileText,
   companies: Building2,
   demandes: Inbox,
+  parametres: Settings,
   traductions: Globe2,
 };
 const errorText = (err: unknown) => (err instanceof Error ? err.message : 'Une erreur est survenue.');
@@ -346,6 +349,79 @@ const CollectionAdmin: React.FC<{ collection: (typeof COLLECTIONS)[number] }> = 
   );
 };
 
+// --- Paramètres du site -------------------------------------------------------------------------
+
+const SettingsAdmin: React.FC = () => {
+  const { notify } = useToast();
+  const toEditor = (s: SiteSettings) => ({
+    contact: { email: s.email, phone: s.phone, whatsapp: s.whatsapp, hours: s.hours },
+    social: s.social,
+    offices: s.offices,
+  });
+  const [value, setValue] = useState<Record<string, unknown>>(() => toEditor(siteSettings()));
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    const contact = value.contact as Record<string, string>;
+    if (!contact?.email?.trim()) return notify('L’e-mail de contact est obligatoire.', 'error');
+    setBusy(true);
+    try {
+      const data: SiteSettings = {
+        email: contact.email.trim(),
+        phone: (contact.phone ?? '').trim(),
+        whatsapp: (contact.whatsapp ?? '').trim(),
+        hours: (contact.hours ?? '').trim(),
+        social: value.social as SiteSettings['social'],
+        offices: value.offices as SiteSettings['offices'],
+      };
+      await api.put('/site-admin/contents/site:settings', { data });
+      await loadSiteContent();
+      notify('Paramètres enregistrés : le site est à jour.', 'success');
+    } catch (err) {
+      notify(errorText(err), 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reset = async () => {
+    if (!window.confirm('Rétablir les coordonnées d’origine ?')) return;
+    setBusy(true);
+    try {
+      await api.delete('/site-admin/contents/site:settings');
+      await loadSiteContent();
+      setValue(toEditor(DEFAULT_SITE_SETTINGS));
+      notify('Contenu d’origine rétabli.', 'success');
+    } catch (err) {
+      notify(errorText(err), 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className={card}>
+        <p className="text-xs text-slate-500 mb-4">
+          Coordonnées affichées sur la page Contact, dans les pieds de page et les mentions légales. Les liens des réseaux sociaux s’ouvrent depuis toutes
+          les pages.
+        </p>
+        <SchemaForm fields={SETTINGS_FIELDS} value={value} onChange={setValue} />
+      </div>
+      <div className="flex justify-end gap-2">
+        {Boolean(contentOverride('site:settings')) && (
+          <button onClick={reset} disabled={busy} className={secondaryButton}>
+            <Undo2 className="w-3.5 h-3.5" /> Rétablir l’original
+          </button>
+        )}
+        <button onClick={save} disabled={busy} className={primaryButton}>
+          {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Enregistrer
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // --- Demandes reçues -----------------------------------------------------------------------------
 
 const INBOXES: { id: string; label: string; columns: [string, (row: Record<string, unknown>) => string][] }[] = [
@@ -597,6 +673,7 @@ export const SiteAdminView: React.FC = () => {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'secteurs', label: 'Secteurs et sous-secteurs' },
     ...COLLECTIONS.map((item) => ({ id: item.id as Tab, label: item.label })),
+    { id: 'parametres', label: 'Paramètres du site' },
     { id: 'demandes', label: 'Demandes reçues' },
     { id: 'traductions', label: 'Traductions' },
   ];
@@ -625,6 +702,7 @@ export const SiteAdminView: React.FC = () => {
       </div>
       {tab === 'secteurs' && <SectorsAdmin />}
       {collection && <CollectionAdmin collection={collection} />}
+      {tab === 'parametres' && <SettingsAdmin />}
       {tab === 'demandes' && <InboxAdmin />}
       {tab === 'traductions' && <TranslationsAdmin />}
     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { siteSettings } from '../lib/siteSettings';
 import {
   ArrowRight,
   ArrowLeft,
@@ -986,15 +987,15 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
             <div className="flex flex-col items-center lg:items-end space-y-2 shrink-0">
               <div className="flex items-center gap-3">
                 {/* LinkedIn */}
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-[#0077b5] text-white flex items-center justify-center hover:opacity-90">
+                <a href={siteSettings().social.linkedin} target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-[#0077b5] text-white flex items-center justify-center hover:opacity-90">
                   <Linkedin className="w-3.5 h-3.5" />
                 </a>
                 {/* YouTube */}
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-[#ff0000] text-white flex items-center justify-center hover:opacity-90">
+                <a href={siteSettings().social.youtube} target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-[#ff0000] text-white flex items-center justify-center hover:opacity-90">
                   <Youtube className="w-3.5 h-3.5" />
                 </a>
                 {/* X */}
-                <a href="https://x.com" target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-black text-white flex items-center justify-center hover:opacity-90 font-bold text-xs">
+                <a href={siteSettings().social.x} target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-black text-white flex items-center justify-center hover:opacity-90 font-bold text-xs">
                   𝕏
                 </a>
               </div>

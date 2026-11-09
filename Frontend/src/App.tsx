@@ -668,6 +668,7 @@ export default function App() {
 
           <Hero
             visitorLocation={visitorLocation}
+            availableCategories={servicesData.length ? servicesData.map((service) => service.category) : undefined}
             onExploreOpportunities={() => handleScrollToSection('opportunites')}
             onSearch={handleSearch}
             onSelectCategory={(cat) => {
@@ -688,6 +689,7 @@ export default function App() {
         <section id="services" className="scroll-mt-16 w-full">
           <ServicesSection
             services={filteredServices}
+            categories={[...new Set(servicesData.map((service) => service.category).filter(Boolean))]}
             activeCategory={selectedCategory}
             searchQuery={searchQuery}
             onClearSearch={() => setSearchQuery('')}

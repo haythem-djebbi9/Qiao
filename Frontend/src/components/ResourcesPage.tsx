@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
   Download,
@@ -1273,7 +1274,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
             {/* Socials & Lang */}
             <div className="flex items-center gap-3">
               <a
-                href="https://linkedin.com"
+                href={siteSettings().social.linkedin}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors"
@@ -1281,7 +1282,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
                 <Linkedin className="w-4 h-4" />
               </a>
               <a
-                href="https://youtube.com"
+                href={siteSettings().social.youtube}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors"
@@ -1289,7 +1290,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
                 <Youtube className="w-4 h-4" />
               </a>
               <a
-                href="https://twitter.com"
+                href={siteSettings().social.x}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors font-bold text-xs"

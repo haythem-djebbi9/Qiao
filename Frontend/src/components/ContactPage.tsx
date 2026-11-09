@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { siteSettings, telHref, whatsappHref } from '../lib/siteSettings';
 import {
   User,
   Mail,
@@ -46,12 +47,16 @@ interface ContactPageProps {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+const FLAG_EMOJI: Record<string, string> = { TN: '🇹🇳', CN: '🇨🇳', MA: '🇲🇦', DZ: '🇩🇿', EG: '🇪🇬', LY: '🇱🇾' };
+
 export const ContactPage: React.FC<ContactPageProps> = ({
   onNavigate,
   onOpenRegister,
   prefill,
   onPrefillConsumed,
 }) => {
+  const settings = siteSettings();
+  const headOffice = settings.offices[0];
   const { user } = useAuth();
   const { openLegal } = useAppActions();
   // Form State
@@ -752,7 +757,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 <div className="space-y-4">
                   {/* Email */}
                   <a
-                    href="mailto:contact@qiao-platform.com"
+                    href={`mailto:${settings.email}`}
                     className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -760,8 +765,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-slate-500">Email</div>
-                      <div className="text-sm font-bold text-blue-600 group-hover:underline">
-                        contact@qiao-platform.com
+                      <div className="text-sm font-bold text-blue-600 group-hover:underline" translate="no">
+                        {settings.email}
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
                         Nous répondons sous 24 heures.
@@ -771,7 +776,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
                   {/* Téléphone */}
                   <a
-                    href="tel:+21671123456"
+                    href={telHref(settings.phone)}
                     className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -779,11 +784,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-slate-500">Téléphone</div>
-                      <div className="text-sm font-bold text-slate-800">
-                        +216 71 123 456
+                      <div className="text-sm font-bold text-slate-800" translate="no">
+                        {settings.phone}
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
-                        Lundi - Vendredi, 9h00 - 18h00 (GMT+1)
+                        {settings.hours}
                       </div>
                     </div>
                   </a>
@@ -796,17 +801,17 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     <div>
                       <div className="text-xs font-semibold text-slate-500">Siège social</div>
                       <div className="text-sm font-bold text-slate-800">
-                        Immeuble International City Center
+                        {headOffice?.address[0]}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                        Avenue de la Bourse, Les Berges du Lac, 1053 Tunis, Tunisie
+                        {headOffice?.address.slice(1).join(', ')}
                       </div>
                     </div>
                   </div>
 
                   {/* LinkedIn */}
                   <a
-                    href="https://linkedin.com"
+                    href={settings.social.linkedin}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
@@ -824,7 +829,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
                   {/* WhatsApp Business */}
                   <a
-                    href="https://wa.me/21671123456"
+                    href={whatsappHref(settings.whatsapp)}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-emerald-50/50 transition-colors group cursor-pointer"
@@ -834,8 +839,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-slate-500">WhatsApp Business</div>
-                      <div className="text-sm font-bold text-emerald-700">
-                        +216 71 123 456
+                      <div className="text-sm font-bold text-emerald-700" translate="no">
+                        {settings.whatsapp}
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
                         Échangez directement avec nous.
@@ -869,35 +874,31 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mt-6">
-                {/* Office 1: Tunis */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                {settings.offices.map((office) => (
+                <div key={office.name} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
                   <div className="h-32 w-full overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80"
-                      alt="Tunis Headquarters"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={office.image} alt={office.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                     <div className="absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow">
-                      🇹🇳 Tunis
+                      {FLAG_EMOJI[office.countryCode] ?? ''} {office.city.split(',')[0]}
                     </div>
                   </div>
                   <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 mb-1">
-                        <span className="text-red-600">🇹🇳</span>
-                        <span>Tunis (Siège social)</span>
+                        <span className="text-red-600">{FLAG_EMOJI[office.countryCode] ?? ''}</span>
+                        <span>{office.name}</span>
                       </div>
                       <p className="text-[11px] text-slate-600 leading-relaxed">
-                        Immeuble International City Center
-                        <br />
-                        Avenue de la Bourse, Les Berges du Lac
-                        <br />
-                        1053 Tunis, Tunisie
+                        {office.address.map((line, index) => (
+                          <React.Fragment key={index}>
+                            {index > 0 && <br />}
+                            {line}
+                          </React.Fragment>
+                        ))}
                       </p>
                     </div>
                     <a
-                      href="https://maps.google.com/?q=Les+Berges+du+Lac+Tunis"
+                      href={office.mapsUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
@@ -907,80 +908,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </a>
                   </div>
                 </div>
-
-                {/* Office 2: Shanghai */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                  <div className="h-32 w-full overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?auto=format&fit=crop&w=600&q=80"
-                      alt="Shanghai Office"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow">
-                      🇨🇳 Shanghai
-                    </div>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 mb-1">
-                        <span className="text-red-600">🇨🇳</span>
-                        <span>Shanghai (Bureau Asie)</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                        Shanghai Tower, 100 Century Avenue
-                        <br />
-                        Pudong, Shanghai 200120, Chine
-                      </p>
-                    </div>
-                    <a
-                      href="https://maps.google.com/?q=Shanghai+Tower+Pudong"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      <span>Voir sur Google Maps</span>
-                      <span>➔</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Office 3: Casablanca */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                  <div className="h-32 w-full overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=600&q=80"
-                      alt="Casablanca Office"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow">
-                      🇲🇦 Casablanca
-                    </div>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 mb-1">
-                        <span className="text-red-600">🇲🇦</span>
-                        <span>Casablanca (Bureau Afrique du Nord)</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                        Tour CFC, 100 Boulevard Sidi Mohamed Ben Abdellah
-                        <br />
-                        Casablanca, Maroc
-                      </p>
-                    </div>
-                    <a
-                      href="https://maps.google.com/?q=Casablanca+Finance+City+Tour+CFC"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      <span>Voir sur Google Maps</span>
-                      <span>➔</span>
-                    </a>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -1118,7 +1046,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
             {/* Socials & Lang */}
             <div className="flex items-center gap-3">
               <a
-                href="https://linkedin.com"
+                href={siteSettings().social.linkedin}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors"
@@ -1126,7 +1054,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 <Linkedin className="w-4 h-4" />
               </a>
               <a
-                href="https://youtube.com"
+                href={siteSettings().social.youtube}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors"
@@ -1134,7 +1062,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 <Youtube className="w-4 h-4" />
               </a>
               <a
-                href="https://twitter.com"
+                href={siteSettings().social.x}
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors font-bold text-xs"

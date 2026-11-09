@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Building2,
   Handshake,
@@ -384,7 +385,7 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
 
               {/* Channel 3 */}
               <a
-                href="mailto:contact@qiao.tn"
+                href={`mailto:${siteSettings().email}`}
                 className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl hover:border-emerald-500/50 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between"
               >
                 <div>
@@ -393,8 +394,8 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
                   </div>
                   <div className="text-xs font-bold text-white">Nous écrire</div>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1 truncate group-hover:text-emerald-400">
-                  contact@qiao.tn
+                <p className="text-[10px] text-slate-400 mt-1 truncate group-hover:text-emerald-400" translate="no">
+                  {siteSettings().email}
                 </p>
               </a>
             </div>
