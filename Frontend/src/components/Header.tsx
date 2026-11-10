@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Globe,
   ChevronDown,
@@ -17,6 +17,18 @@ import {
   Search,
   Bell,
   Mail,
+  LogIn as QuickLogIn,
+  UserPlus as QuickUserPlus,
+  LayoutDashboard as QuickDashboard,
+  Home as QuickHome,
+  Layers as QuickSectors,
+  Briefcase as QuickServices,
+  Target as QuickOpportunities,
+  GraduationCap as QuickAcademy,
+  CalendarDays as QuickEvents,
+  Users as QuickCommunity,
+  BookOpen as QuickResources,
+  Mail as QuickContact,
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { AppTab } from '../types';
@@ -136,7 +148,36 @@ export const Header: React.FC<HeaderProps> = ({
     notify('Vous êtes déconnecté. À bientôt sur QIAO !', 'info');
   };
 
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1023.98px)').matches);
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 1023.98px)');
+    const update = () => setCompact(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  // Barre de boutons rapides : la page est décalée de sa hauteur exacte pour que rien ne passe dessous.
+  const quickBar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const bar = quickBar.current;
+    if (!compact || !bar) {
+      document.body.style.paddingTop = '';
+      return;
+    }
+    const apply = () => {
+      document.body.style.paddingTop = `${bar.offsetHeight}px`;
+    };
+    apply();
+    const observer = new ResizeObserver(apply);
+    observer.observe(bar);
+    return () => {
+      observer.disconnect();
+      document.body.style.paddingTop = '';
+    };
+  }, [compact]);
+
   const isLight =
+    compact ||
     isScrolled ||
     activeTab === 'sector-detail' ||
     activeTab === 'secteurs' ||
@@ -1006,6 +1047,66 @@ export const Header: React.FC<HeaderProps> = ({
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
+      </div>
+
+      {/* Boutons rapides (mobile et tablette) : compte et rubriques principales, toujours visibles en haut. */}
+      <div ref={quickBar} className="lg:hidden pt-2.5">
+        <nav aria-label="Accès rapide" className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-4 sm:px-6 pb-0.5">
+          {isLoggedIn ? (
+            <button
+              onClick={() => handleNavClick('dashboard')}
+              className={`shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold cursor-pointer ${
+                activeTab === 'dashboard' ? 'bg-[#0a1c3d] text-white' : 'bg-red-600 text-white'
+              }`}
+            >
+              <QuickDashboard className="w-3.5 h-3.5" /> Mon espace
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenLogin();
+                }}
+                className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold border border-slate-300 text-slate-800 bg-white cursor-pointer"
+              >
+                <QuickLogIn className="w-3.5 h-3.5" /> {t.login}
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenRegister();
+                }}
+                className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold bg-red-600 text-white cursor-pointer"
+              >
+                <QuickUserPlus className="w-3.5 h-3.5" /> {t.register}
+              </button>
+            </>
+          )}
+          <span className="shrink-0 w-px h-5 bg-slate-200 mx-0.5" aria-hidden="true" />
+          {[
+            { tab: 'home', label: t.home, icon: QuickHome, active: ['home'] },
+            { tab: 'secteurs', label: t.sectors, icon: QuickSectors, active: ['secteurs', 'sector-detail'] },
+            { tab: 'services', label: t.services, icon: QuickServices, active: ['services'] },
+            { tab: 'opportunites-pays', label: 'Opportunités', icon: QuickOpportunities, active: ['opportunites-pays', 'commerce-hub', 'intelligence'] },
+            { tab: 'academy', label: t.academy, icon: QuickAcademy, active: ['academy'] },
+            { tab: 'evenements', label: t.events, icon: QuickEvents, active: ['evenements', 'stories'] },
+            { tab: 'community', label: t.community, icon: QuickCommunity, active: ['community'] },
+            { tab: 'resources', label: t.resources, icon: QuickResources, active: ['resources'] },
+            { tab: 'contact', label: t.contact, icon: QuickContact, active: ['contact'] },
+          ].map(({ tab, label, icon: Icon, active }) => (
+            <button
+              key={tab}
+              onClick={() => handleNavClick(tab)}
+              aria-current={active.includes(activeTab ?? '') ? 'page' : undefined}
+              className={`shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold cursor-pointer ${
+                active.includes(activeTab ?? '') ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-100 text-slate-700 border border-transparent'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" /> {label}
+            </button>
+          ))}
+        </nav>
       </div>
 
       {/* Mobile Drawer Navigation Menu */}
