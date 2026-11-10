@@ -668,8 +668,11 @@ const TranslationsAdmin: React.FC = () => {
 // --- Vue principale -----------------------------------------------------------------------------
 
 /** Administration des contenus du site. */
-export const SiteAdminView: React.FC = () => {
-  const [tab, setTab] = useState<Tab>('secteurs');
+export const SiteAdminView: React.FC<{ initialTab?: string }> = ({ initialTab }) => {
+  const [tab, setTab] = useState<Tab>((initialTab as Tab) || 'secteurs');
+  useEffect(() => {
+    if (initialTab) setTab(initialTab as Tab);
+  }, [initialTab]);
   const tabs: { id: Tab; label: string }[] = [
     { id: 'secteurs', label: 'Secteurs et sous-secteurs' },
     ...COLLECTIONS.map((item) => ({ id: item.id as Tab, label: item.label })),

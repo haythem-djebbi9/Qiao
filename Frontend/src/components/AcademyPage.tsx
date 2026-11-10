@@ -284,7 +284,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
       {cart.count > 0 && !cartOpen && (
         <button
           onClick={() => setCartOpen(true)}
-          className="fixed bottom-6 left-6 z-40 px-4 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white shadow-2xl flex items-center gap-2 text-sm font-bold cursor-pointer"
+          className="fixed bottom-[calc(1.5rem+var(--qiao-bottom-bar,0px))] left-6 z-40 px-4 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white shadow-2xl flex items-center gap-2 text-sm font-bold cursor-pointer"
         >
           <ShoppingCart className="w-5 h-5" />
           <span>Panier ({cart.count})</span>
@@ -352,7 +352,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-sky-400/40 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-[calc(1.5rem+var(--qiao-bottom-bar,0px))] right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-sky-400/40 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           <span className="text-sm font-medium">{toastMessage}</span>
         </div>

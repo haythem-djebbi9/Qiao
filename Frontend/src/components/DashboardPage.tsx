@@ -262,7 +262,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             {section === 'admin-paiements' && <PaymentsAdminView selectedId={routeId} />}
             {section === 'admin-academy' && <AcademyAdminView route={route.slice(1)} />}
             {section === 'admin-events' && <EventsAdminView route={route.slice(1)} />}
-            {section === 'admin-site' && <SiteAdminView />}
+            {section === 'admin-site' && <SiteAdminView initialTab={routeId} />}
 
             {data && section === 'overview' && (
               <>
