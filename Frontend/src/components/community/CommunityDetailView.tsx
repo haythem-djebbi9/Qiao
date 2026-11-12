@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { JoinedList } from '../common/JoinedList';
 import { ArrowLeft, Check, Flag, Languages, Lock, MapPin, MessageSquare, ShieldCheck, UserMinus, UserPlus, Users, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { CommunityDetail, CommunitySummary, LANGUAGE_LABELS, MemberSummary, POLICY_LABELS, Paged, navigateCommunity } from '../../lib/community';
@@ -112,7 +113,7 @@ export const CommunityDetailView: React.FC<{ slug: string; section?: string }> =
                   <MessageSquare className="w-3.5 h-3.5" /> {community.postsCount} discussions
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Languages className="w-3.5 h-3.5" /> {community.languages.map((l) => LANGUAGE_LABELS[l] ?? l).join(', ')}
+                  <Languages className="w-3.5 h-3.5" /> <JoinedList items={community.languages.map((l) => LANGUAGE_LABELS[l] ?? l)} />
                 </span>
                 {community.scope && (
                   <span className="inline-flex items-center gap-1">
@@ -174,7 +175,7 @@ export const CommunityDetailView: React.FC<{ slug: string; section?: string }> =
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3">
                   <dt className="text-slate-500">Langues</dt>
-                  <dd className="font-bold text-slate-900 mt-0.5">{community.languages.map((l) => LANGUAGE_LABELS[l] ?? l).join(', ')}</dd>
+                  <dd className="font-bold text-slate-900 mt-0.5"><JoinedList items={community.languages.map((l) => LANGUAGE_LABELS[l] ?? l)} /></dd>
                 </div>
               </dl>
               <h4 className="mt-6 text-sm font-bold text-slate-900">Règles de la communauté</h4>

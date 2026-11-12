@@ -1,3 +1,5 @@
+import { appLocale, getLanguage } from '../i18n/runtime';
+
 /** Identifiant stable dérivé d'un titre — même règle que le backend (Backend/src/common/text.ts). */
 export function slugify(value: string): string {
   return value
@@ -17,6 +19,13 @@ export function timeAgo(date: string | Date, style: 'short' | 'long' = 'short'):
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
+  if (getLanguage() !== 'FR') {
+    const format = new Intl.RelativeTimeFormat(appLocale(), { numeric: 'auto', style: style === 'long' ? 'long' : 'narrow' });
+    if (days >= 1) return format.format(-days, 'day');
+    if (hours >= 1) return format.format(-hours, 'hour');
+    return format.format(-minutes, 'minute');
+  }
+
   if (style === 'long') {
     if (days >= 1) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
     if (hours >= 1) return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
@@ -29,6 +38,20 @@ export function timeAgo(date: string | Date, style: 'short' | 'long' = 'short'):
 
 export function formatDate(date: string | Date): string {
   return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/** Texte comparable : sans accents ni majuscules. */
+export function normalize(value: string | null | undefined): string {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+export function matchesText(query: string, ...fields: (string | null | undefined)[]): boolean {
+  const needle = normalize(query);
+  return !needle || fields.some((field) => normalize(field).includes(needle));
 }
 
 export function initials(name: string): string {

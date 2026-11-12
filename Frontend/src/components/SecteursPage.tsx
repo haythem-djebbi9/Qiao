@@ -306,7 +306,7 @@ export const SecteursPage: React.FC<SecteursPageProps> = ({
                 <Globe className="w-8 h-8 text-[#1d4ed8] mb-2 stroke-[1.5]" />
                 <div className="text-3xl sm:text-4xl font-extrabold text-[#0a1c3d]">6</div>
                 <div className="text-xs text-slate-600 font-medium mt-1 leading-snug">
-                  Pays d'Afrique<br />du Nord couverts
+                  <span className="whitespace-pre-line">{"Pays d'Afrique\ndu Nord couverts"}</span>
                 </div>
               </div>
 

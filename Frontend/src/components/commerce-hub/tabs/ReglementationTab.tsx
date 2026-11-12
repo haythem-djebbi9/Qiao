@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { api } from '../../../lib/api';
+import { useAppActions } from '../../../context/AppActionsContext';
 import {
   FileText,
   Search,
@@ -26,6 +28,36 @@ import {
 import { CommerceHubTab } from '../../../types';
 import { FlagIcon } from '../../common/FlagIcon';
 
+/** Résultat de /regulations/hs-codes. */
+interface HsCodeResult {
+  code: string;
+  label: string;
+  category: string;
+  duties: Record<string, number>;
+  requirements: string | null;
+}
+
+/** Fiche de /regulations/profiles/:key. */
+interface RegulationProfile {
+  id: string;
+  name: string;
+  kind: 'country' | 'agreement';
+  summary: string;
+  requirements: string[];
+  documents: string[];
+  agencies: string[];
+  clearanceTime: string | null;
+  guideDocumentId: string | null;
+}
+
+const DUTY_COUNTRIES: [string, string][] = [
+  ['maroc', 'Maroc'],
+  ['algerie', 'Algérie'],
+  ['tunisie', 'Tunisie'],
+  ['egypte', 'Égypte'],
+  ['libye', 'Libye'],
+];
+
 interface ReglementationTabProps {
   onSelectTab: (tab: CommerceHubTab) => void;
   onOpenConsultation?: () => void;
@@ -38,13 +70,14 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
   onOpenDocDetail,
 }) => {
   const [selectedCountry, setSelectedCountry] = useState('Tous les pays');
-  const [selectedInfoType, setSelectedInfoType] = useState('Toutes les informations');
-  const [selectedCategory, setSelectedCategory] = useState('Toutes les catégories');
-  const [selectedHsCode, setSelectedHsCode] = useState('Tous les codes');
   const [searchQuery, setSearchQuery] = useState('');
   const [hsSearchInput, setHsSearchInput] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [downloadDocTitle, setDownloadDocTitle] = useState<string | null>(null);
+  const [hsResults, setHsResults] = useState<HsCodeResult[] | null>(null);
+  const [hsLoading, setHsLoading] = useState(false);
+  const [profile, setProfile] = useState<RegulationProfile | null>(null);
+  const [profileMissing, setProfileMissing] = useState(false);
+  const { openDocument, navigate } = useAppActions();
   const [selectedCountryModal, setSelectedCountryModal] = useState<string | null>(null);
 
   // 5 KPI metrics matching screenshot
@@ -237,116 +270,95 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
     },
   ];
 
+  const runHsSearch = (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    setHsLoading(true);
+    api
+      .get<HsCodeResult[]>(`/regulations/hs-codes?q=${encodeURIComponent(q)}`)
+      .then(setHsResults)
+      .catch(() => setHsResults([]))
+      .finally(() => setHsLoading(false));
+  };
+
+  // Fiche réglementaire réelle du pays ou de l'accord choisi.
+  useEffect(() => {
+    setProfile(null);
+    setProfileMissing(false);
+    if (!selectedCountryModal) return;
+    api
+      .get<RegulationProfile>(`/regulations/profiles/${encodeURIComponent(selectedCountryModal)}`)
+      .then(setProfile)
+      .catch(() => setProfileMissing(true));
+  }, [selectedCountryModal]);
+
+  const q = searchQuery.trim().toLowerCase();
+  const matchesText = (...texts: string[]) => !q || texts.some((text) => text.toLowerCase().includes(q));
+  const visibleCountries = countryRegulations.filter(
+    (c) => (selectedCountry === 'Tous les pays' || c.name === selectedCountry) && matchesText(c.name, c.desc, ...c.items),
+  );
+  const visibleAgreements = tradeAgreements.filter(
+    (acc) => (selectedCountry === 'Tous les pays' || acc.title.includes(selectedCountry) || !/Maroc|Tunisie|Algérie|Égypte|Libye/.test(acc.title)) && matchesText(acc.title, acc.subtitle),
+  );
+  const visibleDocuments = documentResources.filter(
+    (doc) => (selectedCountry === 'Tous les pays' || doc.title.includes(selectedCountry) || !/Chine|Maroc|Tunisie|Algérie|Égypte|Libye/.test(doc.title)) && matchesText(doc.title),
+  );
+  const visibleFaq = faqQuestions.filter((item) => matchesText(item.q, item.a));
+  const filtersActive = selectedCountry !== 'Tous les pays' || q !== '';
+  const resetFilters = () => {
+    setSelectedCountry('Tous les pays');
+    setSearchQuery('');
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
-      {/* ========================================================================= */}
-      {/* 1. SEARCH & 4 DROPDOWN FILTERS BAR                                        */}
-      {/* ========================================================================= */}
+      {/* 1. FILTRES : PAYS ET RECHERCHE */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
-          
-          {/* 4 Selects */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
-            
-            {/* 1. Pays */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1">Pays</label>
-              <div className="relative">
-                <select
-                  value={selectedCountry}
-                  onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option>Tous les pays</option>
-                  <option>Chine</option>
-                  <option>Maroc</option>
-                  <option>Algérie</option>
-                  <option>Tunisie</option>
-                  <option>Égypte</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr_auto] gap-3 items-end">
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Pays</label>
+            <div className="relative">
+              <select
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              >
+                <option>Tous les pays</option>
+                {countryRegulations.map((c) => (
+                  <option key={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
-
-            {/* 2. Type d'information */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1">Type d'information</label>
-              <div className="relative">
-                <select
-                  value={selectedInfoType}
-                  onChange={(e) => setSelectedInfoType(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option>Toutes les informations</option>
-                  <option>Tarifs douaniers</option>
-                  <option>Normes & certifications</option>
-                  <option>Procédures d'import/export</option>
-                  <option>Accords commerciaux</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* 3. Catégorie de produits */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1">Catégorie de produits</label>
-              <div className="relative">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option>Toutes les catégories</option>
-                  <option>Électronique & High-Tech</option>
-                  <option>Textiles & Habillement</option>
-                  <option>Automobile & Transport</option>
-                  <option>Matériaux de construction</option>
-                  <option>Agroalimentaire</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* 4. HS Code */}
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1">HS Code</label>
-              <div className="relative">
-                <select
-                  value={selectedHsCode}
-                  onChange={(e) => setSelectedHsCode(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option>Tous les codes</option>
-                  <option>8517 (Smartphones)</option>
-                  <option>8703 (Automobiles)</option>
-                  <option>8541 (Panneaux solaires)</option>
-                  <option>1509 (Huile d'olive)</option>
-                  <option>6205 (Textiles)</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
           </div>
-
-          {/* Search bar on the right */}
-          <div className="relative min-w-[240px] sm:min-w-[280px]">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher une réglementation..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 pr-11 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <button
-              onClick={() => {}}
-              className="absolute right-1 top-1 bottom-1 px-3 bg-[#0a2559] hover:bg-blue-900 text-white rounded-lg flex items-center justify-center cursor-pointer transition-colors"
-            >
-              <Search className="w-3.5 h-3.5" />
-            </button>
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Recherche</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && document.getElementById('reglementation-par-pays')?.scrollIntoView({ behavior: 'smooth' })}
+                placeholder="Rechercher une réglementation, un document, une question..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 pr-11 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <button
+                onClick={() => document.getElementById('reglementation-par-pays')?.scrollIntoView({ behavior: 'smooth' })}
+                aria-label="Rechercher"
+                className="absolute right-1 top-1 bottom-1 px-3 bg-[#0a2559] hover:bg-blue-900 text-white rounded-lg flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-
+          <button
+            onClick={resetFilters}
+            disabled={!filtersActive}
+            className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer disabled:opacity-40 disabled:cursor-default"
+          >
+            Réinitialiser
+          </button>
         </div>
       </div>
 
@@ -383,7 +395,7 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
       {/* ========================================================================= */}
       {/* 3. ROW 1: RÉGLEMENTATION PAR PAYS (LEFT) & ACCORDS COMMERCIAUX (RIGHT)     */}
       {/* ========================================================================= */}
-      <div id="reglementation-par-pays" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div id="reglementation-par-pays" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left: Réglementation par pays (approx 7 cols) */}
         <div className="lg:col-span-8 bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col justify-between">
@@ -403,7 +415,7 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
 
             {/* 6 Countries Cards in a horizontal grid with authentic FlagIcon */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {countryRegulations.map((c) => (
+              {visibleCountries.map((c) => (
                 <div
                   key={c.id}
                   className="bg-white border border-slate-200/80 rounded-2xl p-3 flex flex-col justify-between hover:border-blue-400 hover:shadow-xs transition-all text-center"
@@ -448,17 +460,11 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                 Accords commerciaux
               </h2>
-              <button
-                onClick={() => setSelectedInfoType('Accords commerciaux')}
-                className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Voir tous les accords</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+
             </div>
 
             <div className="space-y-2">
-              {tradeAgreements.map((acc, idx) => {
+              {visibleAgreements.map((acc, idx) => {
                 const Icon = acc.icon;
                 return (
                   <div
@@ -504,14 +510,17 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
             {/* Input with dark search button */}
             <div className="relative mb-4">
               <input
+                id="recherche-code-sh"
                 type="text"
                 value={hsSearchInput}
                 onChange={(e) => setHsSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && runHsSearch(hsSearchInput)}
                 placeholder="Entrez un code HS (ex: 8517) ou un mot-clé de produit..."
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-10 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <button
-                onClick={() => {}}
+                onClick={() => runHsSearch(hsSearchInput)}
+                aria-label="Rechercher le code SH"
                 className="absolute right-1 top-1 bottom-1 px-2.5 bg-[#0a2559] hover:bg-blue-900 text-white rounded-lg flex items-center justify-center cursor-pointer transition-colors"
               >
                 <Search className="w-3.5 h-3.5" />
@@ -533,7 +542,10 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
               ].map((item, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setHsSearchInput(`${item.code} ${item.label}`)}
+                  onClick={() => {
+                    setHsSearchInput(`${item.code} ${item.label}`);
+                    runHsSearch(item.code);
+                  }}
                   className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer transition-colors"
                 >
                   <strong className="text-blue-700 font-bold mr-1">{item.code}</strong>
@@ -541,6 +553,34 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
                 </button>
               ))}
             </div>
+            {hsLoading && <p className="mt-3 text-xs text-slate-500">Recherche en cours...</p>}
+            {!hsLoading && hsResults && hsResults.length === 0 && (
+              <p className="mt-3 text-xs text-slate-500">Aucun code SH trouvé pour cette recherche.</p>
+            )}
+            {!hsLoading && hsResults && hsResults.length > 0 && (
+              <div className="mt-4 space-y-2 max-h-72 overflow-y-auto pr-1">
+                {hsResults.slice(0, 8).map((hs) => (
+                  <div key={hs.code} className="p-3 rounded-xl border border-slate-200 bg-slate-50/60">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="text-xs font-bold text-slate-900">
+                        <span className="text-blue-700 mr-1.5">{hs.code}</span>
+                        {hs.label}
+                      </div>
+                      <span className="text-[10px] font-semibold text-slate-500 shrink-0">{hs.category}</span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-5 gap-1 text-center text-[10px]">
+                      {DUTY_COUNTRIES.map(([key, label]) => (
+                        <div key={key} className="bg-white rounded-md border border-slate-100 py-1">
+                          <div className="text-slate-500">{label}</div>
+                          <div className="font-black text-slate-900">{hs.duties?.[key] ?? '—'}{hs.duties?.[key] !== undefined ? ' %' : ''}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {hs.requirements && <p className="mt-2 text-[11px] text-slate-600">{hs.requirements}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -552,10 +592,14 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
                 Tarifs douaniers <span className="text-slate-400 font-normal text-xs">(exemple)</span>
               </h3>
               <button
-                onClick={() => setSelectedInfoType('Tarifs douaniers')}
+                onClick={() => {
+                  const input = document.getElementById('recherche-code-sh') as HTMLInputElement | null;
+                  input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  input?.focus();
+                }}
                 className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
               >
-                <span>Voir tous les tarifs</span>
+                <span>Chercher un autre code</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -596,7 +640,7 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
                 Documents et ressources
               </h3>
               <button
-                onClick={() => onSelectTab('rapports')}
+                onClick={() => navigate('resources')}
                 className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
               >
                 <span>Voir toutes les ressources</span>
@@ -605,10 +649,10 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
             </div>
 
             <div className="space-y-2">
-              {documentResources.map((doc, idx) => (
+              {visibleDocuments.map((doc, idx) => (
                 <div
                   key={idx}
-                  onClick={() => setDownloadDocTitle(doc.title)}
+                  onClick={() => (onOpenDocDetail ? onOpenDocDetail(doc.title) : openDocument(doc.title))}
                   className="flex items-center justify-between p-2 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -687,7 +731,7 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
             </div>
 
             <div className="space-y-2">
-              {faqQuestions.map((item, idx) => {
+              {visibleFaq.map((item, idx) => {
                 const isOpen = openFaqIndex === idx;
                 return (
                   <div
@@ -743,16 +787,39 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
                 <p className="text-xs text-slate-500">Guide de conformité et exigences douanières</p>
               </div>
             </div>
-            <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
-              <p>
-                Retrouvez l’ensemble des normes obligatoires, certificats d’origine, déclarations en douane
-                et régimes tarifaires préférentiels applicables pour le marché <strong>{selectedCountryModal}</strong>.
-              </p>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1 text-[11px]">
-                <div>• Système de guichet unique électronique opérationnel</div>
-                <div>• Normes sanitaires et phytosanitaires homologuées</div>
-                <div>• Délais de traitement moyen constatés : 24-48h</div>
-              </div>
+            <div className="space-y-3 text-xs text-slate-600 leading-relaxed max-h-[55vh] overflow-y-auto">
+              {!profile && !profileMissing && <p className="text-slate-500">Chargement de la fiche...</p>}
+              {profileMissing && (
+                <p>
+                  Cette fiche n’est pas encore détaillée. Le guide « Accords commerciaux Chine – Afrique » rassemble les accords et leurs textes officiels.
+                </p>
+              )}
+              {profile && (
+                <>
+                  <p>{profile.summary}</p>
+                  {[
+                    ['Exigences', profile.requirements],
+                    ['Documents à fournir', profile.documents],
+                    ['Organismes compétents', profile.agencies],
+                  ].map(([title, items]) =>
+                    (items as string[]).length ? (
+                      <div key={title as string}>
+                        <div className="text-[11px] font-bold text-slate-800 mb-1">{title as string}</div>
+                        <ul className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1 text-[11px]">
+                          {(items as string[]).map((item) => (
+                            <li key={item}>• {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null,
+                  )}
+                  {profile.clearanceTime && (
+                    <p>
+                      <strong>Délai de dédouanement :</strong> {profile.clearanceTime}
+                    </p>
+                  )}
+                </>
+              )}
             </div>
             <div className="mt-6 flex items-center justify-end gap-2.5">
               <button
@@ -761,6 +828,18 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
               >
                 Fermer
               </button>
+              {(profile?.guideDocumentId || profileMissing) && (
+                <button
+                  onClick={() => {
+                    const guide = profile?.guideDocumentId ?? 'accords-commerciaux-chine-afrique';
+                    setSelectedCountryModal(null);
+                    openDocument(guide);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >
+                  Lire le guide
+                </button>
+              )}
               <button
                 onClick={() => {
                   setSelectedCountryModal(null);
@@ -769,45 +848,6 @@ export const ReglementationTab: React.FC<ReglementationTabProps> = ({
                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer shadow-xs"
               >
                 Demander un accompagnement
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 7. MODAL: PDF DOWNLOAD                                                    */}
-      {/* ========================================================================= */}
-      {downloadDocTitle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 text-center relative">
-            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
-              <Download className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">
-              Télécharger le document
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              « {downloadDocTitle} »
-            </p>
-            <p className="text-xs text-slate-600 leading-relaxed mb-6">
-              Ce document officiel inclut l’ensemble des formulaires types, listes de contrôle et guides administratifs en vigueur.
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => setDownloadDocTitle(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => {
-                  alert(`Le téléchargement de « ${downloadDocTitle} » a débuté.`);
-                  setDownloadDocTitle(null);
-                }}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer shadow-xs"
-              >
-                Confirmer le téléchargement (PDF)
               </button>
             </div>
           </div>

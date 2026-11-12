@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { JoinedList } from '../common/JoinedList';
 import { X, Download, FileText, Lock, Loader2, Calendar, Globe, ArrowRight } from 'lucide-react';
 import { api } from '../../lib/api';
 import { resolveImage } from '../../lib/assets';
@@ -101,7 +102,7 @@ export const DocumentModal: React.FC<DocumentModalProps> = ({ documentKey, onClo
                   <div className="text-slate-400 font-bold uppercase text-[10px]">Pays couverts</div>
                   <div className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
                     <Globe className="w-3.5 h-3.5 text-slate-500" />
-                    {(doc.countries ?? ['Chine', 'Afrique du Nord']).join(', ')}
+                    <JoinedList items={doc.countries ?? ['Chine', 'Afrique du Nord']} />
                   </div>
                 </div>
               </div>

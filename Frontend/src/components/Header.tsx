@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Globe,
   ChevronDown,
@@ -17,6 +17,18 @@ import {
   Search,
   Bell,
   Mail,
+  LogIn as QuickLogIn,
+  UserPlus as QuickUserPlus,
+  LayoutDashboard as QuickDashboard,
+  Home as QuickHome,
+  Layers as QuickSectors,
+  Briefcase as QuickServices,
+  Target as QuickOpportunities,
+  GraduationCap as QuickAcademy,
+  CalendarDays as QuickEvents,
+  Users as QuickCommunity,
+  BookOpen as QuickResources,
+  Mail as QuickContact,
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { AppTab } from '../types';
@@ -136,12 +148,45 @@ export const Header: React.FC<HeaderProps> = ({
     notify('Vous êtes déconnecté. À bientôt sur QIAO !', 'info');
   };
 
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1199.98px)').matches);
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 1199.98px)');
+    const update = () => setCompact(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  // Barre de boutons rapides en bas de l'écran : la page est rallongée de sa hauteur exacte pour que rien ne passe dessous.
+  const quickBar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const bar = quickBar.current;
+    const root = document.documentElement;
+    if (!compact || !bar) {
+      document.body.style.paddingBottom = '';
+      root.style.setProperty('--qiao-bottom-bar', '0px');
+      return;
+    }
+    const apply = () => {
+      document.body.style.paddingBottom = `${bar.offsetHeight}px`;
+      root.style.setProperty('--qiao-bottom-bar', `${bar.offsetHeight}px`);
+    };
+    apply();
+    const observer = new ResizeObserver(apply);
+    observer.observe(bar);
+    return () => {
+      observer.disconnect();
+      document.body.style.paddingBottom = '';
+      root.style.setProperty('--qiao-bottom-bar', '0px');
+    };
+  }, [compact]);
+
   const isLight =
     isScrolled ||
     activeTab === 'sector-detail' ||
     activeTab === 'secteurs' ||
     activeTab === 'commerce-hub' ||
     activeTab === 'about' ||
+    activeTab === 'certificat' ||
     activeTab === 'contact' ||
     activeTab === 'community' ||
     activeTab === 'academy' ||
@@ -160,8 +205,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   const languages = [
     { code: 'FR', label: 'Français', flag: '🇫🇷' },
-    { code: 'ZH', label: '中文 (Chinois)', flag: '🇨🇳' },
-    { code: 'AR', label: 'العربية (Arabe)', flag: '🇹🇳' },
+    { code: 'ZH', label: '中文', flag: '🇨🇳' },
+    { code: 'AR', label: 'العربية', flag: '🇹🇳' },
     { code: 'EN', label: 'English', flag: '🇬🇧' },
   ];
 
@@ -206,6 +251,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
+    <>
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isLight
@@ -217,20 +263,25 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Left: QIAO Logo */}
         <div 
           onClick={() => handleNavClick('home')}
-          className="cursor-pointer hover:opacity-95 transition-opacity shrink-0 mr-4 xl:mr-8"
+          className="cursor-pointer hover:opacity-95 transition-opacity shrink-0 mr-3 2xl:mr-8"
         >
-          <Logo variant={isLight ? 'light' : 'dark'} size="md" />
+          <span className="block min-[1200px]:hidden 2xl:block">
+            <Logo variant={isLight ? 'light' : 'dark'} size="md" />
+          </span>
+          <span className="hidden min-[1200px]:block 2xl:hidden">
+            <Logo variant={isLight ? 'light' : 'dark'} size="sm" />
+          </span>
         </div>
 
         {/* Center/Right Navigation Menu (Clean, uncrowded, responsive) */}
-        <div className="hidden lg:flex items-center gap-3.5 xl:gap-5.5 ml-auto mr-3 xl:mr-6">
-          <nav className={`flex items-center gap-3 xl:gap-4.5 text-[13px] xl:text-[13.5px] font-medium ${
+        <div className="hidden min-[1200px]:flex items-center gap-2.5 2xl:gap-5.5 ml-auto mr-2 2xl:mr-6">
+          <nav className={`flex items-center gap-2.5 2xl:gap-4.5 text-[12.5px] 2xl:text-[13.5px] font-medium ${
             isLight ? 'text-slate-800' : 'text-white/90'
           }`}>
             {/* 1. Accueil */}
             <button
               onClick={() => handleNavClick('home')}
-              className={`transition-all cursor-pointer py-1 whitespace-nowrap ${
+              className={`hidden 2xl:block transition-all cursor-pointer py-1 whitespace-nowrap ${
                 activeTab === 'home'
                   ? 'text-red-600 font-bold border-b-2 border-red-600 pb-0.5'
                   : isLight
@@ -695,7 +746,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right Actions: Clean, non-cluttered, never cut off */}
-        <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
+        <div className="hidden min-[1200px]:flex items-center gap-2 2xl:gap-3 shrink-0">
           
           {/* 1. Search Icon */}
           <button
@@ -728,7 +779,7 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <Globe className={`w-3.5 h-3.5 ${isLight ? 'text-slate-700' : 'text-white'}`} />
-              <span className="font-semibold">{currentLang}</span>
+              <span translate="no" className="font-semibold">{currentLang}</span>
               <ChevronDown className="w-3 h-3 opacity-75" />
             </button>
             {langDropdownOpen && (
@@ -749,7 +800,7 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <span className="flex items-center gap-2">
                       <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
+                      <span translate="no">{lang.label}</span>
                     </span>
                     {currentLang === lang.code && <span className="text-red-600 font-bold">✓</span>}
                   </button>
@@ -763,7 +814,7 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Se connecter */}
               <button
                 onClick={() => handleAuth('login')}
-                className={`px-2.5 xl:px-3 py-1.5 text-xs sm:text-[13px] font-medium transition-colors cursor-pointer whitespace-nowrap rounded-lg ${
+                className={`px-2.5 2xl:px-3 py-1.5 text-xs sm:text-[13px] font-medium transition-colors cursor-pointer whitespace-nowrap rounded-lg ${
                   isLight
                     ? 'text-slate-700 hover:text-red-600 hover:bg-slate-100'
                     : 'text-white/90 hover:text-white hover:bg-white/10'
@@ -775,7 +826,7 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Red Solid CTA Button: Créer un compte */}
               <button
                 onClick={() => handleAuth('register')}
-                className="px-3.5 xl:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer whitespace-nowrap shrink-0"
+                className="px-3.5 2xl:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer whitespace-nowrap shrink-0"
               >
                 {t.register}
               </button>
@@ -962,7 +1013,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Mobile menu hamburger button */}
-        <div className="flex lg:hidden items-center gap-2 relative">
+        <div className="flex min-[1200px]:hidden items-center gap-2 relative">
           {langDropdownOpen && (
             <div className="absolute top-full right-0 mt-2 w-44 rounded-2xl shadow-2xl py-2 px-1.5 z-50 border bg-white border-slate-200 text-slate-800">
               {languages.map((lang) => (
@@ -975,7 +1026,7 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <span className="flex items-center gap-2">
                     <span>{lang.flag}</span>
-                    <span>{lang.label}</span>
+                    <span translate="no">{lang.label}</span>
                   </span>
                   {currentLang === lang.code && <span className="text-red-600 font-bold">✓</span>}
                 </button>
@@ -986,19 +1037,19 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => setLangDropdownOpen(!langDropdownOpen)}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
-              isScrolled
+              isLight
                 ? 'text-slate-700 border-slate-200 bg-slate-100'
                 : 'text-white border-white/20 bg-white/10'
             }`}
           >
-            <span>{currentLang}</span>
+            <span translate="no">{currentLang}</span>
             <ChevronDown className="w-3 h-3" />
           </button>
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={`p-2 rounded-xl focus:outline-none ${
-              isScrolled ? 'text-slate-800 hover:bg-slate-100' : 'text-white hover:bg-white/10'
+              isLight ? 'text-slate-800 hover:bg-slate-100' : 'text-white hover:bg-white/10'
             }`}
             aria-label="Menu"
           >
@@ -1007,10 +1058,11 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
+
       {/* Mobile Drawer Navigation Menu */}
       {mobileMenuOpen && (
-        <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-2xl ${
-          isScrolled
+        <div className={`min-[1200px]:hidden border-b px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-2xl ${
+          isLight
             ? 'bg-white border-slate-200 text-slate-800'
             : 'bg-[#07152b] border-white/10 text-white'
         }`}>
@@ -1018,7 +1070,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('home')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.home}
@@ -1028,7 +1080,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`text-left px-3 py-2.5 rounded-xl font-semibold ${
                 activeTab === 'about'
                   ? 'text-red-500 bg-red-500/10'
-                  : isScrolled
+                  : isLight
                   ? 'hover:bg-slate-100 text-slate-800'
                   : 'hover:bg-white/10 text-white'
               }`}
@@ -1040,7 +1092,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`text-left px-3 py-2.5 rounded-xl font-semibold ${
                 activeTab === 'secteurs' || activeTab === 'sector-detail'
                   ? 'text-red-500 bg-red-500/10'
-                  : isScrolled
+                  : isLight
                   ? 'hover:bg-slate-100 text-slate-800'
                   : 'hover:bg-white/10 text-white'
               }`}
@@ -1050,7 +1102,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('services')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Services & Catalogue
@@ -1060,7 +1112,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`text-left px-3 py-2.5 rounded-xl font-semibold ${
                 activeTab === 'community'
                   ? 'text-red-500 bg-red-500/10'
-                  : isScrolled
+                  : isLight
                   ? 'hover:bg-slate-100 text-slate-800'
                   : 'hover:bg-white/10 text-white'
               }`}
@@ -1070,7 +1122,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('academy')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.academy}
@@ -1078,7 +1130,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('intelligence')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Intelligence
@@ -1086,7 +1138,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('partners')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Partenaires &amp; Réseau
@@ -1094,7 +1146,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('resources')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.resources}
@@ -1102,7 +1154,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('evenements')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.events}
@@ -1110,7 +1162,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('how-it-works')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               Comment ça marche
@@ -1118,7 +1170,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('contact')}
               className={`text-left px-3 py-2.5 rounded-xl ${
-                isScrolled ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
+                isLight ? 'hover:bg-slate-100 text-slate-800' : 'hover:bg-white/10 text-white'
               }`}
             >
               {t.contact}
@@ -1127,7 +1179,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Mobile Auth and Simulator Actions */}
           <div className={`pt-3 border-t flex flex-col gap-2 ${
-            isScrolled ? 'border-slate-200' : 'border-white/10'
+            isLight ? 'border-slate-200' : 'border-white/10'
           }`}>
             <button
               onClick={() => {
@@ -1135,7 +1187,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenCalculator?.();
               }}
               className={`w-full py-2.5 px-4 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border ${
-                isScrolled
+                isLight
                   ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
                   : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
               }`}
@@ -1149,7 +1201,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenSearch?.();
               }}
               className={`w-full py-2.5 px-4 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border ${
-                isScrolled
+                isLight
                   ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
                   : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
               }`}
@@ -1162,7 +1214,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   onClick={() => handleNavClick('dashboard')}
                   className={`py-2.5 text-xs font-medium rounded-xl border text-center ${
-                    isScrolled
+                    isLight
                       ? 'border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100'
                       : 'border-white/20 text-white bg-white/5 hover:bg-white/10'
                   }`}
@@ -1184,7 +1236,7 @@ export const Header: React.FC<HeaderProps> = ({
                     handleAuth('login');
                   }}
                   className={`py-2.5 text-xs font-medium rounded-xl border text-center ${
-                    isScrolled
+                    isLight
                       ? 'border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100'
                       : 'border-white/20 text-white bg-white/5 hover:bg-white/10'
                   }`}
@@ -1206,5 +1258,85 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
     </header>
+
+    {/* Boutons rapides (mobile et tablette), en bas de l'écran : compte, administration et rubriques principales. */}
+    <div
+        ref={quickBar}
+        className="min-[1200px]:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      >
+        <nav aria-label="Accès rapide" className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-4 sm:px-6 pb-0.5">
+          {isLoggedIn ? (
+            <button
+              onClick={() => handleNavClick('dashboard')}
+              className={`shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold cursor-pointer ${
+                activeTab === 'dashboard' ? 'bg-[#0a1c3d] text-white' : 'bg-red-600 text-white'
+              }`}
+            >
+              <QuickDashboard className="w-3.5 h-3.5" /> Mon espace
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenLogin();
+                }}
+                className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold border border-slate-300 text-slate-800 bg-white cursor-pointer"
+              >
+                <QuickLogIn className="w-3.5 h-3.5" /> {t.login}
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenRegister();
+                }}
+                className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold bg-red-600 text-white cursor-pointer"
+              >
+                <QuickUserPlus className="w-3.5 h-3.5" /> {t.register}
+              </button>
+            </>
+          )}
+          {user?.role === 'admin' && (
+            <>
+              <button
+                onClick={() => handleNavClick('dashboard/admin-site/secteurs')}
+                className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold bg-[#0a1c3d] text-white cursor-pointer"
+              >
+                <QuickSectors className="w-3.5 h-3.5" /> Gérer les secteurs
+              </button>
+              <button
+                onClick={() => handleNavClick('dashboard/admin-site/services')}
+                className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold bg-[#0a1c3d] text-white cursor-pointer"
+              >
+                <QuickServices className="w-3.5 h-3.5" /> Gérer les services
+              </button>
+            </>
+          )}
+          <span className="shrink-0 w-px h-5 bg-slate-200 mx-0.5" aria-hidden="true" />
+          {[
+            { tab: 'home', label: t.home, icon: QuickHome, active: ['home'] },
+            { tab: 'secteurs', label: t.sectors, icon: QuickSectors, active: ['secteurs', 'sector-detail'] },
+            { tab: 'services', label: t.services, icon: QuickServices, active: ['services'] },
+            { tab: 'opportunites-pays', label: 'Opportunités', icon: QuickOpportunities, active: ['opportunites-pays', 'commerce-hub', 'intelligence'] },
+            { tab: 'academy', label: t.academy, icon: QuickAcademy, active: ['academy'] },
+            { tab: 'evenements', label: t.events, icon: QuickEvents, active: ['evenements', 'stories'] },
+            { tab: 'community', label: t.community, icon: QuickCommunity, active: ['community'] },
+            { tab: 'resources', label: t.resources, icon: QuickResources, active: ['resources'] },
+            { tab: 'contact', label: t.contact, icon: QuickContact, active: ['contact'] },
+          ].map(({ tab, label, icon: Icon, active }) => (
+            <button
+              key={tab}
+              onClick={() => handleNavClick(tab)}
+              aria-current={active.includes(activeTab ?? '') ? 'page' : undefined}
+              className={`shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold cursor-pointer ${
+                active.includes(activeTab ?? '') ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-100 text-slate-700 border border-transparent'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" /> {label}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </>
   );
 };

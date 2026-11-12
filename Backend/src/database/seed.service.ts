@@ -310,7 +310,7 @@ export class SeedService implements OnApplicationBootstrap {
             origin: member.origin,
             title: member.headline,
             location: `${member.city}, ${member.country}`,
-            avatarUrl: member.avatar,
+            avatarUrl: member.avatar || null,
             verified: true,
             createdAt: minutesAgo(60 * 24 * (120 - index * 4)),
           }),

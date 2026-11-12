@@ -53,7 +53,7 @@ export const Avatar: React.FC<{ src: string | null | undefined; name: string; cl
   return src && !broken ? (
     <img src={src} alt={name} onError={() => setBroken(true)} className={`${className} rounded-full object-cover shrink-0`} />
   ) : (
-    <span className={`${className} rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0`}>
+    <span translate="no" className={`${className} rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0`}>
       {initials(name || '?')}
     </span>
   );

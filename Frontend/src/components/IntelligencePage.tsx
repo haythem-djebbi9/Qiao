@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { siteSettings } from '../lib/siteSettings';
 import { Logo } from './Logo';
 import intelligenceHeroBg from '../data/qiao_intelligence.jpg';
 import chinaNightCorridorBg from '../assets/images/china_corridor_night_skyline_1790804583067.jpg';
@@ -7,7 +9,7 @@ import solarFarmTunisiaImg from '../assets/images/solar_farm_tunisia_17908051653
 import containerPortCargoImg from '../assets/images/container_port_cargo_1790805153002.jpg';
 import oliveOilExportImg from '../assets/images/olive_oil_export_1790805177453.jpg';
 import industrialEngineerMachineImg from '../assets/images/industrial_engineer_machine_1790805190415.jpg';
-import chinaEcommerceReportImg from '../assets/images/china_ecommerce_report_1790808742649.jpg';
+import chinaEcommerceReportImg from '../assets/images/ecommerce_devices_marketplace_1790934935730.jpg';
 import {
   Search,
   ArrowRight,
@@ -64,13 +66,12 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
   onRequestAnalysis,
   onOpenRegister,
 }) => {
-  const { applyToOpportunity, openDocument, openArticle, openLegal } = useAppActions();
+  const { openOpportunities, openDocument, openArticle, openLegal } = useAppActions();
   const { downloadDocument, pending } = useDownloads();
   const [searchQuery, setSearchQuery] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('Tous les secteurs');
   const [activeCorridorModal, setActiveCorridorModal] = useState<'cn-na' | 'na-cn' | null>(null);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [opportunityPage, setOpportunityPage] = useState(0);
   const [analysisOffset, setAnalysisOffset] = useState(0);
 
@@ -672,7 +673,7 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
             {visibleOpportunities.map((opp) => (
               <div
                 key={opp.id}
-                onClick={() => setSelectedOpportunity(opp)}
+                onClick={() => openOpportunities({ id: opp.id, country: opp.country })}
                 className="group bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 p-3 sm:p-3.5 flex flex-row items-stretch gap-3 cursor-pointer"
               >
                 {/* Left Side: Rounded Photo Thumbnail */}
@@ -979,10 +980,7 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
 
               {/* Social links */}
               <div className="flex items-center gap-3 pt-1 text-slate-400">
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">in</a>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">f</a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">▶</a>
-                <a href="https://x.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">𝕏</a>
+                <SocialLinks itemClassName="hover:text-white cursor-pointer transition-colors" iconClassName="w-4 h-4" />
               </div>
             </div>
 
@@ -1031,79 +1029,6 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
       {/* ========================================================================= */}
       {/* MODAL: OPPORTUNITY DETAILS                                               */}
       {/* ========================================================================= */}
-      {selectedOpportunity && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="relative h-48 w-full">
-              <img
-                src={resolveImage(selectedOpportunity.image)}
-                alt={selectedOpportunity.title}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
-              <button
-                onClick={() => setSelectedOpportunity(null)}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <span className="absolute bottom-3 left-3 bg-slate-900 text-sky-300 text-xs font-bold px-3 py-1 rounded-md">
-                {selectedOpportunity.type}
-              </span>
-            </div>
-
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                {selectedOpportunity.title}
-              </h3>
-
-              <div className="flex flex-wrap gap-4 text-xs text-slate-600 mb-4 pb-4 border-b border-slate-100">
-                <span className="flex items-center gap-1 font-medium text-slate-900">
-                  <MapPin className="w-3.5 h-3.5 text-red-600" />
-                  {selectedOpportunity.country}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Zap className="w-3.5 h-3.5 text-amber-500" />
-                  {selectedOpportunity.sector}
-                </span>
-                <span className="flex items-center gap-1 font-bold text-slate-900">
-                  <Tag className="w-3.5 h-3.5 text-red-600" />
-                  {selectedOpportunity.amountLabel}
-                </span>
-                {selectedOpportunity.deadline && (
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    Date limite : {selectedOpportunity.deadline}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6 font-light">
-                {selectedOpportunity.description}
-              </p>
-
-              <div className="flex items-center justify-between gap-3">
-                <button
-                  onClick={() => setSelectedOpportunity(null)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 cursor-pointer"
-                >
-                  Fermer
-                </button>
-                <button
-                  onClick={() => {
-                    const opportunity = selectedOpportunity;
-                    setSelectedOpportunity(null);
-                    applyToOpportunity(opportunity);
-                  }}
-                  className="px-6 py-2.5 rounded-xl bg-red-600 text-white text-xs font-medium hover:bg-red-700 shadow-md transition-all cursor-pointer"
-                >
-                  Postuler / Contacter l'expert
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* MODAL: CORRIDOR DETAILS                                                  */}

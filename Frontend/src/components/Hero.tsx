@@ -23,6 +23,8 @@ import { FlagIcon } from './common/FlagIcon';
 
 interface HeroProps {
   onSearch?: (query: string) => void;
+  /** Catégories qui ont au moins un service : les raccourcis sans service sont masqués. */
+  availableCategories?: string[];
   onSelectCategory?: (cat: string) => void;
   /** Position détectée automatiquement (compte, fuseau horaire ou langue). */
   visitorLocation: VisitorLocation;
@@ -34,6 +36,7 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({
+  availableCategories,
   onSearch,
   onSelectCategory,
   visitorLocation,
@@ -106,7 +109,7 @@ export const Hero: React.FC<HeroProps> = ({
               Le pont entre
             </span>
             <span className="block mt-1.5">
-              la <span className="text-red-500">Chine</span> &amp; <span className="text-sky-400">l'Afrique du Nord</span>
+              <span className="fr-only" translate="no">la </span><span className="text-red-500">Chine</span> &amp; <span className="text-sky-400">l'Afrique du Nord</span>
             </span>
           </h1>
 
@@ -197,7 +200,9 @@ export const Hero: React.FC<HeroProps> = ({
 
               {/* Service Categories Icons Row with Outline Icons */}
               <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1 scrollbar-none pt-0.5">
-                {categories.map((cat) => {
+                {categories
+                  .filter((cat) => cat.name === 'Plus' || !availableCategories || availableCategories.includes(cat.name))
+                  .map((cat) => {
                   const Icon = cat.icon;
                   const isSelected = activeCategory === cat.name;
                   return (
@@ -294,7 +299,7 @@ export const Hero: React.FC<HeroProps> = ({
                     98%
                   </div>
                   <div className="text-[10px] sm:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
-                    Taux de<br />satisfaction
+                    <span className="whitespace-pre-line">{'Taux de\nsatisfaction'}</span>
                   </div>
                 </div>
 

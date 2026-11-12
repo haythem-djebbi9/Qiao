@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Building2,
   Handshake,
@@ -24,6 +25,7 @@ import {
   Hexagon,
 } from 'lucide-react';
 import { caseStudiesData, testimonialsData } from '../data/mockData';
+import { initials } from '../lib/text';
 import { CaseStudy } from '../types';
 
 interface SuccessStoriesSectionProps {
@@ -282,7 +284,7 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonialsData.slice(0, 3).map((item) => (
+            {[0, 1, 2].map((offset) => testimonialsData[(activeTestimonialIndex + offset) % testimonialsData.length]).map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between"
@@ -304,12 +306,18 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                  <img
-                    src={item.avatar}
-                    alt={item.name}
-                    referrerPolicy="no-referrer"
-                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                  />
+                  {item.avatar ? (
+                    <img
+                      src={item.avatar}
+                      alt={item.name}
+                      referrerPolicy="no-referrer"
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <span className="w-10 h-10 rounded-full bg-[#0a1c3d] text-white text-xs font-bold flex items-center justify-center shrink-0" translate="no">
+                      {initials(item.name)}
+                    </span>
+                  )}
                   <div>
                     <h4 className="text-xs font-bold text-slate-900">{item.name}</h4>
                     <p className="text-[11px] text-slate-500">
@@ -384,7 +392,7 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
 
               {/* Channel 3 */}
               <a
-                href="mailto:contact@qiao.tn"
+                href={`mailto:${siteSettings().email}`}
                 className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl hover:border-emerald-500/50 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between"
               >
                 <div>
@@ -393,8 +401,8 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
                   </div>
                   <div className="text-xs font-bold text-white">Nous écrire</div>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1 truncate group-hover:text-emerald-400">
-                  contact@qiao.tn
+                <p className="text-[10px] text-slate-400 mt-1 truncate group-hover:text-emerald-400" translate="no">
+                  {siteSettings().email}
                 </p>
               </a>
             </div>

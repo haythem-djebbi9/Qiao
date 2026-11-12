@@ -15,7 +15,7 @@ import bridgeLogoImg from '../assets/images/qiao_bridge_red_blue_1787498218294.j
 
 interface HowItWorksSectionProps {
   onJoinNow: () => void;
-  onOpenVideo: () => void;
+  onOpenVideo?: () => void;
 }
 
 export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
@@ -252,6 +252,7 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
+                {onOpenVideo && (
                 <button
                   onClick={onOpenVideo}
                   className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-800 text-xs sm:text-sm font-medium rounded-full border border-slate-200 transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
@@ -261,6 +262,7 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
                   </div>
                   <span>Voir la vidéo</span>
                 </button>
+                )}
               </div>
             </div>
 

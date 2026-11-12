@@ -155,8 +155,23 @@ Réponds à ses questions sur le SEO et le GEO de ce contenu : concret, concis (
 
   // ==========================================================================
 
+  get configured() {
+    return Boolean(this.apiKey);
+  }
+
+  /** Traduction de textes du catalogue : renvoie un tableau de même longueur, vide si la réponse est mal formée. */
+  async translateStrings(systemPrompt: string, texts: string[]): Promise<string[]> {
+    const { text } = await this.generate(
+      { contents: [{ role: 'user', parts: [{ text: JSON.stringify(texts) }] }] },
+      { responseMimeType: 'application/json', responseSchema: { type: 'ARRAY', items: { type: 'STRING' } }, maxOutputTokens: 8192, temperature: 0.2 },
+      systemPrompt,
+    );
+    const parsed = JSON.parse(text) as unknown;
+    return Array.isArray(parsed) && parsed.length === texts.length ? (parsed as string[]) : [];
+  }
+
   /** Essaie chaque modèle dans l'ordre ; un modèle hors quota ou saturé est mis de côté quelques minutes. */
-  private async generate(body: { contents: unknown[] }, generationConfig: Record<string, unknown>) {
+  private async generate(body: { contents: unknown[] }, generationConfig: Record<string, unknown>, systemPrompt = SYSTEM_PROMPT) {
     if (!this.apiKey) {
       throw new ServiceUnavailableException("Assistant IA non configuré : ajoutez GEMINI_API_KEY dans Backend/.env.");
     }
@@ -165,7 +180,7 @@ Réponds à ses questions sur le SEO et le GEO de ce contenu : concret, concis (
     let lastError = 'aucun modèle disponible';
     for (const model of candidates.length ? candidates : this.models) {
       try {
-        const text = await this.call(model, body, generationConfig);
+        const text = await this.call(model, body, generationConfig, systemPrompt);
         return { text, model };
       } catch (err) {
         const status = err instanceof GeminiError ? err.status : 0;
@@ -178,7 +193,7 @@ Réponds à ses questions sur le SEO et le GEO de ce contenu : concret, concis (
     throw new ServiceUnavailableException("L'assistant IA est momentanément indisponible. Le score calculé localement reste affiché ; réessayez dans un instant.");
   }
 
-  private async call(model: string, body: { contents: unknown[] }, generationConfig: Record<string, unknown>) {
+  private async call(model: string, body: { contents: unknown[] }, generationConfig: Record<string, unknown>, systemPrompt: string) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
     // Les modèles 2.5 « réfléchissent » par défaut : inutile ici et beaucoup plus lent.
@@ -189,7 +204,7 @@ Réponds à ses questions sur le SEO et le GEO de ce contenu : concret, concis (
         signal: controller.signal,
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          systemInstruction: { parts: [{ text: systemPrompt }] },
           ...body,
           generationConfig: { ...generationConfig, ...thinking },
         }),

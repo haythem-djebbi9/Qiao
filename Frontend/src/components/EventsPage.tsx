@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
   MapPin,
@@ -45,7 +47,7 @@ import { useAppActions } from '../context/AppActionsContext';
 // Local High-Definition Images
 import evenementPageBg from '../assets/images/evenement_page_bg.jpg';
 import evenementsHeroPlaza from '../assets/images/evenements_hero_plaza_1791399698341.jpg';
-import catSalonsCanton from '../assets/images/cat_salons_canton_1791399715213.jpg';
+import catSalonsCanton from '../assets/images/event_canton_fair_exterior_1791399745116.jpg';
 import catOrganisateursStage from '../assets/images/cat_organisateurs_stage_1791399731228.jpg';
 import eventCantonFairExterior from '../assets/images/event_canton_fair_exterior_1791399745116.jpg';
 import shanghaiSkylineDusk from '../assets/images/secteurs_hero_skyline_1791220840877.jpg';
@@ -836,39 +838,8 @@ export const EventsPage: React.FC<EventsPageProps> = ({
 
             {/* Socials & Language dropdown button */}
             <div className="flex items-center gap-3">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-md bg-[#0a66c2] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-4 h-4 fill-current" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-md bg-[#ff0000] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-                aria-label="YouTube"
-              >
-                <Youtube className="w-4 h-4 fill-current" />
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-md bg-black text-white flex items-center justify-center hover:opacity-90 transition-opacity font-bold text-xs"
-                aria-label="X (Twitter)"
-              >
-                ✕
-              </a>
+              <SocialLinks itemClassName="w-7 h-7 rounded-md text-white flex items-center justify-center hover:opacity-90 transition-opacity" iconClassName="w-4 h-4" brandColors />
 
-              {/* Language Dropdown FR */}
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-300 text-xs font-bold text-slate-700 bg-white">
-                <span>FR</span>
-                <ChevronDown className="w-3 h-3 text-slate-500" />
-              </div>
             </div>
           </div>
 

@@ -49,7 +49,7 @@ export const servicesData: ServiceItem[] = [
     description: 'Expertise juridique et fiscale pour sécuriser vos activités et optimiser votre structure.',
     category: 'Juridique',
     iconName: 'Scale',
-    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80',
     accentColor: 'blue',
     details: [
       'Rédaction et révision des contrats bilingues (Chinois, Français, Arabe, Anglais)',
@@ -64,7 +64,7 @@ export const servicesData: ServiceItem[] = [
     description: 'Services linguistiques professionnels en chinois, arabe, français et anglais pour tous vos besoins.',
     category: 'Traduction',
     iconName: 'Languages',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80',
     accentColor: 'red',
     details: [
       'Interprétation simultanée et consécutive pour délégations et foires (Canton Fair, etc.)',
@@ -79,7 +79,7 @@ export const servicesData: ServiceItem[] = [
     description: 'Recrutez les meilleurs talents locaux et gérez vos ressources humaines efficacement.',
     category: 'Recrutement',
     iconName: 'Users',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80',
     accentColor: 'blue',
     details: [
       'Chasse de têtes de profils biculturels et trilingues (Chine - Maghreb)',
@@ -151,7 +151,7 @@ export const servicesData: ServiceItem[] = [
     description: 'Développez vos compétences grâce à nos formations professionnelles et sessions de coaching sur-mesure.',
     category: 'Business',
     iconName: 'GraduationCap',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80',
     isNew: true,
     accentColor: 'red',
     details: [
@@ -245,7 +245,7 @@ export const caseStudiesData: CaseStudy[] = [
     company: 'SOTUFAB',
     tag: 'IMPORT - LOGISTIQUE',
     title: 'Importation de machines industrielles depuis la Chine vers la Tunisie.',
-    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=800&q=80',
     logoText: 'SOTUFAB',
     logoBg: 'bg-red-600',
     metrics: [
@@ -319,7 +319,7 @@ export const testimonialsData: Testimonial[] = [
     role: 'CEO',
     company: 'TechSolutions & GreenTech',
     content: 'QIAO nous a accompagnés dans la création de notre filiale en Afrique du Nord. Un service complet, humain et efficace. Je recommande vivement !',
-    avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=200&q=80',
+    avatar: '',
     rating: 5,
     companyLogo: 'GreenTech'
   },
@@ -379,7 +379,7 @@ export const articlesData: ArticleItem[] = [
     date: '05 mai 2024',
     category: 'Investissement',
     readTime: '8 min',
-    image: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?auto=format&fit=crop&w=400&q=80'
+    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80'
   },
   {
     id: 'art-3',

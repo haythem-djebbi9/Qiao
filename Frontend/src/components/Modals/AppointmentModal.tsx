@@ -128,7 +128,10 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
               <p className="text-xs text-slate-600 max-w-xs mx-auto">
                 {confirmed.specialtyLabel} —{' '}
                 {new Date(`${confirmed.date}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à{' '}
-                {confirmed.time} (GMT+1). Une invitation a été envoyée à {email}.
+                {confirmed.time} (GMT+1).{' '}
+                {confirmed.emailSent
+                  ? `La confirmation et le lien de la visioconférence ont été envoyés à ${email}.`
+                  : 'Notez le lien de la visioconférence ci-dessous : il s’ouvre depuis un navigateur, sans installation.'}
               </p>
               <a
                 href={confirmed.meetingLink}
@@ -137,8 +140,14 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100"
               >
                 <Video className="w-4 h-4" />
-                {confirmed.meetingLink.replace('https://', '')}
+                Rejoindre la visioconférence
               </a>
+              <p className="text-[11px] text-slate-500 break-all" translate="no">
+                {confirmed.meetingLink.replace('https://', '')}
+              </p>
+              {user && (
+                <p className="text-[11px] text-slate-500">Le rendez-vous et son lien restent disponibles dans « Mon espace ».</p>
+              )}
               <div>
                 <button
                   onClick={onClose}

@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SocialIcon, SocialLinks, activeSocialLinks } from './common/SocialLinks';
+import { siteSettings, telHref, whatsappHref } from '../lib/siteSettings';
 import {
   User,
   Mail,
@@ -27,11 +29,13 @@ import {
   Download,
   Copy,
   Check,
-  Youtube
+  Youtube,
+  Handshake,
 } from 'lucide-react';
 import { StrategicRegionMap } from './StrategicRegionMap';
 import { AppTab } from '../types';
 import { Logo } from './Logo';
+import { FlagIcon } from './common/FlagIcon';
 import shanghaiBanner from '../assets/images/contact_shanghai_greatwall_complete_1791404766592.jpg';
 import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
@@ -46,12 +50,16 @@ interface ContactPageProps {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+const FLAG_EMOJI: Record<string, string> = { TN: '🇹🇳', CN: '🇨🇳', MA: '🇲🇦', DZ: '🇩🇿', EG: '🇪🇬', LY: '🇱🇾' };
+
 export const ContactPage: React.FC<ContactPageProps> = ({
   onNavigate,
   onOpenRegister,
   prefill,
   onPrefillConsumed,
 }) => {
+  const settings = siteSettings();
+  const headOffice = settings.offices[0];
   const { user } = useAuth();
   const { openLegal } = useAppActions();
   // Form State
@@ -248,24 +256,21 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 et vous accompagner à chaque étape de votre développement entre la Chine et l'Afrique du Nord.
               </p>
 
-              {/* 4 Trust Badges in single horizontal row */}
-              <div className="pt-4 flex flex-wrap items-center gap-5 sm:gap-7 text-xs sm:text-sm font-bold text-[#0c2560]">
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-600 text-lg">🤝</span>
-                  <span>Une écoute attentive</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Des réponses rapides</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Des experts à votre service</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Vos informations en toute confidentialité</span>
-                </div>
+              {/* 4 engagements : grille régulière, même taille et même alignement */}
+              <div className="pt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-[13px] font-bold text-[#0c2560]">
+                {[
+                  { icon: Handshake, label: 'Une écoute attentive' },
+                  { icon: Target, label: 'Des réponses rapides' },
+                  { icon: Users, label: 'Des experts à votre service' },
+                  { icon: Shield, label: 'Vos informations en toute confidentialité' },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-2.5 bg-white rounded-xl border border-slate-200 px-3 py-2.5">
+                    <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <span className="leading-snug">{label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -282,18 +287,27 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               </div>
 
               {/* Geographic Column over mountain foreground */}
-              <div className="bg-[#0c2560]/85 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 shadow-lg max-w-xs w-full text-right text-xs font-black tracking-wider text-white space-y-1">
-                <div className="text-sky-300 text-[11px] font-bold tracking-widest pb-1 border-b border-white/20 uppercase">
-                  Réseau Stratégique
+              <div className="bg-[#0c2560]/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 shadow-lg max-w-xs w-full text-white">
+                <div className="text-sky-300 text-[11px] font-bold tracking-widest pb-2 mb-3 border-b border-white/20 uppercase">
+                  Réseau stratégique
                 </div>
-                <div>CHINE</div>
-                <div>TUNISIE</div>
-                <div>ALGÉRIE</div>
-                <div>MAROC</div>
-                <div>ÉGYPTE</div>
-                <div>LIBYE</div>
-                <div className="pt-2 text-[10px] text-amber-300 uppercase tracking-widest font-black border-t border-white/25">
-                  DES OPPORTUNITÉS SANS FRONTIÈRES
+                <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 text-xs font-bold">
+                  {[
+                    ['CN', 'Chine'],
+                    ['TN', 'Tunisie'],
+                    ['DZ', 'Algérie'],
+                    ['MA', 'Maroc'],
+                    ['EG', 'Égypte'],
+                    ['LY', 'Libye'],
+                  ].map(([code, name]) => (
+                    <div key={code} className="flex items-center gap-2">
+                      <FlagIcon country={code} size="xs" />
+                      <span>{name}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-2.5 text-[10px] text-amber-300 uppercase tracking-widest font-black border-t border-white/25">
+                  Des opportunités sans frontières
                 </div>
               </div>
             </div>
@@ -752,7 +766,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 <div className="space-y-4">
                   {/* Email */}
                   <a
-                    href="mailto:contact@qiao-platform.com"
+                    href={`mailto:${settings.email}`}
                     className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -760,8 +774,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-slate-500">Email</div>
-                      <div className="text-sm font-bold text-blue-600 group-hover:underline">
-                        contact@qiao-platform.com
+                      <div className="text-sm font-bold text-blue-600 group-hover:underline" translate="no">
+                        {settings.email}
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
                         Nous répondons sous 24 heures.
@@ -771,7 +785,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
                   {/* Téléphone */}
                   <a
-                    href="tel:+21671123456"
+                    href={telHref(settings.phone)}
                     className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -779,11 +793,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-slate-500">Téléphone</div>
-                      <div className="text-sm font-bold text-slate-800">
-                        +216 71 123 456
+                      <div className="text-sm font-bold text-slate-800" translate="no">
+                        {settings.phone}
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
-                        Lundi - Vendredi, 9h00 - 18h00 (GMT+1)
+                        {settings.hours}
                       </div>
                     </div>
                   </a>
@@ -796,35 +810,38 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     <div>
                       <div className="text-xs font-semibold text-slate-500">Siège social</div>
                       <div className="text-sm font-bold text-slate-800">
-                        Immeuble International City Center
+                        {headOffice?.address[0]}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                        Avenue de la Bourse, Les Berges du Lac, 1053 Tunis, Tunisie
+                        {headOffice?.address.slice(1).join(', ')}
                       </div>
                     </div>
                   </div>
 
-                  {/* LinkedIn */}
-                  <a
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <Linkedin className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-slate-500">LinkedIn</div>
-                      <div className="text-xs font-medium text-slate-700 mt-0.5">
-                        Suivez notre actualité et connectez avec notre équipe.
+                  {/* Réseaux sociaux renseignés dans Paramètres du site */}
+                  {activeSocialLinks().map((network) => (
+                    <a
+                      key={network.key}
+                      href={network.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
+                    >
+                      <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform ${network.brand}`}>
+                        <SocialIcon network={network.key} className="w-5 h-5" />
                       </div>
-                    </div>
-                  </a>
+                      <div>
+                        <div className="text-xs font-semibold text-slate-500" translate="no">{network.label}</div>
+                        <div className="text-xs font-medium text-slate-700 mt-0.5">
+                          Suivez notre actualité et connectez avec notre équipe.
+                        </div>
+                      </div>
+                    </a>
+                  ))}
 
                   {/* WhatsApp Business */}
                   <a
-                    href="https://wa.me/21671123456"
+                    href={whatsappHref(settings.whatsapp)}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-emerald-50/50 transition-colors group cursor-pointer"
@@ -834,8 +851,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-slate-500">WhatsApp Business</div>
-                      <div className="text-sm font-bold text-emerald-700">
-                        +216 71 123 456
+                      <div className="text-sm font-bold text-emerald-700" translate="no">
+                        {settings.whatsapp}
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
                         Échangez directement avec nous.
@@ -869,35 +886,31 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mt-6">
-                {/* Office 1: Tunis */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                {settings.offices.map((office) => (
+                <div key={office.name} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
                   <div className="h-32 w-full overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80"
-                      alt="Tunis Headquarters"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={office.image} alt={office.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                     <div className="absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow">
-                      🇹🇳 Tunis
+                      {FLAG_EMOJI[office.countryCode] ?? ''} {office.city.split(',')[0]}
                     </div>
                   </div>
                   <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 mb-1">
-                        <span className="text-red-600">🇹🇳</span>
-                        <span>Tunis (Siège social)</span>
+                        <span className="text-red-600">{FLAG_EMOJI[office.countryCode] ?? ''}</span>
+                        <span>{office.name}</span>
                       </div>
                       <p className="text-[11px] text-slate-600 leading-relaxed">
-                        Immeuble International City Center
-                        <br />
-                        Avenue de la Bourse, Les Berges du Lac
-                        <br />
-                        1053 Tunis, Tunisie
+                        {office.address.map((line, index) => (
+                          <React.Fragment key={index}>
+                            {index > 0 && <br />}
+                            {line}
+                          </React.Fragment>
+                        ))}
                       </p>
                     </div>
                     <a
-                      href="https://maps.google.com/?q=Les+Berges+du+Lac+Tunis"
+                      href={office.mapsUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
@@ -907,80 +920,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </a>
                   </div>
                 </div>
-
-                {/* Office 2: Shanghai */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                  <div className="h-32 w-full overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?auto=format&fit=crop&w=600&q=80"
-                      alt="Shanghai Office"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow">
-                      🇨🇳 Shanghai
-                    </div>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 mb-1">
-                        <span className="text-red-600">🇨🇳</span>
-                        <span>Shanghai (Bureau Asie)</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                        Shanghai Tower, 100 Century Avenue
-                        <br />
-                        Pudong, Shanghai 200120, Chine
-                      </p>
-                    </div>
-                    <a
-                      href="https://maps.google.com/?q=Shanghai+Tower+Pudong"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      <span>Voir sur Google Maps</span>
-                      <span>➔</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Office 3: Casablanca */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                  <div className="h-32 w-full overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=600&q=80"
-                      alt="Casablanca Office"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow">
-                      🇲🇦 Casablanca
-                    </div>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 mb-1">
-                        <span className="text-red-600">🇲🇦</span>
-                        <span>Casablanca (Bureau Afrique du Nord)</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                        Tour CFC, 100 Boulevard Sidi Mohamed Ben Abdellah
-                        <br />
-                        Casablanca, Maroc
-                      </p>
-                    </div>
-                    <a
-                      href="https://maps.google.com/?q=Casablanca+Finance+City+Tour+CFC"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      <span>Voir sur Google Maps</span>
-                      <span>➔</span>
-                    </a>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -1117,30 +1057,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
             {/* Socials & Lang */}
             <div className="flex items-center gap-3">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors font-bold text-xs"
-              >
-                𝕏
-              </a>
+              <SocialLinks itemClassName="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors" iconClassName="w-4 h-4" />
 
               <div className="pl-2 border-l border-slate-200">
                 <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">

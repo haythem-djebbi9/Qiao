@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
   Users,
@@ -312,7 +314,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
           {/* Main Title */}
           <h1 className={`font-black text-white tracking-tight leading-[1.15] ${isHome ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-2xl sm:text-3xl'}`}>
             Bienvenue dans <br className="sm:hidden" />
-            <span className="text-red-500">QIAO</span> Community
+            <span className="text-red-500">QIAO</span> <span translate="no">Community</span>
           </h1>
 
           {isHome && (
@@ -1098,18 +1100,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
 
               {/* Social icons */}
               <div className="mt-6 flex items-center gap-3 text-slate-400">
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">in</span>
-                </a>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">fb</span>
-                </a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">yt</span>
-                </a>
-                <a href="https://x.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">𝕏</span>
-                </a>
+                <SocialLinks itemClassName="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors" iconClassName="w-3.5 h-3.5" />
               </div>
             </div>
 
