@@ -3,6 +3,17 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  /* Largeur des contenus : 1536 px au lieu de 1280 px, pour éviter les grandes marges blanches
+     sur les écrans larges ou avec un zoom du navigateur à 80-90 %. */
+  --container-7xl: 96rem;
+}
+
+/* Bandeaux du Hub Commerce : sur ordinateur, la photo commence juste après la colonne de texte
+   (jamais dessous) et va jusqu'au bord droit de l'écran. */
+@media (min-width: 1024px) {
+  .hub-hero-media {
+    left: calc(max(0px, (100% - var(--container-7xl)) / 2) + 2rem + 34rem + 2.5rem);
+  }
 }
 
 @layer base {

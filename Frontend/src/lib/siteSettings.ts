@@ -20,28 +20,33 @@ export interface SiteSettings {
   phone: string;
   whatsapp: string;
   hours: string;
-  social: { linkedin: string; facebook: string; x: string; youtube: string };
+  /** Adresse complète de chaque réseau ; un réseau laissé vide n'est pas affiché sur le site. */
+  social: { instagram: string; facebook: string; linkedin: string; x: string; youtube: string };
+  /** Vidéo de présentation (YouTube, Facebook, Vimeo ou fichier MP4). Vide : les boutons « Voir la vidéo » sont masqués. */
+  videoUrl: string;
   offices: SiteOffice[];
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   email: 'contact@qiao.tn',
-  phone: '+216 71 123 456',
-  whatsapp: '+216 71 123 456',
+  phone: '+216 28 773 249',
+  whatsapp: '+216 28 773 249',
   hours: 'Lundi - Vendredi, 9h00 - 18h00 (GMT+1)',
   social: {
-    linkedin: 'https://linkedin.com',
-    facebook: 'https://facebook.com',
-    x: 'https://x.com',
-    youtube: 'https://youtube.com',
+    instagram: 'https://www.instagram.com/qiao.china.bridge/',
+    facebook: 'https://www.facebook.com/p/Qiao-China-Bridge-Platform-61589776743829/',
+    linkedin: '',
+    x: '',
+    youtube: '',
   },
+  videoUrl: '',
   offices: [
     {
       name: 'Tunis (Siège social)',
       city: 'Tunis, Tunisie',
       countryCode: 'TN',
       address: ['Immeuble International City Center', 'Avenue de la Bourse, Les Berges du Lac', '1053 Tunis, Tunisie'],
-      phone: '+216 71 123 456',
+      phone: '+216 28 773 249',
       mapsUrl: 'https://maps.google.com/?q=Les+Berges+du+Lac+Tunis',
       image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80',
     },

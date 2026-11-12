@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SocialIcon, SocialLinks, activeSocialLinks } from './common/SocialLinks';
 import { siteSettings, telHref, whatsappHref } from '../lib/siteSettings';
 import {
   User,
@@ -28,11 +29,13 @@ import {
   Download,
   Copy,
   Check,
-  Youtube
+  Youtube,
+  Handshake,
 } from 'lucide-react';
 import { StrategicRegionMap } from './StrategicRegionMap';
 import { AppTab } from '../types';
 import { Logo } from './Logo';
+import { FlagIcon } from './common/FlagIcon';
 import shanghaiBanner from '../assets/images/contact_shanghai_greatwall_complete_1791404766592.jpg';
 import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
@@ -253,24 +256,21 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 et vous accompagner à chaque étape de votre développement entre la Chine et l'Afrique du Nord.
               </p>
 
-              {/* 4 Trust Badges in single horizontal row */}
-              <div className="pt-4 flex flex-wrap items-center gap-5 sm:gap-7 text-xs sm:text-sm font-bold text-[#0c2560]">
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-600 text-lg">🤝</span>
-                  <span>Une écoute attentive</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Des réponses rapides</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Des experts à votre service</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Vos informations en toute confidentialité</span>
-                </div>
+              {/* 4 engagements : grille régulière, même taille et même alignement */}
+              <div className="pt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-[13px] font-bold text-[#0c2560]">
+                {[
+                  { icon: Handshake, label: 'Une écoute attentive' },
+                  { icon: Target, label: 'Des réponses rapides' },
+                  { icon: Users, label: 'Des experts à votre service' },
+                  { icon: Shield, label: 'Vos informations en toute confidentialité' },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-2.5 bg-white rounded-xl border border-slate-200 px-3 py-2.5">
+                    <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <span className="leading-snug">{label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -287,18 +287,27 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               </div>
 
               {/* Geographic Column over mountain foreground */}
-              <div className="bg-[#0c2560]/85 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 shadow-lg max-w-xs w-full text-right text-xs font-black tracking-wider text-white space-y-1">
-                <div className="text-sky-300 text-[11px] font-bold tracking-widest pb-1 border-b border-white/20 uppercase">
-                  Réseau Stratégique
+              <div className="bg-[#0c2560]/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 shadow-lg max-w-xs w-full text-white">
+                <div className="text-sky-300 text-[11px] font-bold tracking-widest pb-2 mb-3 border-b border-white/20 uppercase">
+                  Réseau stratégique
                 </div>
-                <div>CHINE</div>
-                <div>TUNISIE</div>
-                <div>ALGÉRIE</div>
-                <div>MAROC</div>
-                <div>ÉGYPTE</div>
-                <div>LIBYE</div>
-                <div className="pt-2 text-[10px] text-amber-300 uppercase tracking-widest font-black border-t border-white/25">
-                  DES OPPORTUNITÉS SANS FRONTIÈRES
+                <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 text-xs font-bold">
+                  {[
+                    ['CN', 'Chine'],
+                    ['TN', 'Tunisie'],
+                    ['DZ', 'Algérie'],
+                    ['MA', 'Maroc'],
+                    ['EG', 'Égypte'],
+                    ['LY', 'Libye'],
+                  ].map(([code, name]) => (
+                    <div key={code} className="flex items-center gap-2">
+                      <FlagIcon country={code} size="xs" />
+                      <span>{name}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-2.5 text-[10px] text-amber-300 uppercase tracking-widest font-black border-t border-white/25">
+                  Des opportunités sans frontières
                 </div>
               </div>
             </div>
@@ -809,23 +818,26 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                     </div>
                   </div>
 
-                  {/* LinkedIn */}
-                  <a
-                    href={settings.social.linkedin}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <Linkedin className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-slate-500">LinkedIn</div>
-                      <div className="text-xs font-medium text-slate-700 mt-0.5">
-                        Suivez notre actualité et connectez avec notre équipe.
+                  {/* Réseaux sociaux renseignés dans Paramètres du site */}
+                  {activeSocialLinks().map((network) => (
+                    <a
+                      key={network.key}
+                      href={network.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-start gap-3.5 p-3 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
+                    >
+                      <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform ${network.brand}`}>
+                        <SocialIcon network={network.key} className="w-5 h-5" />
                       </div>
-                    </div>
-                  </a>
+                      <div>
+                        <div className="text-xs font-semibold text-slate-500" translate="no">{network.label}</div>
+                        <div className="text-xs font-medium text-slate-700 mt-0.5">
+                          Suivez notre actualité et connectez avec notre équipe.
+                        </div>
+                      </div>
+                    </a>
+                  ))}
 
                   {/* WhatsApp Business */}
                   <a
@@ -1045,30 +1057,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
             {/* Socials & Lang */}
             <div className="flex items-center gap-3">
-              <a
-                href={siteSettings().social.linkedin}
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href={siteSettings().social.youtube}
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-              <a
-                href={siteSettings().social.x}
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors font-bold text-xs"
-              >
-                𝕏
-              </a>
+              <SocialLinks itemClassName="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors" iconClassName="w-4 h-4" />
 
               <div className="pl-2 border-l border-slate-200">
                 <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">

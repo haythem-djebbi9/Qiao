@@ -25,6 +25,7 @@ import {
   Hexagon,
 } from 'lucide-react';
 import { caseStudiesData, testimonialsData } from '../data/mockData';
+import { initials } from '../lib/text';
 import { CaseStudy } from '../types';
 
 interface SuccessStoriesSectionProps {
@@ -305,12 +306,18 @@ export const SuccessStoriesSection: React.FC<SuccessStoriesSectionProps> = ({
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                  <img
-                    src={item.avatar}
-                    alt={item.name}
-                    referrerPolicy="no-referrer"
-                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                  />
+                  {item.avatar ? (
+                    <img
+                      src={item.avatar}
+                      alt={item.name}
+                      referrerPolicy="no-referrer"
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <span className="w-10 h-10 rounded-full bg-[#0a1c3d] text-white text-xs font-bold flex items-center justify-center shrink-0" translate="no">
+                      {initials(item.name)}
+                    </span>
+                  )}
                   <div>
                     <h4 className="text-xs font-bold text-slate-900">{item.name}</h4>
                     <p className="text-[11px] text-slate-500">

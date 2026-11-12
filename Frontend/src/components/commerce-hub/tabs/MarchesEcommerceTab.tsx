@@ -29,7 +29,7 @@ import { CommerceHubTab } from '../../../types';
 import { FlagIcon } from '../../common/FlagIcon';
 
 // Image assets for article thumbnails
-import reportCoverImg from '../../../assets/images/china_ecommerce_report_1790808742649.jpg';
+import reportCoverImg from '../../../assets/images/ecommerce_devices_marketplace_1790934935730.jpg';
 import electronicsImg from '../../../assets/images/hightech_electronics_1790888270277.jpg';
 import corridorNightImg from '../../../assets/images/china_corridor_night_skyline_1790804583067.jpg';
 import containerPortImg from '../../../assets/images/container_port_cargo_1790805153002.jpg';
@@ -631,8 +631,8 @@ export const MarchesEcommerceTab: React.FC<MarchesEcommerceTabProps> = ({
             </span>
           </div>
           <div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">450 Mds</span>
+            <div className="flex flex-wrap items-baseline gap-x-1">
+              <span className="text-xl sm:text-3xl whitespace-nowrap font-black text-slate-900 tracking-tight">450 Mds</span>
               <span className="text-[11px] font-bold text-blue-600 uppercase">USD</span>
             </div>
             <div className="text-xs font-semibold text-slate-600 mt-0.5 leading-snug">
@@ -660,8 +660,8 @@ export const MarchesEcommerceTab: React.FC<MarchesEcommerceTabProps> = ({
             </div>
           </div>
           <div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">28,4 Mds</span>
+            <div className="flex flex-wrap items-baseline gap-x-1">
+              <span className="text-xl sm:text-3xl whitespace-nowrap font-black text-slate-900 tracking-tight">28,4 Mds</span>
               <span className="text-[11px] font-bold text-blue-600 uppercase">USD</span>
             </div>
             <div className="text-xs font-semibold text-slate-600 mt-0.5 leading-snug">
@@ -686,8 +686,8 @@ export const MarchesEcommerceTab: React.FC<MarchesEcommerceTabProps> = ({
             </span>
           </div>
           <div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">320 Mds</span>
+            <div className="flex flex-wrap items-baseline gap-x-1">
+              <span className="text-xl sm:text-3xl whitespace-nowrap font-black text-slate-900 tracking-tight">320 Mds</span>
               <span className="text-[11px] font-bold text-blue-600 uppercase">USD</span>
             </div>
             <div className="text-xs font-semibold text-slate-600 mt-0.5 leading-snug">

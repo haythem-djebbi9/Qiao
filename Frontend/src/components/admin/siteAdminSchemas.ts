@@ -211,11 +211,20 @@ export const SETTINGS_FIELDS: Field[] = [
     label: 'Réseaux sociaux (adresse complète de chaque page)',
     type: 'group',
     fields: [
-      { key: 'linkedin', label: 'LinkedIn', type: 'text' },
+      { key: 'instagram', label: 'Instagram', type: 'text' },
       { key: 'facebook', label: 'Facebook', type: 'text' },
+      { key: 'linkedin', label: 'LinkedIn', type: 'text' },
       { key: 'x', label: 'X (Twitter)', type: 'text' },
       { key: 'youtube', label: 'YouTube', type: 'text' },
     ],
+    help: 'Un réseau laissé vide n’est pas affiché sur le site.',
+  },
+  {
+    key: 'media',
+    label: 'Vidéo de présentation',
+    type: 'group',
+    fields: [{ key: 'videoUrl', label: 'Adresse de la vidéo (YouTube, Facebook, Vimeo ou fichier MP4)', type: 'text' }],
+    help: 'Laissée vide, les boutons « Voir la vidéo » ne sont pas affichés.',
   },
   {
     key: 'offices',

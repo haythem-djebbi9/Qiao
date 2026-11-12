@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { SocialLinks } from './common/SocialLinks';
 import { siteSettings } from '../lib/siteSettings';
 import { Logo } from './Logo';
 import qiaoAcademyHero from '../assets/images/qiao_academy_hero_1791404215248.jpg';
@@ -41,6 +42,7 @@ import { api } from '../lib/api';
 import { AcademyItemType, Cart, Course, LearningPath } from '../lib/models';
 import { CheckoutModal, CheckoutResult } from './academy/CheckoutModal';
 import { resolveImage } from '../lib/assets';
+import { Avatar } from './community/ui';
 import { CourseOutline, LESSON_TYPE_LABELS, formatMinutes } from '../lib/academy';
 import { LessonTypeIcon } from './academy/ui';
 import { useAuth } from '../context/AuthContext';
@@ -725,12 +727,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
                       {/* Instructor with Avatar */}
                       <div className="flex items-center gap-2 mb-3">
-                        <img
-                          src={resolveImage(course.instructorImg)}
-                          alt={course.instructor}
-                          referrerPolicy="no-referrer"
-                          className="w-6 h-6 rounded-full object-cover border border-slate-200"
-                        />
+                        <Avatar src={course.instructorImg ? resolveImage(course.instructorImg) : null} name={course.instructor} className="w-6 h-6 border border-slate-200" />
                         <span className="text-xs text-slate-600 font-normal">
                           {course.instructor}
                         </span>
@@ -968,12 +965,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
                       {/* Instructor */}
                       <div className="flex items-center gap-2 mb-2.5">
-                        <img
-                          src={resolveImage(course.instructorImg)}
-                          alt={course.instructor}
-                          referrerPolicy="no-referrer"
-                          className="w-5 h-5 rounded-full object-cover border border-slate-200"
-                        />
+                        <Avatar src={course.instructorImg ? resolveImage(course.instructorImg) : null} name={course.instructor} className="w-6 h-6 border border-slate-200" />
                         <span className="text-xs text-slate-600 font-normal">
                           {course.instructor}
                         </span>
@@ -1055,7 +1047,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
               {/* 4 Overlapping Avatar Circles */}
               <div className="flex items-center -space-x-2 mb-2">
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80"
                   alt="Expert 1"
                   className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-2xs"
                 />
@@ -1065,7 +1057,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                   className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-2xs"
                 />
                 <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80"
+                  src="https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=120&q=80"
                   alt="Expert 3"
                   className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-2xs"
                 />
@@ -1218,10 +1210,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
               {/* Social links */}
               <div className="flex items-center gap-3 pt-1 text-slate-400">
-                <a href={siteSettings().social.linkedin} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">in</a>
-                <a href={siteSettings().social.facebook} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">f</a>
-                <a href={siteSettings().social.youtube} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">▶</a>
-                <a href={siteSettings().social.x} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">𝕏</a>
+                <SocialLinks itemClassName="hover:text-white cursor-pointer transition-colors" iconClassName="w-4 h-4" />
               </div>
             </div>
 
@@ -1324,10 +1313,10 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
               {/* Instructor & Meta */}
               <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={resolveImage(activeCourseModal.instructorImg)}
-                    alt={activeCourseModal.instructor}
-                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                  <Avatar
+                    src={activeCourseModal.instructorImg ? resolveImage(activeCourseModal.instructorImg) : null}
+                    name={activeCourseModal.instructor}
+                    className="w-10 h-10 border border-slate-200"
                   />
                   <div>
                     <div className="font-semibold text-slate-900 text-sm">{activeCourseModal.instructor}</div>

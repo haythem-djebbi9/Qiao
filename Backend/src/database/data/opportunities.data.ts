@@ -185,7 +185,7 @@ export const OPPORTUNITIES: SeedOpportunity[] = [
     amountMinUsd: 100_000,
     amountMaxUsd: 500_000,
     partnerType: 'Contrat de fabrication',
-    image: 'asset:pharma_laboratory_1790888319378.jpg',
+    image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80',
     description:
       'Partenariat OEM/ODM pour la formulation et le conditionnement de soins cosmétiques à base d’huile d’argan et d’ingrédients botaniques certifiés bio.',
     deadline: '15 Février 2027',
@@ -284,7 +284,7 @@ export const OPPORTUNITIES: SeedOpportunity[] = [
     amountMinUsd: 100_000,
     amountMaxUsd: 500_000,
     partnerType: 'Distributeurs',
-    image: 'asset:pharma_laboratory_1790888319378.jpg',
+    image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80',
     description: 'Marque chinoise de soins de la peau recherche des distributeurs exclusifs pour le marché nord-africain.',
     deadline: '15 Février 2027',
     verified: false,

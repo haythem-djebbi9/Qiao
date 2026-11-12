@@ -377,6 +377,8 @@ export interface Appointment {
   meetingLink: string;
   notes: string | null;
   createdAt: string;
+  /** Vrai quand la confirmation a été envoyée par e-mail (SMTP configuré). */
+  emailSent?: boolean;
 }
 
 export interface Dashboard {

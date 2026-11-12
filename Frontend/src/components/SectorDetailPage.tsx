@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
 import { siteSettings } from '../lib/siteSettings';
 import {
   ArrowRight,
@@ -314,27 +315,23 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
             alt={sector.title}
             loading="eager"
             onError={(e) => {
-              e.currentTarget.src = "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1920&q=85";
+              e.currentTarget.src = "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=85";
             }}
             className={`w-full h-full object-cover contrast-[1.12] saturate-[1.18] brightness-[1.02] opacity-100 ${
               sector.id === 'industrie' ? 'object-right' : sector.id === 'logistique' ? 'object-top' : 'object-center'
             }`}
           />
           {/* Dégradé protecteur blanc pur et doux couvrant toute la colonne de gauche (from-white via-white/95 to-transparent), éliminant tout conflit visuel avec les conteneurs et camions en arrière-plan */}
-          <div 
-            className="absolute inset-y-0 left-0 w-full sm:w-[64%] lg:w-[54%] bg-gradient-to-r from-white via-white/95 to-transparent z-10"
-            style={{
-              maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 75px, rgba(0,0,0,1) 125px, rgba(0,0,0,1) 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 75px, rgba(0,0,0,1) 125px, rgba(0,0,0,1) 100%)',
-            }}
-          />
+          {/* Lisibilité : voile blanc sur mobile ; sur ordinateur, fondu blanc sous toute la colonne de texte. */}
+          <div className="sm:hidden absolute inset-0 bg-white/85 z-10" />
+          <div className="hidden sm:block absolute inset-y-0 left-0 w-[78%] lg:w-[62%] bg-gradient-to-r from-white from-0% via-white/95 via-65% to-transparent z-10" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
             {/* Left Column: Sector tag, Titles, Description, CTA Buttons */}
-            <div className="lg:col-span-7 text-left space-y-4">
+            <div className="lg:col-span-6 text-left space-y-4">
               
               {/* SECTEUR Tag */}
               <div className="inline-flex items-center gap-2">
@@ -387,7 +384,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
             </div>
 
             {/* Right Column: Floating Slogan & Navy Dock of Sub-sectors */}
-            <div className="lg:col-span-5 flex flex-col items-end justify-center space-y-6">
+            <div className="lg:col-span-6 flex flex-col items-end justify-center space-y-6">
               
               {/* Cursive / Brush Slogan */}
               {sector.heroSlogan && (
@@ -417,11 +414,11 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
 
               {/* Floating Dock of Sub-sectors */}
               {sector.heroPills && sector.heroPills.length > 0 && (
-                <div className={`w-full max-w-[280px] rounded-2xl p-4 text-white space-y-2.5 ${
-                  sector.id === 'agriculture'
-                    ? 'bg-black/35 backdrop-blur-md border border-white/20 shadow-2xl'
-                    : 'bg-[#0a1c3d] rounded-2xl shadow-2xl border border-blue-900/40'
-                }`}>
+                <div className="hidden lg:block w-full max-w-[280px] rounded-2xl p-4 text-white space-y-2.5 bg-[#0a1c3d]/95 shadow-2xl border border-blue-900/40">
+                  {/* Titre : ce que regroupe cette carte (les sous-secteurs détaillés plus bas). */}
+                  <div className="px-2 pb-1.5 border-b border-white/15 text-[10px] font-bold uppercase tracking-widest text-white/70">
+                    Domaines couverts par QIAO
+                  </div>
                   {sector.heroPills.map((pill, idx) => (
                     <div
                       key={idx}
@@ -573,7 +570,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
                     src={sub.image}
                     alt={sub.title}
                     onError={(e) => {
-                      e.currentTarget.src = "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80";
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80";
                     }}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                   />
@@ -986,18 +983,7 @@ export const SectorDetailPage: React.FC<SectorDetailPageProps> = ({
             {/* Right: Social icons, Language, Copyright, Cursive Slogan */}
             <div className="flex flex-col items-center lg:items-end space-y-2 shrink-0">
               <div className="flex items-center gap-3">
-                {/* LinkedIn */}
-                <a href={siteSettings().social.linkedin} target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-[#0077b5] text-white flex items-center justify-center hover:opacity-90">
-                  <Linkedin className="w-3.5 h-3.5" />
-                </a>
-                {/* YouTube */}
-                <a href={siteSettings().social.youtube} target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-[#ff0000] text-white flex items-center justify-center hover:opacity-90">
-                  <Youtube className="w-3.5 h-3.5" />
-                </a>
-                {/* X */}
-                <a href={siteSettings().social.x} target="_blank" rel="noreferrer" className="w-6 h-6 rounded bg-black text-white flex items-center justify-center hover:opacity-90 font-bold text-xs">
-                  𝕏
-                </a>
+                <SocialLinks itemClassName="w-6 h-6 rounded text-white flex items-center justify-center hover:opacity-90" iconClassName="w-3.5 h-3.5" brandColors />
               </div>
 
               <div className="text-[11px] text-slate-500">

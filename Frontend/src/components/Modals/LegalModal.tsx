@@ -71,7 +71,7 @@ const CONTENT: Record<LegalKind, { title: string; sections: { heading: string; t
     title: 'Mentions légales',
     sections: [
       { heading: 'Éditeur', text: 'QIAO Bridge SARL — Immeuble International City Center, Avenue de la Bourse, Les Berges du Lac, 1053 Tunis, Tunisie.' },
-      { heading: 'Contact', text: 'contact@qiao.tn — +216 71 123 456 (du lundi au vendredi, 9h00 - 18h00 GMT+1).' },
+      { heading: 'Contact', text: 'contact@qiao.tn — +216 28 773 249 (du lundi au vendredi, 9h00 - 18h00 GMT+1).' },
       { heading: 'Bureaux', text: 'Tunis (siège), Shanghai, Alger et Casablanca.' },
       { heading: 'Propriété intellectuelle', text: "La marque QIAO (桥), le logo et l'ensemble des contenus du site sont protégés. Toute reproduction sans autorisation est interdite." },
     ],

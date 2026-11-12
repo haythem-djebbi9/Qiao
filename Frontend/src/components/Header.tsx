@@ -148,9 +148,9 @@ export const Header: React.FC<HeaderProps> = ({
     notify('Vous êtes déconnecté. À bientôt sur QIAO !', 'info');
   };
 
-  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1023.98px)').matches);
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1199.98px)').matches);
   useEffect(() => {
-    const query = window.matchMedia('(max-width: 1023.98px)');
+    const query = window.matchMedia('(max-width: 1199.98px)');
     const update = () => setCompact(query.matches);
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
@@ -263,20 +263,25 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Left: QIAO Logo */}
         <div 
           onClick={() => handleNavClick('home')}
-          className="cursor-pointer hover:opacity-95 transition-opacity shrink-0 mr-4 xl:mr-8"
+          className="cursor-pointer hover:opacity-95 transition-opacity shrink-0 mr-3 2xl:mr-8"
         >
-          <Logo variant={isLight ? 'light' : 'dark'} size="md" />
+          <span className="block min-[1200px]:hidden 2xl:block">
+            <Logo variant={isLight ? 'light' : 'dark'} size="md" />
+          </span>
+          <span className="hidden min-[1200px]:block 2xl:hidden">
+            <Logo variant={isLight ? 'light' : 'dark'} size="sm" />
+          </span>
         </div>
 
         {/* Center/Right Navigation Menu (Clean, uncrowded, responsive) */}
-        <div className="hidden lg:flex items-center gap-3.5 xl:gap-5.5 ml-auto mr-3 xl:mr-6">
-          <nav className={`flex items-center gap-3 xl:gap-4.5 text-[13px] xl:text-[13.5px] font-medium ${
+        <div className="hidden min-[1200px]:flex items-center gap-2.5 2xl:gap-5.5 ml-auto mr-2 2xl:mr-6">
+          <nav className={`flex items-center gap-2.5 2xl:gap-4.5 text-[12.5px] 2xl:text-[13.5px] font-medium ${
             isLight ? 'text-slate-800' : 'text-white/90'
           }`}>
             {/* 1. Accueil */}
             <button
               onClick={() => handleNavClick('home')}
-              className={`transition-all cursor-pointer py-1 whitespace-nowrap ${
+              className={`hidden 2xl:block transition-all cursor-pointer py-1 whitespace-nowrap ${
                 activeTab === 'home'
                   ? 'text-red-600 font-bold border-b-2 border-red-600 pb-0.5'
                   : isLight
@@ -741,7 +746,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right Actions: Clean, non-cluttered, never cut off */}
-        <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
+        <div className="hidden min-[1200px]:flex items-center gap-2 2xl:gap-3 shrink-0">
           
           {/* 1. Search Icon */}
           <button
@@ -809,7 +814,7 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Se connecter */}
               <button
                 onClick={() => handleAuth('login')}
-                className={`px-2.5 xl:px-3 py-1.5 text-xs sm:text-[13px] font-medium transition-colors cursor-pointer whitespace-nowrap rounded-lg ${
+                className={`px-2.5 2xl:px-3 py-1.5 text-xs sm:text-[13px] font-medium transition-colors cursor-pointer whitespace-nowrap rounded-lg ${
                   isLight
                     ? 'text-slate-700 hover:text-red-600 hover:bg-slate-100'
                     : 'text-white/90 hover:text-white hover:bg-white/10'
@@ -821,7 +826,7 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Red Solid CTA Button: Créer un compte */}
               <button
                 onClick={() => handleAuth('register')}
-                className="px-3.5 xl:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer whitespace-nowrap shrink-0"
+                className="px-3.5 2xl:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer whitespace-nowrap shrink-0"
               >
                 {t.register}
               </button>
@@ -1008,7 +1013,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Mobile menu hamburger button */}
-        <div className="flex lg:hidden items-center gap-2 relative">
+        <div className="flex min-[1200px]:hidden items-center gap-2 relative">
           {langDropdownOpen && (
             <div className="absolute top-full right-0 mt-2 w-44 rounded-2xl shadow-2xl py-2 px-1.5 z-50 border bg-white border-slate-200 text-slate-800">
               {languages.map((lang) => (
@@ -1056,7 +1061,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Navigation Menu */}
       {mobileMenuOpen && (
-        <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-2xl ${
+        <div className={`min-[1200px]:hidden border-b px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-200 shadow-2xl ${
           isLight
             ? 'bg-white border-slate-200 text-slate-800'
             : 'bg-[#07152b] border-white/10 text-white'
@@ -1257,7 +1262,7 @@ export const Header: React.FC<HeaderProps> = ({
     {/* Boutons rapides (mobile et tablette), en bas de l'écran : compte, administration et rubriques principales. */}
     <div
         ref={quickBar}
-        className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="min-[1200px]:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <nav aria-label="Accès rapide" className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-4 sm:px-6 pb-0.5">
           {isLoggedIn ? (

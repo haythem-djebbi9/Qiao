@@ -125,7 +125,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
       publisher: 'QIAO Intelligence',
       date: 'Juin 2024',
       size: 'PDF - 3,8 MB',
-      image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=400&q=80',
+      image: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=400&q=80',
     },
     {
       id: 'rep-3',
@@ -174,7 +174,7 @@ export const RapportsTab: React.FC<RapportsTabProps> = ({
       rank: 2,
       title: 'E-commerce in North Africa 2024',
       downloads: '9,8k téléchargements',
-      image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=200&q=80',
+      image: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=200&q=80',
     },
     {
       rank: 3,

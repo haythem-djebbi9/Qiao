@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { slugify } from '../../common/text';
+import { workingLink } from '../appointments/appointments.service';
 import { AuditService } from '../platform/platform.services';
 import { User } from '../users/user.entity';
 import { COLLECTIONS, CollectionDef, INBOXES } from './site-admin.collections';
@@ -140,10 +141,15 @@ export class SiteAdminService {
   async inbox(name: string) {
     const def = INBOXES[name];
     if (!def) throw new NotFoundException('Liste inconnue.');
-    return this.dataSource.getRepository(def.entity).find({
+    const rows = await this.dataSource.getRepository(def.entity).find({
       relations: def.relations,
       order: { createdAt: 'DESC' } as never,
       take: 300,
+    });
+    if (name !== 'appointments') return rows;
+    return rows.map((row) => {
+      const link = (row as { meetingLink?: string }).meetingLink;
+      return link ? { ...row, meetingLink: workingLink(link) } : row;
     });
   }
 

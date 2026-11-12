@@ -75,8 +75,8 @@ export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
             <div className="text-xs font-semibold text-slate-600 leading-snug">
               Échanges commerciaux totaux
             </div>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">46,8 Mds</span>
+            <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
+              <span className="text-xl sm:text-3xl whitespace-nowrap font-black text-slate-900 tracking-tight">46,8 Mds</span>
               <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
             </div>
             <div className="mt-1 text-xs font-bold text-emerald-600 flex items-center gap-1">
@@ -95,8 +95,8 @@ export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
             <div className="text-xs font-semibold text-slate-600 leading-snug">
               Exportations de la Chine → Afrique du Nord
             </div>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">24,1 Mds</span>
+            <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
+              <span className="text-xl sm:text-3xl whitespace-nowrap font-black text-slate-900 tracking-tight">24,1 Mds</span>
               <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
             </div>
             <div className="mt-1 text-xs font-bold text-emerald-600 flex items-center gap-1">
@@ -115,8 +115,8 @@ export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
             <div className="text-xs font-semibold text-slate-600 leading-snug">
               Importations de l'Afrique du Nord → Chine
             </div>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">22,7 Mds</span>
+            <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
+              <span className="text-xl sm:text-3xl whitespace-nowrap font-black text-slate-900 tracking-tight">22,7 Mds</span>
               <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
             </div>
             <div className="mt-1 text-xs font-bold text-emerald-600 flex items-center gap-1">
@@ -135,8 +135,8 @@ export const FluxCommerciauxTab: React.FC<FluxCommerciauxTabProps> = ({
             <div className="text-xs font-semibold text-slate-600 leading-snug">
               Balance commerciale
             </div>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">+1,4 Mds</span>
+            <div className="flex flex-wrap items-baseline gap-x-1 mt-0.5">
+              <span className="text-xl sm:text-3xl whitespace-nowrap font-black text-slate-900 tracking-tight">+1,4 Mds</span>
               <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
             </div>
             <div className="mt-1 text-xs font-medium text-slate-500">

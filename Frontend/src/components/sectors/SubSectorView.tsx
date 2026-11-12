@@ -6,7 +6,7 @@ import { useAppActions } from '../../context/AppActionsContext';
 import { setQueryParams } from '../../lib/routes';
 import { CountryFlag } from '../common/CountryFlag';
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80';
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80';
 
 const scrollToOpportunities = () => document.getElementById('opportunites-sous-secteur')?.scrollIntoView({ behavior: 'smooth' });
 

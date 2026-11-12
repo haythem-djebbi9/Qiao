@@ -2,7 +2,7 @@ import solarPanelsImg from '../assets/images/solar_farm_tunisia_1790805165350.jp
 import fashionTextileImg from '../assets/images/textile_fashion_apparel_1790888282892.jpg';
 import oliveOilImg from '../assets/images/olive_oil_export_1790805177453.jpg';
 import logisticsWarehouseImg from '../assets/images/container_port_cargo_1790805153002.jpg';
-import cosmeticsImg from '../assets/images/pharma_laboratory_1790888319378.jpg';
+const cosmeticsImg = 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80';
 
 /** Opportunités présentées dans le Commerce Hub. */
 export interface HubOpportunity {

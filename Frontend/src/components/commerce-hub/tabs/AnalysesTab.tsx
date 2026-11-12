@@ -404,8 +404,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.vol}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.vol}</span>
                 <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
@@ -430,8 +430,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.ecom}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.ecom}</span>
                 <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
@@ -456,8 +456,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.export}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.export}</span>
                 <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
@@ -482,8 +482,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.usersCn}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.usersCn}</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
                 Consommateurs en ligne en Chine
@@ -507,8 +507,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.usersNa}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.usersNa}</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
                 Consommateurs e-commerce (AN)

@@ -421,9 +421,13 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
               key={idx}
               className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-md transition-shadow flex items-start justify-between"
             >
-              <div>
-                <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  {m.value}
+              <div className="min-w-0">
+                {/* Montant et unité séparés : l'unité passe à la ligne sur téléphone au lieu d'être coupée. */}
+                <div className="flex flex-wrap items-baseline gap-x-1">
+                  <span className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight whitespace-nowrap">
+                    {m.value.replace(/\s*USD$/, '')}
+                  </span>
+                  {/USD$/.test(m.value) && <span className="text-[11px] font-bold text-blue-600 uppercase">USD</span>}
                 </div>
                 <div className="text-xs font-semibold text-slate-600 mt-1 leading-snug">
                   {m.label}
@@ -432,7 +436,7 @@ export const ProduitsTab: React.FC<ProduitsTabProps> = ({
                   {m.change}
                 </div>
               </div>
-              <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+              <div className="hidden sm:flex w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 items-center justify-center shrink-0">
                 <Icon className={`w-5 h-5 ${m.color}`} />
               </div>
             </div>

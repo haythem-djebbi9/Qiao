@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
 import { siteSettings } from '../lib/siteSettings';
 import { Logo } from './Logo';
 import intelligenceHeroBg from '../data/qiao_intelligence.jpg';
@@ -8,7 +9,7 @@ import solarFarmTunisiaImg from '../assets/images/solar_farm_tunisia_17908051653
 import containerPortCargoImg from '../assets/images/container_port_cargo_1790805153002.jpg';
 import oliveOilExportImg from '../assets/images/olive_oil_export_1790805177453.jpg';
 import industrialEngineerMachineImg from '../assets/images/industrial_engineer_machine_1790805190415.jpg';
-import chinaEcommerceReportImg from '../assets/images/china_ecommerce_report_1790808742649.jpg';
+import chinaEcommerceReportImg from '../assets/images/ecommerce_devices_marketplace_1790934935730.jpg';
 import {
   Search,
   ArrowRight,
@@ -979,10 +980,7 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
 
               {/* Social links */}
               <div className="flex items-center gap-3 pt-1 text-slate-400">
-                <a href={siteSettings().social.linkedin} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">in</a>
-                <a href={siteSettings().social.facebook} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">f</a>
-                <a href={siteSettings().social.youtube} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">▶</a>
-                <a href={siteSettings().social.x} target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">𝕏</a>
+                <SocialLinks itemClassName="hover:text-white cursor-pointer transition-colors" iconClassName="w-4 h-4" />
               </div>
             </div>
 

@@ -46,8 +46,9 @@ import { ACADEMY_FILES_DIR, LearningService } from './learning.service';
 type Admin = Pick<User, 'id' | 'fullName'>;
 
 const IMG = (id: string, w = 800) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
-const DEFAULT_COURSE_IMAGE = IMG('photo-1522202176988-66273c2fd55f');
-const DEFAULT_INSTRUCTOR_IMAGE = IMG('photo-1522202176988-66273c2fd55f', 200);
+const DEFAULT_COURSE_IMAGE = IMG('photo-1503676260728-1c00da094a0b');
+/** Sans photo : les initiales du formateur sont affichées. */
+const DEFAULT_INSTRUCTOR_IMAGE = '';
 
 export const MAX_ACADEMY_UPLOAD = 60 * 1024 * 1024;
 const MAX_COVER_SIZE = 5 * 1024 * 1024;

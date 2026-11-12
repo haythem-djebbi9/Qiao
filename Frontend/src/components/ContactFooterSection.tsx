@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SocialLinks } from './common/SocialLinks';
 import { siteSettings, telHref } from '../lib/siteSettings';
 import {
   Clock,
@@ -572,49 +573,7 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
           <div className="lg:col-span-2 space-y-3 lg:border-l lg:border-slate-800/80 lg:pl-6">
             <h4 className="text-sm font-bold text-white">Suivez-nous</h4>
             <div className="flex items-center gap-2.5 pt-1">
-              {/* LinkedIn */}
-              <a
-                href={siteSettings().social.linkedin}
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-3.5 h-3.5" />
-              </a>
-
-              {/* Facebook */}
-              <a
-                href={siteSettings().social.facebook}
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-3.5 h-3.5" />
-              </a>
-
-              {/* YouTube */}
-              <a
-                href={siteSettings().social.youtube}
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
-                aria-label="YouTube"
-              >
-                <Youtube className="w-3.5 h-3.5" />
-              </a>
-
-              {/* X / Twitter */}
-              <a
-                href={siteSettings().social.x}
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
-                aria-label="X"
-              >
-                <Twitter className="w-3.5 h-3.5" />
-              </a>
+              <SocialLinks itemClassName="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer" iconClassName="w-3.5 h-3.5" />
             </div>
           </div>
 

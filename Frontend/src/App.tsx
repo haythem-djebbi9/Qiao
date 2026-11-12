@@ -26,6 +26,7 @@ import { CertificateVerifyPage } from './components/academy/CertificateVerifyPag
 // Modals
 import { ImportCalculatorModal } from './components/Modals/ImportCalculatorModal';
 import { VideoModal } from './components/Modals/VideoModal';
+import { BackToTop } from './components/common/BackToTop';
 import { AuthModal } from './components/Modals/AuthModal';
 import { AppointmentModal } from './components/Modals/AppointmentModal';
 import { ServiceDetailModal } from './components/Modals/ServiceDetailModal';
@@ -62,6 +63,7 @@ import { navigateCommunity, routeFromLink } from './lib/community';
 import { navigateDashboard } from './lib/payments';
 import { opportunityRoute } from './lib/opportunities';
 import { loadSiteContent, useSiteContentVersion } from './lib/siteContent';
+import { siteSettings } from './lib/siteSettings';
 import { setLanguage, toLanguage } from './i18n/runtime';
 import { TermsGate } from './components/community/TermsGate';
 
@@ -139,6 +141,8 @@ export default function App() {
   // Modal states
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  // Sans vidéo renseignée par l'administration, les boutons « Voir la vidéo » ne sont pas affichés.
+  const openVideo = siteSettings().videoUrl ? () => setIsVideoOpen(true) : undefined;
   const [appointment, setAppointment] = useState<{ isOpen: boolean; context?: AppointmentContext }>({ isOpen: false });
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [selectedCaseStudy, setSelectedCaseStudy] = useState<CaseStudy | null>(null);
@@ -615,7 +619,7 @@ export default function App() {
           onNavigate={handleScrollToSection}
           onOpenRegister={handleOpenRegister}
           onOpenContact={() => contactUs()}
-          onOpenVideo={() => setIsVideoOpen(true)}
+          onOpenVideo={openVideo}
         />
       ) : activeTab === 'community' ? (
         <CommunityPage
@@ -678,7 +682,7 @@ export default function App() {
             }}
             onOpenCalculator={() => setIsCalculatorOpen(true)}
             onOpenRegister={handleOpenRegister}
-            onOpenVideo={() => setIsVideoOpen(true)}
+            onOpenVideo={openVideo}
             onExploreServices={() => handleScrollToSection('services')}
           />
         </section>
@@ -710,7 +714,7 @@ export default function App() {
         {/* ========================================================================= */}
         <section id="why-qiao" className="scroll-mt-16 w-full">
           <TechHumanSection
-            onOpenVideo={() => setIsVideoOpen(true)}
+            onOpenVideo={openVideo}
             onOpenMission={() => handleScrollToSection('how-it-works')}
           />
         </section>
@@ -721,7 +725,7 @@ export default function App() {
         <section id="how-it-works" className="scroll-mt-16 w-full">
           <HowItWorksSection
             onJoinNow={handleOpenRegister}
-            onOpenVideo={() => setIsVideoOpen(true)}
+            onOpenVideo={openVideo}
           />
         </section>
 
@@ -732,7 +736,7 @@ export default function App() {
           <AcademySection
             onSelectDomain={(domain) => setSelectedDomain(domain)}
             onExploreCourses={() => handleScrollToSection('academy')}
-            onOpenVideo={() => setIsVideoOpen(true)}
+            onOpenVideo={openVideo}
           />
         </section>
 
@@ -798,10 +802,13 @@ export default function App() {
 
       <VideoModal
         isOpen={isVideoOpen}
+        url={siteSettings().videoUrl}
         onClose={() => setIsVideoOpen(false)}
       />
 
       <AuthModal defaultOrigin={visitorLocation.region} />
+
+      <BackToTop />
 
       <TermsGate />
 

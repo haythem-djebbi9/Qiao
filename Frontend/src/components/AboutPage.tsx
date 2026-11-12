@@ -25,7 +25,8 @@ import heroClearBg from '../data/herophoto.jpg';
 import visionMountainFlagsImg from '../data/unpointverslavenir.jpg';
 import missionPartnersImg from '../assets/images/about_mission_partners_uncut_1791236115168.jpg';
 import containerPortImg from '../assets/images/container_port_cargo_1790805153002.jpg';
-import qiaoAcademyImg from '../assets/images/qiao_academy_hero_1787505055310.jpg';
+import qiaoAcademyImg from '../assets/images/qiao_academy_hero_1791404215248.jpg';
+import { initials } from '../lib/text';
 import qiaoIntelligenceImg from '../assets/images/qiao_intelligence.jpg';
 
 // Official Partner & Institution Logos
@@ -83,8 +84,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         '« Une plateforme indispensable pour sécuriser nos flux d’approvisionnement et bâtir des relations solides de long terme entre nos ingénieurs et les usines chinoises. »',
       author: 'Nadia Cherif',
       role: 'Responsable Achats & Sourcing Méditerranée',
-      image:
-        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
+      image: '',
     },
   ];
 
@@ -97,7 +97,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
     {
       title: 'Ouverture',
       description: 'Des échanges sans frontières pour plus d’opportunités.',
-      image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80',
+      image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80',
     },
     {
       title: 'Innovation',
@@ -174,12 +174,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({
     {
       name: 'Amira Khlifi',
       role: 'Relations Afrique du Nord',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+      image: '',
     },
     {
       name: 'Zhang Min',
       role: 'Partenariats internationaux',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80',
+      image: '',
     },
     {
       name: 'Karim Haddad',
@@ -240,13 +240,15 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
+                {onOpenVideo && (
                 <button
-                  onClick={() => onOpenVideo ? onOpenVideo() : null}
+                  onClick={onOpenVideo}
                   className="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 shadow-xs cursor-pointer"
                 >
                   <Play className="w-3.5 h-3.5 text-[#1d4ed8] fill-[#1d4ed8]" />
                   <span>Voir la vidéo</span>
                 </button>
+                )}
               </div>
             </div>
 
@@ -945,12 +947,18 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 {team.map((member, idx) => (
                   <div key={idx} className="flex flex-col items-center">
                     <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden shadow-sm border border-slate-200 mb-2">
-                      <img
-                        src={member.image}
-                        alt={member.name}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover object-center"
-                      />
+                      {member.image ? (
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover object-center"
+                        />
+                      ) : (
+                        <span className="w-full h-full flex items-center justify-center bg-[#0a1c3d] text-white text-sm font-bold" translate="no">
+                          {initials(member.name)}
+                        </span>
+                      )}
                     </div>
                     <span className="text-[11px] font-bold text-[#0a1c3d] leading-snug">
                       {member.name}
@@ -1111,12 +1119,18 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               {/* Testimonial Card */}
               <div className="relative bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center gap-5">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden shrink-0 shadow-2xs">
-                  <img
-                    src={stories[activeStoryIndex].image}
-                    alt={stories[activeStoryIndex].author}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
-                  />
+                  {stories[activeStoryIndex].image ? (
+                    <img
+                      src={stories[activeStoryIndex].image}
+                      alt={stories[activeStoryIndex].author}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="w-full h-full flex items-center justify-center bg-[#0a1c3d] text-white text-2xl font-bold" translate="no">
+                      {initials(stories[activeStoryIndex].author)}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex-1 space-y-2">

@@ -20,7 +20,7 @@ import {
 import handshakeImg from '../assets/images/china_africa_handshake_1787501713904.jpg';
 
 interface TechHumanSectionProps {
-  onOpenVideo: () => void;
+  onOpenVideo?: () => void;
   onOpenMission: () => void;
 }
 
@@ -542,7 +542,7 @@ export const TechHumanSection: React.FC<TechHumanSectionProps> = ({
           <div className="lg:col-span-5">
             <div 
               onClick={onOpenVideo}
-              className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden cursor-pointer group shadow-xl border border-blue-900/40"
+              className={`relative w-full aspect-[16/9] rounded-2xl overflow-hidden group shadow-xl border border-blue-900/40 ${onOpenVideo ? 'cursor-pointer' : ''}`}
             >
               <img
                 src={handshakeImg}
@@ -551,9 +551,11 @@ export const TechHumanSection: React.FC<TechHumanSectionProps> = ({
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-blue-950/40 group-hover:bg-blue-950/20 transition-colors flex items-center justify-center">
-                <div className="w-14 h-14 rounded-full bg-white text-red-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <Play className="w-5 h-5 ml-0.5 fill-red-600" />
-                </div>
+                {onOpenVideo && (
+                  <div className="w-14 h-14 rounded-full bg-white text-red-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Play className="w-5 h-5 ml-0.5 fill-red-600" />
+                  </div>
+                )}
               </div>
             </div>
           </div>

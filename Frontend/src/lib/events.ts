@@ -45,7 +45,6 @@ export const EVENT_IMAGE_LIBRARY = [
   'asset:evenements_hero_panorama_1791400498744.jpg',
   'asset:evenements_hero_plaza_1791399698341.jpg',
   'asset:event_canton_fair_exterior_1791399745116.jpg',
-  'asset:cat_salons_canton_1791399715213.jpg',
   'asset:cat_organisateurs_stage_1791399731228.jpg',
   'asset:mission_partners_clear_1791224240641.jpg',
   'asset:about_mission_partners_uncut_1791236115168.jpg',

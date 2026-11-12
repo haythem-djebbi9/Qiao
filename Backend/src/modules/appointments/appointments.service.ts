@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { randomBytes } from 'crypto';
 import { Repository } from 'typeorm';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MailService } from '../platform/platform.services';
 import { User } from '../users/user.entity';
 import { Appointment } from './appointment.entity';
 import { CreateAppointmentDto, TIME_SLOTS } from './appointments.dto';
@@ -28,6 +29,17 @@ function formatDate(date: string): string {
   });
 }
 
+/** Salle de visioconférence réelle (Jitsi Meet, gratuite, sans installation), propre à chaque rendez-vous. */
+export function newMeetingLink(): string {
+  return `https://meet.jit.si/QIAO-${randomBytes(6).toString('hex')}`;
+}
+
+/** Les premiers rendez-vous pointaient vers un domaine inexistant (meet.qiao.tn) : même salle, sur Jitsi Meet. */
+export function workingLink(link: string): string {
+  const old = /^https:\/\/meet\.qiao\.tn\/([a-z0-9]+)$/i.exec(link);
+  return old ? `https://meet.jit.si/QIAO-${old[1]}` : link;
+}
+
 function isClosedDay(date: string): boolean {
   const day = new Date(`${date}T12:00:00Z`).getUTCDay();
   return day === 0 || day === 6;
@@ -38,6 +50,7 @@ export class AppointmentsService {
   constructor(
     @InjectRepository(Appointment) private readonly appointments: Repository<Appointment>,
     private readonly notifications: NotificationsService,
+    private readonly mail: MailService,
   ) {}
 
   async availability(date: string, specialty: string) {
@@ -80,7 +93,7 @@ export class AppointmentsService {
         phone: dto.phone?.trim() || null,
         notes: dto.notes?.trim() || null,
         source: dto.source ?? null,
-        meetingLink: `https://meet.qiao.tn/${randomBytes(5).toString('hex')}`,
+        meetingLink: newMeetingLink(),
         user: user ? ({ id: user.id } as User) : null,
       }),
     );
@@ -92,7 +105,29 @@ export class AppointmentsService {
       'appointment',
       'dashboard',
     );
-    return this.present(appointment);
+
+    // Confirmation par e-mail quand le SMTP est configuré (sinon le message est écrit dans les journaux).
+    let emailSent = false;
+    try {
+      await this.mail.send(
+        appointment.email,
+        `QIAO — Rendez-vous confirmé le ${formatDate(date)} à ${dto.time}`,
+        [
+          `Bonjour ${appointment.fullName},`,
+          ``,
+          `Votre consultation « ${SPECIALTY_LABELS[dto.specialty]} » est confirmée le ${formatDate(date)} à ${dto.time} (heure de Tunis, GMT+1).`,
+          ``,
+          `Lien de la visioconférence (sans installation, depuis un navigateur) : ${appointment.meetingLink}`,
+          ``,
+          `À bientôt,`,
+          `L'équipe QIAO`,
+        ].join('\n'),
+      );
+      emailSent = this.mail.enabled;
+    } catch {
+      emailSent = false;
+    }
+    return { ...this.present(appointment), emailSent };
   }
 
   async listForUser(user: User) {
@@ -126,6 +161,10 @@ export class AppointmentsService {
   }
 
   private present(appointment: Appointment) {
-    return { ...appointment, specialtyLabel: SPECIALTY_LABELS[appointment.specialty] ?? appointment.specialty };
+    return {
+      ...appointment,
+      meetingLink: workingLink(appointment.meetingLink),
+      specialtyLabel: SPECIALTY_LABELS[appointment.specialty] ?? appointment.specialty,
+    };
   }
 }
