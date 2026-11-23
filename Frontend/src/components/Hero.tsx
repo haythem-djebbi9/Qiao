@@ -15,19 +15,14 @@ import {
   Building2,
   Globe,
   Star,
-  MapPin,
   ArrowRight,
 } from 'lucide-react';
-import { VisitorLocation } from '../lib/geo';
-import { FlagIcon } from './common/FlagIcon';
 
 interface HeroProps {
   onSearch?: (query: string) => void;
   /** Catégories qui ont au moins un service : les raccourcis sans service sont masqués. */
   availableCategories?: string[];
   onSelectCategory?: (cat: string) => void;
-  /** Position détectée automatiquement (compte, fuseau horaire ou langue). */
-  visitorLocation: VisitorLocation;
   onExploreOpportunities?: () => void;
   onOpenCalculator?: () => void;
   onOpenRegister?: () => void;
@@ -39,16 +34,12 @@ export const Hero: React.FC<HeroProps> = ({
   availableCategories,
   onSearch,
   onSelectCategory,
-  visitorLocation,
   onExploreOpportunities,
   onOpenCalculator,
   onOpenRegister,
   onOpenVideo,
   onExploreServices,
 }) => {
-  const fromChina = visitorLocation.region === 'china';
-  const fromNorthAfrica = visitorLocation.region === 'north-africa';
-
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('Business');
 
@@ -120,47 +111,20 @@ export const Hero: React.FC<HeroProps> = ({
             <p>et développez vos projets en toute sérénité.</p>
           </div>
 
-          {/* Position détectée automatiquement + parcours adapté - Centered base of the pyramid */}
+          {/* Deux parcours, identiques pour tous les visiteurs (aucune détection de position). */}
           <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-5">
-            {/* Detected location pill */}
-            <div
-              className={`px-5 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium flex items-center gap-2.5 shadow-xl backdrop-blur-md text-white ${
-                fromChina ? 'bg-[#dc2626]' : 'bg-[#0a1b38]/90 border border-white/20'
-              }`}
-              title="Position détectée automatiquement"
-            >
-              {visitorLocation.countryCode ? (
-                <FlagIcon country={visitorLocation.countryCode} size="md" className="rounded-sm overflow-hidden shrink-0" />
-              ) : (
-                <MapPin className="w-4 h-4 shrink-0" />
-              )}
-              <span>
-                {fromChina || fromNorthAfrica ? (
-                  <>
-                    Vous êtes en <strong className="font-semibold">{visitorLocation.country}</strong>
-                  </>
-                ) : (
-                  'Bienvenue sur QIAO'
-                )}
-              </span>
-            </div>
-
-            {/* Personalized CTA according to the detected region */}
             <button
-              onClick={fromChina || fromNorthAfrica ? onExploreOpportunities : onExploreServices}
-              className={`px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl active:scale-98 ${
-                fromChina
-                  ? 'bg-[#0a1b38]/90 hover:bg-[#122852] text-white border border-white/20 backdrop-blur-md'
-                  : 'bg-[#dc2626] hover:bg-[#b91c1c] text-white'
-              }`}
+              onClick={onExploreOpportunities}
+              className="px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl active:scale-98 bg-[#0a1b38]/90 hover:bg-[#122852] text-white border border-white/20 backdrop-blur-md"
             >
-              <span>
-                {fromChina
-                  ? "S'implanter en Afrique du Nord"
-                  : fromNorthAfrica
-                  ? 'Sourcer & exporter avec la Chine'
-                  : 'Découvrir nos services'}
-              </span>
+              <span>Explorer les opportunités</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onExploreServices}
+              className="px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl active:scale-98 bg-[#dc2626] hover:bg-[#b91c1c] text-white"
+            >
+              <span>Découvrir nos services</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -309,41 +273,14 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Bottom Coordinates & Rating Strip - Full, unreduced size at the end of the photo */}
-        <div className="mt-3.5 sm:mt-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-          {/* Left: Shanghai Coordinates Pill */}
-          <div className="flex items-center gap-2.5 bg-[#061329]/85 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full shadow-lg">
-            <span className="w-5 h-5 rounded-full bg-red-700 border border-red-500/40 flex items-center justify-center text-[10px] text-white shadow-xs font-bold shrink-0">
-              ★
-            </span>
-            <div className="text-left">
-              <div className="font-semibold text-white tracking-wider text-[11px]">SHANGHAI, CHINA</div>
-              <div className="text-[10px] text-white/60 font-mono">31.2304° N, 121.4737° E</div>
-            </div>
+        {/* Slogan et note, centrés sous la barre de recherche */}
+        <div className="mt-3.5 sm:mt-4 text-center text-xs px-2 py-0.5">
+          <div className="text-white/90 text-xs sm:text-[13px] font-light">
+            Des experts vérifiés et des services fiables pour accompagner vos projets internationaux.
           </div>
-
-          {/* Center: Mission Slogan & 4.8/5 Star Rating */}
-          <div className="text-center px-2 py-0.5">
-            <div className="text-white/90 text-xs sm:text-[13px] font-light">
-              Des experts vérifiés et des services fiables pour accompagner vos projets internationaux.
-            </div>
-            <div className="flex items-center justify-center gap-1.5 mt-1">
-              <span className="text-xs font-semibold text-white">4.8/5</span>
-              <div className="flex items-center text-amber-400 text-xs tracking-widest">
-                ★★★★★
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Tunis Coordinates Pill */}
-          <div className="flex items-center gap-2.5 bg-[#061329]/85 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full shadow-lg">
-            <span className="w-5 h-5 rounded-full bg-blue-600 border border-white/40 flex items-center justify-center text-[10px] text-white shadow-xs font-bold shrink-0">
-              🌍
-            </span>
-            <div className="text-left">
-              <div className="font-semibold text-white tracking-wider text-[11px]">TUNIS, TUNISIA</div>
-              <div className="text-[10px] text-white/60 font-mono">36.8065° N, 10.1815° E</div>
-            </div>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <span className="text-xs font-semibold text-white">4.8/5</span>
+            <div className="flex items-center text-amber-400 text-xs tracking-widest">★★★★★</div>
           </div>
         </div>
       </div>

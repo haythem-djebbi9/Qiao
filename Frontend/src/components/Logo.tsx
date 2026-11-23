@@ -58,8 +58,9 @@ export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'transpare
             <span className={`${DASH_WIDTHS[size]} h-[1.5px] rounded-full shrink-0 ${isDark ? 'bg-sky-400' : 'bg-[#0a1b38]'}`} />
           </div>
           <div className={`${BRAND_SIZES[size]} font-bold tracking-[0.16em] leading-none`}>
-            <span className="text-red-600">THE CHINA</span>
-            <span className={`ml-1 ${isDark ? 'text-sky-300' : 'text-[#0a2f6b]'}`}>BRIDGE</span>
+            {/* Logo officiel : « THE BRIDGE BETWEEN / CHINA & NORTH AFRICA ». */}
+            <span className="text-red-600">CHINA</span>
+            <span className={`ml-1 ${isDark ? 'text-sky-300' : 'text-[#0a2f6b]'}`}>&amp; NORTH AFRICA</span>
           </div>
         </div>
       )}

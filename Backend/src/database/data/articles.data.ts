@@ -130,7 +130,7 @@ export const ARTICLES: Partial<Article>[] = [
     publishedAt: '2024-08-01',
     dateLabel: '1 Août 2024',
     readTime: '5 min de lecture',
-    image: IMG('photo-1522071820081-009f0129c71c'),
+    image: IMG('photo-1539020140153-e479b8c22e70'),
     placements: ['intelligence'],
     summary: 'Due diligence, contrats bilingues, relation de confiance : les clés d’un partenariat durable.',
     keyPoints: [

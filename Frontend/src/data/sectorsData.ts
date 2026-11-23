@@ -417,7 +417,7 @@ export const SECTORS_DETAILS: Record<string, SectorData> = {
       title: "Une startup IA tunisienne s'associe à un géant tech de Shenzhen",
       description:
         "Grâce à l'accompagnement de QIAO, une pépite technologique tunisienne experte en computer vision et traitement du langage a conclu un partenariat de codéveloppement avec un leader technologique de Shenzhen, levant 3,2M$ pour déployer sa solution à l'échelle pan-africaine.",
-      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=800&q=80',
     },
     formTitle: 'Vous avez un projet technologique ou digital ?',
     formSubtitle: 'Notre équipe et notre réseau d’experts tech sino-africains sont à votre disposition pour identifier les meilleures synergies.',

@@ -270,7 +270,7 @@ const CATALOG_COURSES: Partial<Course>[] = [
     duration: '3h',
     durationMinutes: 180,
     price: 69,
-    image: IMG('photo-1522071820081-009f0129c71c', 600),
+    image: IMG('photo-1539020140153-e479b8c22e70', 600),
     domain: 'culture',
     level: 'Débutant',
     format: 'En ligne à son rythme',

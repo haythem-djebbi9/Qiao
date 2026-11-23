@@ -16,8 +16,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { SECTORS_LIST } from '../data/sectorsData';
-import { ContactFooterSection } from './ContactFooterSection';
-import heroClearBg from '../data/herophoto.jpg';
+import { HOME_HERO } from '../lib/heroImage';
 import secteursPartnersImg from '../assets/images/secteurs_partners_apparent_1791221199460.jpg';
 
 interface SecteursPageProps {
@@ -77,9 +76,12 @@ export const SecteursPage: React.FC<SecteursPageProps> = ({
         {/* Full Opacity Panoramic Skyline Background Image */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
-            src={heroClearBg}
+            src={HOME_HERO.src}
+            srcSet={HOME_HERO.srcSet}
+            sizes={HOME_HERO.sizes}
+            fetchPriority="high"
+            decoding="async"
             alt="Skyline moderne Chine et Afrique du Nord"
-            referrerPolicy="no-referrer"
             className="w-full h-full object-cover object-center"
           />
           {/* Soft White Gradient strictly on the left to keep skyline at full opacity */}
@@ -391,10 +393,6 @@ export const SecteursPage: React.FC<SecteursPageProps> = ({
       {/* ========================================================================= */}
       {/* 6. FOOTER SECTION                                                          */}
       {/* ========================================================================= */}
-      <ContactFooterSection
-        showOnlyFooter={true}
-        onScrollToSection={onNavigate}
-      />
     </div>
   );
 };

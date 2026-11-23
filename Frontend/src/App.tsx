@@ -45,7 +45,7 @@ import {
   CaseStudy,
   TrainingDomain,
 } from './types';
-import heroClearBg from './data/herophoto.jpg';
+import { HOME_HERO } from './lib/heroImage';
 import { useAuth } from './context/AuthContext';
 import { useToast } from './context/ToastContext';
 import {
@@ -58,7 +58,6 @@ import {
 import { useApi } from './hooks/useApi';
 import { api } from './lib/api';
 import { Opportunity, User } from './lib/models';
-import { detectVisitorLocation } from './lib/geo';
 import { navigateCommunity, routeFromLink } from './lib/community';
 import { navigateDashboard } from './lib/payments';
 import { opportunityRoute } from './lib/opportunities';
@@ -74,6 +73,11 @@ export interface PageFocus {
 }
 
 const LANGUAGE_KEY = 'qiao.language';
+/** Pages qui ne sont pas la page d'accueil : elles reçoivent le pied de page commun. */
+const DEDICATED_PAGES: string[] = [
+  'opportunites-pays', 'intelligence', 'academy', 'secteurs', 'sector-detail', 'commerce-hub', 'about',
+  'community', 'contact', 'evenements', 'stories', 'certificat', 'resources',
+];
 
 function readStorage(key: string): string | null {
   try {
@@ -129,11 +133,6 @@ export default function App() {
   useEffect(() => {
     void loadSiteContent();
   }, []);
-  // Position du visiteur détectée automatiquement (compte, fuseau horaire, langue).
-  const visitorLocation = useMemo(
-    () => detectVisitorLocation(user ? { origin: user.origin, location: user.location } : null),
-    [user],
-  );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [contactPrefill, setContactPrefill] = useState<ContactPrefill | null>(null);
@@ -659,11 +658,18 @@ export default function App() {
           {/* SECTION 1: HERO (ACCUEIL)                                                 */}
           {/* ========================================================================= */}
           <section id="hero" className="relative overflow-hidden w-full">
-          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          {/* Aperçu flou immédiat (178 octets), puis la photo WebP préchargée dans index.html. */}
+          <div
+            className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-[#c9b39c] bg-cover bg-center"
+            style={{ backgroundImage: `url(${HOME_HERO.placeholder})` }}
+          >
             <img
-              src={heroClearBg}
-              alt="QIAO Bridge - Connecting China and North Africa"
-              referrerPolicy="no-referrer"
+              src={HOME_HERO.src}
+              srcSet={HOME_HERO.srcSet}
+              sizes={HOME_HERO.sizes}
+              fetchPriority="high"
+              decoding="async"
+              alt="QIAO - le pont entre la Chine et l’Afrique du Nord"
               className="w-full h-full object-cover object-center"
             />
             {/* Refined Blue/Vibrant Overlay - Lighter in the center to make the background photo much more apparent */}
@@ -671,7 +677,6 @@ export default function App() {
           </div>
 
           <Hero
-            visitorLocation={visitorLocation}
             availableCategories={servicesData.length ? servicesData.map((service) => service.category) : undefined}
             onExploreOpportunities={() => handleScrollToSection('opportunites')}
             onSearch={handleSearch}
@@ -794,6 +799,11 @@ export default function App() {
       </main>
       )}
 
+      {/* Pied de page commun, identique sur toutes les pages (l'accueil l'affiche déjà sous son formulaire de contact). */}
+      {(DEDICATED_PAGES.includes(activeTab) || (activeTab === 'dashboard' && user)) && (
+        <ContactFooterSection showOnlyFooter onScrollToSection={handleScrollToSection} />
+      )}
+
       {/* Interactive Modals */}
       <ImportCalculatorModal
         isOpen={isCalculatorOpen}
@@ -806,7 +816,7 @@ export default function App() {
         onClose={() => setIsVideoOpen(false)}
       />
 
-      <AuthModal defaultOrigin={visitorLocation.region} />
+      <AuthModal />
 
       <BackToTop />
 

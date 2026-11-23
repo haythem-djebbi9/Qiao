@@ -35,6 +35,7 @@ import {
 import { StrategicRegionMap } from './StrategicRegionMap';
 import { AppTab } from '../types';
 import { Logo } from './Logo';
+import { resolveImage } from '../lib/assets';
 import { FlagIcon } from './common/FlagIcon';
 import shanghaiBanner from '../assets/images/contact_shanghai_greatwall_complete_1791404766592.jpg';
 import { api } from '../lib/api';
@@ -82,7 +83,6 @@ export const ContactPage: React.FC<ContactPageProps> = ({
   const [reference, setReference] = useState('');
   const [submittedName, setSubmittedName] = useState('');
   const [wechatModalOpen, setWechatModalOpen] = useState(false);
-  const [copiedWeChat, setCopiedWeChat] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Identité du membre connecté.
@@ -196,11 +196,6 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     }
   };
 
-  const copyWeChatId = () => {
-    navigator.clipboard.writeText('QIAO_Connect_Official');
-    setCopiedWeChat(true);
-    setTimeout(() => setCopiedWeChat(false), 2000);
-  };
 
   return (
     <div className="w-full bg-white text-slate-900 font-sans min-h-screen">
@@ -700,50 +695,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
                   {/* QR Code Container */}
                   <div className="w-32 bg-white p-2.5 rounded-xl border border-emerald-200 shadow-sm text-center shrink-0">
-                    <div className="w-full aspect-square bg-white flex items-center justify-center p-1 rounded-lg border border-slate-100">
-                      {/* Realistic SVG WeChat QR Code representation */}
-                      <svg viewBox="0 0 100 100" className="w-full h-full text-slate-900">
-                        {/* Corner 1 */}
-                        <rect x="0" y="0" width="30" height="30" fill="currentColor" rx="2" />
-                        <rect x="5" y="5" width="20" height="20" fill="white" rx="1" />
-                        <rect x="10" y="10" width="10" height="10" fill="currentColor" rx="1" />
-                        
-                        {/* Corner 2 */}
-                        <rect x="70" y="0" width="30" height="30" fill="currentColor" rx="2" />
-                        <rect x="75" y="5" width="20" height="20" fill="white" rx="1" />
-                        <rect x="80" y="10" width="10" height="10" fill="currentColor" rx="1" />
-
-                        {/* Corner 3 */}
-                        <rect x="0" y="70" width="30" height="30" fill="currentColor" rx="2" />
-                        <rect x="5" y="75" width="20" height="20" fill="white" rx="1" />
-                        <rect x="10" y="80" width="10" height="10" fill="currentColor" rx="1" />
-
-                        {/* Matrix Grid Data Points */}
-                        <rect x="35" y="5" width="5" height="10" fill="currentColor" />
-                        <rect x="45" y="0" width="5" height="15" fill="currentColor" />
-                        <rect x="55" y="10" width="10" height="5" fill="currentColor" />
-                        <rect x="35" y="25" width="15" height="5" fill="currentColor" />
-                        <rect x="55" y="20" width="5" height="10" fill="currentColor" />
-
-                        {/* Center Icon circle */}
-                        <circle cx="50" cy="50" r="14" fill="#07C160" />
-                        {/* WeChat 2 bubbles */}
-                        <circle cx="46" cy="48" r="5" fill="white" />
-                        <circle cx="53" cy="53" r="4" fill="white" />
-                        <circle cx="45" cy="47" r="1" fill="#07C160" />
-                        <circle cx="48" cy="47" r="1" fill="#07C160" />
-                        <circle cx="52" cy="52.5" r="0.8" fill="#07C160" />
-                        <circle cx="54.5" cy="52.5" r="0.8" fill="#07C160" />
-
-                        {/* Bottom & side data blocks */}
-                        <rect x="35" y="65" width="10" height="5" fill="currentColor" />
-                        <rect x="50" y="70" width="15" height="5" fill="currentColor" />
-                        <rect x="70" y="35" width="5" height="25" fill="currentColor" />
-                        <rect x="80" y="45" width="15" height="5" fill="currentColor" />
-                        <rect x="85" y="60" width="10" height="15" fill="currentColor" />
-                        <rect x="70" y="80" width="15" height="15" fill="currentColor" />
-                        <rect x="40" y="85" width="20" height="5" fill="currentColor" />
-                      </svg>
+                    <div className="w-full aspect-[233/343] bg-white flex items-center justify-center rounded-lg border border-slate-100 overflow-hidden">
+                      <img src={resolveImage(settings.wechatQr)} alt="QR code WeChat QIAO" className="w-full h-full object-contain" />
                     </div>
                     <p className="text-[9px] text-slate-500 font-medium mt-1 leading-tight">
                       Scannez le QR code avec votre application WeChat
@@ -1005,81 +958,6 @@ export const ContactPage: React.FC<ContactPageProps> = ({
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 5. FOOTER: OFFICIAL INSTITUTIONAL FOOTER (Matching contact.png)           */}
-      {/* ========================================================================= */}
-      <footer className="bg-white border-t border-slate-200 pt-8 pb-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100">
-            {/* Logo */}
-            <div className="cursor-pointer" onClick={() => onNavigate('home')}>
-              <Logo size="md" />
-            </div>
-
-            {/* Main Links */}
-            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600 font-medium">
-              <button onClick={() => onNavigate('home')} className="hover:text-red-600 transition-colors">
-                Accueil
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('about')} className="hover:text-red-600 transition-colors">
-                À propos
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('secteurs')} className="hover:text-red-600 transition-colors">
-                Secteurs
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('partners')} className="hover:text-red-600 transition-colors">
-                Pays
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('commerce-hub')} className="hover:text-red-600 transition-colors">
-                Opportunités
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('intelligence')} className="hover:text-red-600 transition-colors">
-                Analyses
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('stories')} className="hover:text-red-600 transition-colors">
-                Événements
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('resources')} className="hover:text-red-600 transition-colors">
-                Ressources
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('contact')} className="text-red-600 font-bold">
-                Contact
-              </button>
-            </nav>
-
-            {/* Socials & Lang */}
-            <div className="flex items-center gap-3">
-              <SocialLinks itemClassName="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors" iconClassName="w-4 h-4" />
-
-              <div className="pl-2 border-l border-slate-200">
-                <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                  FR ⌵
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sublinks & Copyright */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 text-xs text-slate-400">
-            <div className="flex items-center gap-4">
-              <button onClick={() => openLegal('privacy')} className="hover:text-slate-600 transition-colors cursor-pointer">Confidentialité</button>
-              <span>|</span>
-              <button onClick={() => openLegal('terms')} className="hover:text-slate-600 transition-colors cursor-pointer">Conditions d'utilisation</button>
-              <span>|</span>
-              <button onClick={() => openLegal('legal')} className="hover:text-slate-600 transition-colors cursor-pointer">Mentions légales</button>
-            </div>
-            <div>© {new Date().getFullYear()} QIAO. Tous droits réservés.</div>
-          </div>
-        </div>
-      </footer>
 
       {/* ========================================================================= */}
       {/* 6. WECHAT MODAL                                                           */}
@@ -1105,53 +983,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               Ouvrez WeChat &gt; Découvrir &gt; Scanner pour échanger avec notre conseiller dédié.
             </p>
 
-            <div className="w-48 h-48 mx-auto bg-white p-3 rounded-2xl border-2 border-emerald-300 shadow-md flex items-center justify-center mb-4">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-slate-900">
-                <rect x="0" y="0" width="30" height="30" fill="currentColor" rx="2" />
-                <rect x="5" y="5" width="20" height="20" fill="white" rx="1" />
-                <rect x="10" y="10" width="10" height="10" fill="currentColor" rx="1" />
-                <rect x="70" y="0" width="30" height="30" fill="currentColor" rx="2" />
-                <rect x="75" y="5" width="20" height="20" fill="white" rx="1" />
-                <rect x="80" y="10" width="10" height="10" fill="currentColor" rx="1" />
-                <rect x="0" y="70" width="30" height="30" fill="currentColor" rx="2" />
-                <rect x="5" y="75" width="20" height="20" fill="white" rx="1" />
-                <rect x="10" y="80" width="10" height="10" fill="currentColor" rx="1" />
-                <circle cx="50" cy="50" r="14" fill="#07C160" />
-                <circle cx="46" cy="48" r="5" fill="white" />
-                <circle cx="53" cy="53" r="4" fill="white" />
-                <rect x="35" y="5" width="5" height="10" fill="currentColor" />
-                <rect x="45" y="0" width="5" height="15" fill="currentColor" />
-                <rect x="55" y="10" width="10" height="5" fill="currentColor" />
-                <rect x="35" y="25" width="15" height="5" fill="currentColor" />
-                <rect x="55" y="20" width="5" height="10" fill="currentColor" />
-                <rect x="35" y="65" width="10" height="5" fill="currentColor" />
-                <rect x="50" y="70" width="15" height="5" fill="currentColor" />
-                <rect x="70" y="35" width="5" height="25" fill="currentColor" />
-                <rect x="80" y="45" width="15" height="5" fill="currentColor" />
-                <rect x="85" y="60" width="10" height="15" fill="currentColor" />
-                <rect x="70" y="80" width="15" height="15" fill="currentColor" />
-                <rect x="40" y="85" width="20" height="5" fill="currentColor" />
-              </svg>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between text-xs">
-              <span className="font-mono text-slate-700 font-bold">ID : QIAO_Connect_Official</span>
-              <button
-                onClick={copyWeChatId}
-                className="text-emerald-700 font-semibold flex items-center gap-1 hover:text-emerald-800"
-              >
-                {copiedWeChat ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Copié</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copier ID</span>
-                  </>
-                )}
-              </button>
+            <div className="w-56 h-72 mx-auto bg-white p-2 rounded-2xl border-2 border-emerald-300 shadow-md flex items-center justify-center mb-4">
+              <img src={resolveImage(settings.wechatQr)} alt="QR code WeChat QIAO" className="w-full h-full object-contain" />
             </div>
           </div>
         </div>

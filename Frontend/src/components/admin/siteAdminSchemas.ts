@@ -220,6 +220,13 @@ export const SETTINGS_FIELDS: Field[] = [
     help: 'Un réseau laissé vide n’est pas affiché sur le site.',
   },
   {
+    key: 'wechat',
+    label: 'WeChat',
+    type: 'group',
+    fields: [{ key: 'wechatQr', label: 'QR code WeChat (image)', type: 'image' }],
+    help: 'Affiché sur la page Contact et dans le pied de page de toutes les pages.',
+  },
+  {
     key: 'media',
     label: 'Vidéo de présentation',
     type: 'group',

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SocialLinks } from './common/SocialLinks';
-import { siteSettings, telHref } from '../lib/siteSettings';
+import { resolveImage } from '../lib/assets';
+import { siteSettings, telHref, whatsappHref } from '../lib/siteSettings';
 import {
   Clock,
   ShieldCheck,
@@ -546,7 +547,13 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-white shrink-0 mt-0.5" />
                 <span className="leading-snug">
-                  Tunis, Tunisie<br />
+                  {settings.offices[0]?.address.map((line, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && <br />}
+                      {line}
+                    </React.Fragment>
+                  )) ?? 'Tunis, Tunisie'}
+                  <br />
                   <span className="text-[11px] text-slate-400">Présence en Chine et en Afrique du Nord</span>
                 </span>
               </div>
@@ -562,9 +569,17 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
                   {settings.phone}
                 </a>
               </div>
+              {settings.whatsapp && (
+                <div className="flex items-center gap-2.5">
+                  <MessageCircle className="w-4 h-4 text-white shrink-0" />
+                  <a href={whatsappHref(settings.whatsapp)} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+                    WhatsApp : <span translate="no">{settings.whatsapp}</span>
+                  </a>
+                </div>
+              )}
               <div className="flex items-center gap-2.5 text-[11px] text-slate-400">
                 <Clock className="w-4 h-4 text-white shrink-0" />
-                <span>Lun - Ven : 9h00 - 18h00 (GMT+1)</span>
+                <span>{settings.hours}</span>
               </div>
             </div>
           </div>
@@ -572,9 +587,20 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
           {/* Column 5: Suivez-nous with vertical line divider (2 cols) */}
           <div className="lg:col-span-2 space-y-3 lg:border-l lg:border-slate-800/80 lg:pl-6">
             <h4 className="text-sm font-bold text-white">Suivez-nous</h4>
-            <div className="flex items-center gap-2.5 pt-1">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
               <SocialLinks itemClassName="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer" iconClassName="w-3.5 h-3.5" />
             </div>
+            {settings.wechatQr && (
+              <div className="pt-2">
+                <div className="text-[11px] font-semibold text-slate-300 mb-1.5">WeChat</div>
+                <img
+                  src={resolveImage(settings.wechatQr)}
+                  alt="QR code WeChat QIAO"
+                  loading="lazy"
+                  className="w-24 rounded-lg bg-white p-1"
+                />
+              </div>
+            )}
           </div>
 
         </div>

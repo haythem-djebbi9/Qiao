@@ -20,8 +20,7 @@ import {
   Award,
 } from 'lucide-react';
 import { AppTab } from '../types';
-import { ContactFooterSection } from './ContactFooterSection';
-import heroClearBg from '../data/herophoto.jpg';
+import { HOME_HERO } from '../lib/heroImage';
 import visionMountainFlagsImg from '../data/unpointverslavenir.jpg';
 import missionPartnersImg from '../assets/images/about_mission_partners_uncut_1791236115168.jpg';
 import containerPortImg from '../assets/images/container_port_cargo_1790805153002.jpg';
@@ -198,9 +197,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         {/* Full-bleed Skyline Background Image at Full Opacity */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
-            src={heroClearBg}
+            src={HOME_HERO.src}
+            srcSet={HOME_HERO.srcSet}
+            sizes={HOME_HERO.sizes}
+            fetchPriority="high"
+            decoding="async"
             alt="Shanghai et Afrique du Nord Skyline"
-            referrerPolicy="no-referrer"
             className="w-full h-full object-cover object-center"
           />
           {/* Subtle gradient only on the far left behind text so photo takes more visible space */}
@@ -1242,10 +1244,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       {/* ========================================================================= */}
       {/* 10. FOOTER SECTION                                                        */}
       {/* ========================================================================= */}
-      <ContactFooterSection
-        showOnlyFooter={true}
-        onScrollToSection={onNavigate}
-      />
     </div>
   );
 };

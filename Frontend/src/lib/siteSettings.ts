@@ -24,6 +24,8 @@ export interface SiteSettings {
   social: { instagram: string; facebook: string; linkedin: string; x: string; youtube: string };
   /** Vidéo de présentation (YouTube, Facebook, Vimeo ou fichier MP4). Vide : les boutons « Voir la vidéo » sont masqués. */
   videoUrl: string;
+  /** QR code WeChat (image) affiché sur la page Contact et dans le pied de page. */
+  wechatQr: string;
   offices: SiteOffice[];
 }
 
@@ -35,11 +37,12 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   social: {
     instagram: 'https://www.instagram.com/qiao.china.bridge/',
     facebook: 'https://www.facebook.com/p/Qiao-China-Bridge-Platform-61589776743829/',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/company/qiao-le-pont-entre-la-chine-l-afrique-du-nord/',
     x: '',
     youtube: '',
   },
   videoUrl: '',
+  wechatQr: '/images/wechat-qr.04b9b668.jpg',
   offices: [
     {
       name: 'Tunis (Siège social)',

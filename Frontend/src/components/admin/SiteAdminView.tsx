@@ -357,6 +357,7 @@ const SettingsAdmin: React.FC = () => {
     contact: { email: s.email, phone: s.phone, whatsapp: s.whatsapp, hours: s.hours },
     social: s.social,
     media: { videoUrl: s.videoUrl },
+    wechat: { wechatQr: s.wechatQr },
     offices: s.offices,
   });
   const [value, setValue] = useState<Record<string, unknown>>(() => toEditor(siteSettings()));
@@ -374,6 +375,7 @@ const SettingsAdmin: React.FC = () => {
         hours: (contact.hours ?? '').trim(),
         social: value.social as SiteSettings['social'],
         videoUrl: String((value.media as Record<string, string> | undefined)?.videoUrl ?? '').trim(),
+        wechatQr: String((value.wechat as Record<string, string> | undefined)?.wechatQr ?? '').trim() || DEFAULT_SITE_SETTINGS.wechatQr,
         offices: value.offices as SiteSettings['offices'],
       };
       await api.put('/site-admin/contents/site:settings', { data });

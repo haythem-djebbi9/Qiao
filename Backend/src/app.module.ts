@@ -69,9 +69,15 @@ const FRONTEND_DIST = process.env.FRONTEND_DIST ?? join(__dirname, '..', '..', '
             rootPath: FRONTEND_DIST,
             exclude: ['/api/(.*)'],
             serveStaticOptions: {
-              // Fichiers compilés (nom haché) : cache long ; le reste, dont index.html, est revalidé à chaque visite.
+              // Fichiers compilés et images dont le nom contient une empreinte (ex. accueil-1600.bffcfad5.webp) :
+              // cache long ; le reste, dont index.html, est revalidé à chaque visite.
               setHeaders: (res: { setHeader: (name: string, value: string) => void }, path: string) =>
-                res.setHeader('Cache-Control', /[\\/]assets[\\/]/.test(path) ? 'public, max-age=31536000, immutable' : 'public, max-age=0, must-revalidate'),
+                res.setHeader(
+                  'Cache-Control',
+                  /[\\/]assets[\\/]|\.[0-9a-f]{8}\.(webp|avif|jpe?g|png)$/.test(path)
+                    ? 'public, max-age=31536000, immutable'
+                    : 'public, max-age=0, must-revalidate',
+                ),
             },
           }),
         ]
