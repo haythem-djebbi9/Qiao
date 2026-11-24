@@ -54,7 +54,28 @@ export function toLanguage(code: string | null | undefined): Language {
   return upper === 'EN' || upper === 'ZH' || upper === 'AR' ? upper : 'FR';
 }
 
+/** Langue indiquée au début de l'adresse (/fr, /en, /zh, /ar), sinon null. */
+export function languageFromPath(pathname: string = window.location.pathname): Language | null {
+  const segment = pathname.split('/')[1]?.toLowerCase();
+  return segment === 'fr' || segment === 'en' || segment === 'zh' || segment === 'ar' ? (segment.toUpperCase() as Language) : null;
+}
+
+/** Met la langue au début de l'adresse (ex. /ar?tab=academy), sans recharger la page ni créer d'entrée d'historique. */
+export function syncLanguagePath(code: Language) {
+  try {
+    const url = new URL(window.location.href);
+    const rest = url.pathname.replace(/^\/(fr|en|zh|ar)(?=\/|$)/i, '');
+    url.pathname = `/${code.toLowerCase()}${rest === '/' ? '' : rest}`;
+    if (url.href !== window.location.href) window.history.replaceState(window.history.state, '', url.href);
+  } catch {
+    // Adresse non modifiable (aperçu, contexte restreint) : la langue reste appliquée.
+  }
+}
+
+/** Langue à afficher : celle de l'adresse (lien partagé), sinon le dernier choix fait sur cet appareil. */
 export function storedLanguage(): Language {
+  const fromPath = languageFromPath();
+  if (fromPath) return fromPath;
   try {
     return toLanguage(localStorage.getItem(STORAGE_KEY));
   } catch {
@@ -282,6 +303,7 @@ export async function setLanguage(code: Language): Promise<void> {
   } catch {
     // Préférence non persistée (stockage indisponible).
   }
+  syncLanguagePath(code);
   if (code === 'FR') {
     observer.disconnect();
     if (previous !== 'FR') restoreOriginals();
@@ -318,6 +340,13 @@ export async function initLanguage() {
   patchLocaleFormatting();
   patchNativeDialogs();
   const code = storedLanguage();
+  // La langue de l'adresse devient le choix de l'appareil ; l'adresse affiche toujours la langue (/fr, /ar...).
+  try {
+    localStorage.setItem(STORAGE_KEY, code);
+  } catch {
+    // Préférence non persistée (stockage indisponible).
+  }
+  syncLanguagePath(code);
   applyDocumentAttributes(code);
   if (code !== 'FR') await Promise.race([setLanguage(code), new Promise((resolve) => setTimeout(resolve, 2500))]);
 }

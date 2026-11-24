@@ -63,7 +63,7 @@ import { navigateDashboard } from './lib/payments';
 import { opportunityRoute } from './lib/opportunities';
 import { loadSiteContent, useSiteContentVersion } from './lib/siteContent';
 import { siteSettings } from './lib/siteSettings';
-import { setLanguage, toLanguage } from './i18n/runtime';
+import { setLanguage, syncLanguagePath, toLanguage } from './i18n/runtime';
 import { TermsGate } from './components/community/TermsGate';
 
 /** Élément à mettre en avant à l'arrivée sur une page (résultat de recherche). */
@@ -427,6 +427,8 @@ export default function App() {
   // Bouton retour du navigateur : la page de l'adresse redevient la page affichée.
   useEffect(() => {
     const onPopState = () => {
+      // La langue choisie reste celle affichée : l'adresse de la page précédente reprend la langue actuelle (/fr, /ar...).
+      syncLanguagePath(toLanguage(readStorage(LANGUAGE_KEY)));
       const params = new URLSearchParams(window.location.search);
       if (params.get('cv')) setActiveTab('community');
       else setActiveTab((params.get('tab') as AppTab | null) ?? 'home');
