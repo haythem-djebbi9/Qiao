@@ -274,8 +274,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Center/Right Navigation Menu (Clean, uncrowded, responsive) */}
-        <div className="hidden min-[1200px]:flex items-center gap-2.5 2xl:gap-5.5 ml-auto mr-2 2xl:mr-6">
-          <nav className={`flex items-center gap-2.5 2xl:gap-4.5 text-[12.5px] 2xl:text-[13.5px] font-medium ${
+        <div className="hidden min-[1200px]:flex items-center gap-2 min-[1280px]:gap-2.5 2xl:gap-5.5 ml-auto mr-2 2xl:mr-6">
+          <nav className={`flex items-center gap-2 min-[1280px]:gap-2.5 2xl:gap-4.5 text-[12.5px] 2xl:text-[13.5px] font-medium ${
             isLight ? 'text-slate-800' : 'text-white/90'
           }`}>
             {/* 1. Accueil */}

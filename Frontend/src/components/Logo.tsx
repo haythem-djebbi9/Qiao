@@ -21,17 +21,18 @@ const WORDMARK_HEIGHTS = {
   lg: 'h-6',
   xl: 'h-8',
 };
+// Slogan lisible : « THE BRIDGE BETWEEN / CHINA & NORTH AFRICA » (logo officiel).
 const TAGLINE_SIZES = {
-  sm: 'text-[5.5px] sm:text-[6px]',
-  md: 'text-[6.5px] sm:text-[7px]',
-  lg: 'text-[8.5px]',
-  xl: 'text-[10px]',
+  sm: 'text-[6.5px] sm:text-[7px]',
+  md: 'text-[7.5px] sm:text-[8px]',
+  lg: 'text-[9px]',
+  xl: 'text-[10.5px]',
 };
 const BRAND_SIZES = {
-  sm: 'text-[6.5px] sm:text-[7px]',
-  md: 'text-[7.5px] sm:text-[8.5px]',
-  lg: 'text-[10px]',
-  xl: 'text-[12px]',
+  sm: 'text-[7.5px] sm:text-[8px]',
+  md: 'text-[8.5px] sm:text-[9.5px]',
+  lg: 'text-[11px]',
+  xl: 'text-[12.5px]',
 };
 const DASH_WIDTHS = {
   sm: 'w-1.5 sm:w-2',
@@ -42,7 +43,9 @@ const DASH_WIDTHS = {
 
 /** Logo QIAO officiel (fichier vectoriel) : net à toutes les tailles, jamais traduit ni inversé en arabe. */
 export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'transparent', size = 'md', showText = true }) => {
-  const isDark = variant === 'dark';
+  // Sur fond sombre, le logo entier est posé sur une plaque blanche, dans ses couleurs officielles :
+  // il reste complet et lisible (plus d'emblème isolé ni de texte blanc à côté).
+  const isDark = false;
   const content = (
     <div translate="no" dir="ltr" className="flex items-center gap-2 sm:gap-3">
       <span className={`shrink-0 inline-flex ${isDark ? 'bg-white rounded-xl p-1' : ''}`}>
@@ -54,10 +57,10 @@ export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'transpare
           <img src={wordmark} alt="" className={`${WORDMARK_HEIGHTS[size]} w-auto self-start ${isDark ? 'brightness-0 invert' : ''}`} />
           <div className="flex items-center gap-1 sm:gap-1.5">
             <span className={`${DASH_WIDTHS[size]} h-[1.5px] bg-red-600 rounded-full shrink-0`} />
-            <span className={`${TAGLINE_SIZES[size]} font-semibold tracking-[0.2em] leading-none ${isDark ? 'text-white/80' : 'text-[#0a1b38]'}`}>THE BRIDGE BETWEEN</span>
+            <span className={`${TAGLINE_SIZES[size]} font-bold tracking-[0.18em] leading-none ${isDark ? 'text-white/80' : 'text-[#0a1b38]'}`}>THE BRIDGE BETWEEN</span>
             <span className={`${DASH_WIDTHS[size]} h-[1.5px] rounded-full shrink-0 ${isDark ? 'bg-sky-400' : 'bg-[#0a1b38]'}`} />
           </div>
-          <div className={`${BRAND_SIZES[size]} font-bold tracking-[0.16em] leading-none`}>
+          <div className={`${BRAND_SIZES[size]} font-extrabold tracking-[0.14em] leading-none`}>
             {/* Logo officiel : « THE BRIDGE BETWEEN / CHINA & NORTH AFRICA ». */}
             <span className="text-red-600">CHINA</span>
             <span className={`ml-1 ${isDark ? 'text-sky-300' : 'text-[#0a2f6b]'}`}>&amp; NORTH AFRICA</span>
@@ -66,6 +69,14 @@ export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'transpare
       )}
     </div>
   );
+
+  if (variant === 'dark') {
+    return (
+      <div className={`inline-flex items-center cursor-pointer select-none group bg-white rounded-xl px-2 py-1 shadow-lg shadow-black/25 ring-1 ring-white/60 ${className}`}>
+        {content}
+      </div>
+    );
+  }
 
   if (variant === 'card') {
     return (
