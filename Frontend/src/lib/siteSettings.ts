@@ -86,6 +86,13 @@ export function siteSettings(): SiteSettings {
   };
 }
 
+/**
+ * QR code WeChat à afficher seul (carré) : la carte WeChat d'origine (nom en haut, légende en bas) est
+ * remplacée par son QR découpé ; une image envoyée par l'administration est affichée telle quelle.
+ */
+export const wechatQrSquare = (src: string) =>
+  src === '/images/wechat-qr.04b9b668.jpg' ? '/images/wechat-qr-code.e98da21f.png' : src;
+
 /** Numéro utilisable dans un lien tel: ou wa.me (chiffres seulement). */
 export const digits = (phone: string) => phone.replace(/[^\d]/g, '');
 export const telHref = (phone: string) => `tel:+${digits(phone)}`;

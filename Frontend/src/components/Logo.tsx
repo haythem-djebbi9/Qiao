@@ -1,6 +1,8 @@
 import React from 'react';
 import emblem from '../assets/images/qiao-emblem.svg';
 import wordmark from '../assets/images/qiao-wordmark.svg';
+import emblemReverse from '../assets/images/qiao-emblem-reverse.svg';
+import wordmarkReverse from '../assets/images/qiao-wordmark-reverse.svg';
 
 export interface LogoProps {
   className?: string;
@@ -41,42 +43,39 @@ const DASH_WIDTHS = {
   xl: 'w-5',
 };
 
-/** Logo QIAO officiel (fichier vectoriel) : net à toutes les tailles, jamais traduit ni inversé en arabe. */
+/**
+ * Logo QIAO officiel (fichiers vectoriels) : net à toutes les tailles, jamais traduit ni inversé en arabe.
+ * Sur fond sombre (variant « dark ») : version inversée du même logo, sans plaque ni cadre :
+ * pont rouge vers bleu clair, « QIAO » en blanc, slogan en blanc, « CHINA » en rouge.
+ */
 export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'transparent', size = 'md', showText = true }) => {
-  // Sur fond sombre, le logo entier est posé sur une plaque blanche, dans ses couleurs officielles :
-  // il reste complet et lisible (plus d'emblème isolé ni de texte blanc à côté).
-  const isDark = false;
+  const isDark = variant === 'dark';
   const content = (
     <div translate="no" dir="ltr" className="flex items-center gap-2 sm:gap-3">
-      <span className={`shrink-0 inline-flex ${isDark ? 'bg-white rounded-xl p-1' : ''}`}>
-        <img src={emblem} alt="QIAO - The China Bridge" className={`${EMBLEM_HEIGHTS[size]} w-auto transition-transform duration-300 group-hover:scale-105`} />
-      </span>
+      <img
+        src={isDark ? emblemReverse : emblem}
+        alt="QIAO - The Bridge Between China & North Africa"
+        className={`${EMBLEM_HEIGHTS[size]} w-auto shrink-0 transition-transform duration-300 group-hover:scale-105`}
+      />
 
       {showText && (
         <div className="flex flex-col justify-center gap-[3px] sm:gap-1 text-left select-none shrink-0">
-          <img src={wordmark} alt="" className={`${WORDMARK_HEIGHTS[size]} w-auto self-start ${isDark ? 'brightness-0 invert' : ''}`} />
+          <img src={isDark ? wordmarkReverse : wordmark} alt="" className={`${WORDMARK_HEIGHTS[size]} w-auto self-start`} />
           <div className="flex items-center gap-1 sm:gap-1.5">
-            <span className={`${DASH_WIDTHS[size]} h-[1.5px] bg-red-600 rounded-full shrink-0`} />
-            <span className={`${TAGLINE_SIZES[size]} font-bold tracking-[0.18em] leading-none ${isDark ? 'text-white/80' : 'text-[#0a1b38]'}`}>THE BRIDGE BETWEEN</span>
-            <span className={`${DASH_WIDTHS[size]} h-[1.5px] rounded-full shrink-0 ${isDark ? 'bg-sky-400' : 'bg-[#0a1b38]'}`} />
+            <span className={`${DASH_WIDTHS[size]} h-[1.5px] rounded-full shrink-0 ${isDark ? 'bg-red-500' : 'bg-red-600'}`} />
+            <span className={`${TAGLINE_SIZES[size]} font-bold tracking-[0.18em] leading-none ${isDark ? 'text-white' : 'text-[#0a1b38]'}`}>THE BRIDGE BETWEEN</span>
+            <span className={`${DASH_WIDTHS[size]} h-[1.5px] rounded-full shrink-0 ${isDark ? 'bg-sky-300' : 'bg-[#0a1b38]'}`} />
           </div>
           <div className={`${BRAND_SIZES[size]} font-extrabold tracking-[0.14em] leading-none`}>
             {/* Logo officiel : « THE BRIDGE BETWEEN / CHINA & NORTH AFRICA ». */}
-            <span className="text-red-600">CHINA</span>
-            <span className={`ml-1 ${isDark ? 'text-sky-300' : 'text-[#0a2f6b]'}`}>&amp; NORTH AFRICA</span>
+            {/* Espace réel (pas une marge) : les marges sont inversées quand la page est en arabe. */}
+            <span className={isDark ? 'text-red-500' : 'text-red-600'}>CHINA</span>{' '}
+            <span className={isDark ? 'text-sky-200' : 'text-[#0a2f6b]'}>&amp; NORTH AFRICA</span>
           </div>
         </div>
       )}
     </div>
   );
-
-  if (variant === 'dark') {
-    return (
-      <div className={`inline-flex items-center cursor-pointer select-none group bg-white rounded-xl px-2 py-1 shadow-lg shadow-black/25 ring-1 ring-white/60 ${className}`}>
-        {content}
-      </div>
-    );
-  }
 
   if (variant === 'card') {
     return (
@@ -86,5 +85,10 @@ export const Logo: React.FC<LogoProps> = ({ className = '', variant = 'transpare
     );
   }
 
-  return <div className={`inline-flex items-center cursor-pointer select-none group ${className}`}>{content}</div>;
+  // « dark » : posé directement sur le fond sombre ; « light » et « transparent » : couleurs officielles.
+  return (
+    <div className={`inline-flex items-center cursor-pointer select-none group ${isDark ? 'drop-shadow-[0_1px_6px_rgba(0,0,0,0.35)]' : ''} ${className}`}>
+      {content}
+    </div>
+  );
 };

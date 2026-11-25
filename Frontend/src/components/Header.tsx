@@ -78,7 +78,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { user, logout } = useAuth();
   const { notify } = useToast();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
@@ -180,28 +179,9 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, [compact]);
 
-  const isLight =
-    isScrolled ||
-    activeTab === 'sector-detail' ||
-    activeTab === 'secteurs' ||
-    activeTab === 'commerce-hub' ||
-    activeTab === 'about' ||
-    activeTab === 'certificat' ||
-    activeTab === 'contact' ||
-    activeTab === 'community' ||
-    activeTab === 'academy' ||
-    activeTab === 'evenements' ||
-    activeTab === 'stories' ||
-    activeTab === 'resources' ||
-    activeTab === 'dashboard';
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // En-tête toujours blanc, sur toutes les pages et dès le haut de l'accueil : le logo officiel y reste
+  // complet, dans ses couleurs, sans plaque ni cadre (demande du client), et le menu est toujours lisible.
+  const isLight = true;
 
   const languages = [
     { code: 'FR', label: 'Français', flag: '🇫🇷' },

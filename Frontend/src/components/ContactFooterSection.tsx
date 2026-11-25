@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SocialLinks } from './common/SocialLinks';
 import { resolveImage } from '../lib/assets';
-import { siteSettings, telHref, whatsappHref } from '../lib/siteSettings';
+import { siteSettings, telHref, wechatQrSquare, whatsappHref } from '../lib/siteSettings';
 import {
   Clock,
   ShieldCheck,
@@ -464,20 +464,26 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
         {/* ========================================================================= */}
         {/* 5-COLUMN DETAILED FOOTER (EXACT MATCH TO THE UPLOADED PICTURE)             */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-6 py-12 border-t border-slate-800/80 text-xs text-slate-300">
-          
-          {/* Column 1: Logo & Mission Statement (4 cols) */}
-          <div className="lg:col-span-4 space-y-4 pr-2">
+        <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-10 lg:gap-8 py-12 border-t border-slate-800/80 text-xs text-slate-300">
+
+          {/* Colonne 1 : logo (version pour fond sombre), mission et réseaux sociaux */}
+          <div className="col-span-2 lg:col-span-4 space-y-5 lg:pr-4">
             <div onClick={() => scrollTo('hero')} className="cursor-pointer inline-block">
-              <Logo variant="dark" size="md" />
+              <Logo variant="dark" size="lg" />
             </div>
             <p className="text-xs text-slate-300/90 leading-relaxed max-w-sm">
               QIAO connecte les entreprises, les institutions et les experts entre la Chine et l'Afrique du Nord pour créer des opportunités durables et des réussites partagées.
             </p>
+            <div className="space-y-2.5">
+              <h4 className="text-sm font-bold text-white">Suivez-nous</h4>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <SocialLinks itemClassName="w-9 h-9 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer" iconClassName="w-4 h-4" />
+              </div>
+            </div>
           </div>
 
-          {/* Column 2: Liens rapides (2 cols) */}
-          <div className="lg:col-span-2 space-y-3">
+          {/* Colonne 2 : liens rapides */}
+          <div className="col-span-1 lg:col-span-2 space-y-3">
             <h4 className="text-sm font-bold text-white">Liens rapides</h4>
             <ul className="space-y-2 text-xs text-slate-300">
               <li>
@@ -508,8 +514,8 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
             </ul>
           </div>
 
-          {/* Column 3: Nos domaines d'expertise (2 cols) */}
-          <div className="lg:col-span-2 space-y-3">
+          {/* Colonne 3 : domaines d'expertise */}
+          <div className="col-span-1 lg:col-span-3 space-y-3">
             <h4 className="text-sm font-bold text-white">Nos domaines d'expertise</h4>
             <ul className="space-y-2 text-xs text-slate-300">
               <li>
@@ -540,8 +546,8 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
             </ul>
           </div>
 
-          {/* Column 4: Contactez-nous with vertical line divider (2 cols) */}
-          <div className="lg:col-span-2 space-y-3 lg:border-l lg:border-slate-800/80 lg:pl-6">
+          {/* Colonne 4 : coordonnées, puis la carte WeChat (QR code net, à côté des autres moyens de contact) */}
+          <div className="col-span-2 lg:col-span-3 space-y-3 lg:border-l lg:border-slate-800/80 lg:pl-6">
             <h4 className="text-sm font-bold text-white">Contactez-nous</h4>
             <div className="space-y-2.5 text-xs text-slate-300">
               <div className="flex items-start gap-2.5">
@@ -582,23 +588,21 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
                 <span>{settings.hours}</span>
               </div>
             </div>
-          </div>
-
-          {/* Column 5: Suivez-nous with vertical line divider (2 cols) */}
-          <div className="lg:col-span-2 space-y-3 lg:border-l lg:border-slate-800/80 lg:pl-6">
-            <h4 className="text-sm font-bold text-white">Suivez-nous</h4>
-            <div className="flex flex-wrap items-center gap-2.5 pt-1">
-              <SocialLinks itemClassName="w-8 h-8 rounded-full border border-slate-500/80 hover:border-white hover:bg-white/10 text-white flex items-center justify-center transition-all cursor-pointer" iconClassName="w-3.5 h-3.5" />
-            </div>
             {settings.wechatQr && (
-              <div className="pt-2">
-                <div className="text-[11px] font-semibold text-slate-300 mb-1.5">WeChat</div>
+              <div className="mt-4 flex items-center gap-3.5 max-w-xs rounded-2xl bg-white/[0.04] border border-slate-700/70 p-3">
                 <img
-                  src={resolveImage(settings.wechatQr)}
+                  src={resolveImage(wechatQrSquare(settings.wechatQr))}
                   alt="QR code WeChat QIAO"
                   loading="lazy"
-                  className="w-24 rounded-lg bg-white p-1"
+                  className="w-[92px] h-[92px] shrink-0 rounded-xl bg-white p-1.5 object-contain"
                 />
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-1.5 text-sm font-bold text-white">
+                    <MessageCircle className="w-4 h-4 text-[#07c160] fill-[#07c160]/20" />
+                    <span>WeChat</span>
+                  </div>
+                  <p className="text-[11px] leading-snug text-slate-400">Scannez le QR code avec votre application WeChat</p>
+                </div>
               </div>
             )}
           </div>
