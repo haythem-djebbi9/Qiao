@@ -34,6 +34,8 @@ const securityHeaders = helmet({
         'https://geo.dailymotion.com',
         'https://drive.google.com',
         'https://www.loom.com',
+        // Vidéo de présentation hébergée sur Facebook (Paramètres du site).
+        'https://www.facebook.com',
       ],
       'object-src': ["'self'", 'blob:'],
       'base-uri': ["'self'"],

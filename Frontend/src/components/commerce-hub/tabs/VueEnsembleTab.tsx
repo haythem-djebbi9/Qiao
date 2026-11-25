@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { CommerceHubTab } from '../../../types';
 import { BilateralTradeMap } from '../components/BilateralTradeMap';
+import { useAppActions } from '../../../context/AppActionsContext';
+import { slugify } from '../../../lib/text';
 
 interface VueEnsembleTabProps {
   onSelectTab: (tab: CommerceHubTab) => void;
@@ -170,6 +172,7 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
   onOpenOpportunityDetail,
 }) => {
   const [selectedYearRange, setSelectedYearRange] = useState('2020 - 2024');
+  const { openArticle } = useAppActions();
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -196,8 +199,8 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">46,8 Mds</span>
+                <div className="flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="text-xl sm:text-3xl whitespace-nowrap font-extrabold text-slate-900 tracking-tight">46,8 Mds</span>
                   <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
                 </div>
                 <div className="text-xs font-medium text-slate-600 mt-1 leading-snug">
@@ -221,8 +224,8 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">24,1 Mds</span>
+                <div className="flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="text-xl sm:text-3xl whitespace-nowrap font-extrabold text-slate-900 tracking-tight">24,1 Mds</span>
                   <span className="text-xs font-bold text-red-600 uppercase">USD</span>
                 </div>
                 <div className="text-xs font-medium text-slate-600 mt-1 leading-snug">
@@ -246,8 +249,8 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">22,7 Mds</span>
+                <div className="flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="text-xl sm:text-3xl whitespace-nowrap font-extrabold text-slate-900 tracking-tight">22,7 Mds</span>
                   <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
                 </div>
                 <div className="text-xs font-medium text-slate-600 mt-1 leading-snug">
@@ -271,8 +274,8 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">6 200+</span>
+                <div className="flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="text-xl sm:text-3xl whitespace-nowrap font-extrabold text-slate-900 tracking-tight">6 200+</span>
                 </div>
                 <div className="text-xs font-medium text-slate-600 mt-1 leading-snug">
                   Entreprises actives dans le secteur
@@ -689,7 +692,7 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
                 {
                   title: 'Produits agricoles nord-africains : un potentiel croissant sur le marché chinois',
                   date: '28 Juillet 2024',
-                  image: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=200&q=80',
+                  image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=200&q=80',
                 },
                 {
                   title: 'Logistique et ports : un levier stratégique pour les échanges sino-nord-africains',
@@ -704,7 +707,7 @@ export const VueEnsembleTab: React.FC<VueEnsembleTabProps> = ({
               ].map((art, idx) => (
                 <div
                   key={idx}
-                  onClick={() => onSelectTab('analyses')}
+                  onClick={() => openArticle(slugify(art.title))}
                   className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
                 >
                   <img

@@ -22,7 +22,9 @@ import energieSolairePvImg from '../assets/images/energie_solaire_pv_17911220910
 import energieH2StorageImg from '../assets/images/energie_h2_storage_1791122054924.jpg';
 import energieBessImg from '../assets/images/energie_bess_bess_1791122068768.jpg';
 import industrieRobotImg from '../assets/images/industrie_robot_arm_card_1791221523303.jpg';
-import santeDoctorImg from '../assets/images/sante_doctor_microscope_card_1791221540419.jpg';
+const santeDoctorImg = 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80';
+
+import type { SectorServiceDetail } from './sectorServiceDetails';
 
 export interface SubSector {
   id: string;
@@ -45,6 +47,8 @@ export interface SectorService {
   title: string;
   description: string;
   iconName: string;
+  /** Fiche détaillée propre à ce service (sinon la fiche commune du même titre). */
+  detail?: SectorServiceDetail;
 }
 
 export interface SectorSuccessStory {
@@ -56,6 +60,8 @@ export interface SectorSuccessStory {
 
 export interface SectorData {
   id: string;
+  /** Masqué par l'administration : absent de la page Secteurs, du menu et des opportunités. */
+  hidden?: boolean;
   tag: string;
   title: string;
   subTitle: string;
@@ -411,7 +417,7 @@ export const SECTORS_DETAILS: Record<string, SectorData> = {
       title: "Une startup IA tunisienne s'associe à un géant tech de Shenzhen",
       description:
         "Grâce à l'accompagnement de QIAO, une pépite technologique tunisienne experte en computer vision et traitement du langage a conclu un partenariat de codéveloppement avec un leader technologique de Shenzhen, levant 3,2M$ pour déployer sa solution à l'échelle pan-africaine.",
-      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=800&q=80',
     },
     formTitle: 'Vous avez un projet technologique ou digital ?',
     formSubtitle: 'Notre équipe et notre réseau d’experts tech sino-africains sont à votre disposition pour identifier les meilleures synergies.',
@@ -437,7 +443,7 @@ export const SECTORS_DETAILS: Record<string, SectorData> = {
     heroDescription:
       'QIAO rapproche les acteurs de la santé entre la Chine et l’Afrique du Nord pour développer des partenariats dans les médicaments, les dispositifs médicaux, la biotechnologie et les infrastructures de santé, et améliorer l’accès aux soins pour tous.',
     heroSlogan: 'Des solutions de santé pour des sociétés plus résilientes.',
-    heroBg: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1920&q=85',
+    heroBg: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1920&q=85',
     heroPills: [
       { label: 'Médicaments génériques', iconName: 'Pill' },
       { label: 'Dispositifs médicaux', iconName: 'Stethoscope' },
@@ -550,7 +556,7 @@ export const SECTORS_DETAILS: Record<string, SectorData> = {
     },
     formTitle: 'Vous avez un projet dans la santé ?',
     formSubtitle: 'Notre équipe est à votre écoute pour identifier les meilleures opportunités et vous accompagner à chaque étape.',
-    formBg: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80',
+    formBg: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1200&q=80',
     projectTypes: ['Production pharmaceutique', 'Dispositifs & Matériel médical', 'Clinique ou hôpital privé', 'Biotechnologie & R&D', 'Télémédecine', 'Autre projet de santé'],
     footerSignature: 'Des partenariats pour une vie meilleure.',
   },
@@ -1149,7 +1155,7 @@ export const SECTORS_DETAILS: Record<string, SectorData> = {
         title: 'Agriculture durable',
         description: 'Bio, éco-responsable, résiliente au climat',
         iconName: 'Leaf',
-        image: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80',
       },
     ],
     opportunities: [

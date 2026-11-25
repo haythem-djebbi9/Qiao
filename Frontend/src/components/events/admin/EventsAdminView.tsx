@@ -60,7 +60,7 @@ const EventRow: React.FC<{ event: AdminEvent; menu?: React.ReactNode }> = ({ eve
           {event.isPast && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-slate-100 text-slate-500 border-slate-200">Passé</span>}
           <span className="text-[10px] text-slate-500">
             {eventDateLabel(event)} · {event.category} · {EVENT_FORMAT_LABELS[event.format]}
-            {event.location.toLowerCase() !== EVENT_FORMAT_LABELS[event.format].toLowerCase() && ` · ${event.location}`}
+            {event.location.toLowerCase() !== EVENT_FORMAT_LABELS[event.format].toLowerCase() && <> · {event.location}</>}
           </span>
         </div>
         <div className="text-[10px] text-slate-400 mt-0.5">

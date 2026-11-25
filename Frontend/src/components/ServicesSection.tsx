@@ -22,10 +22,11 @@ import {
   Search,
 } from 'lucide-react';
 import { ServiceItem } from '../types';
-import { useAppActions } from '../context/AppActionsContext';
 
 interface ServicesSectionProps {
   services?: ServiceItem[];
+  /** Catégories de tout le catalogue (gérées par l'administration via les services). */
+  categories?: string[];
   onSelectService: (service: ServiceItem) => void;
   onOpenAllServicesModal?: () => void;
   onOpenCalculator?: () => void;
@@ -39,6 +40,7 @@ interface ServicesSectionProps {
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({
   services = [],
+  categories: catalogCategories,
   onSelectService,
   onOpenAllServicesModal,
   onOpenCalculator,
@@ -49,20 +51,13 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   onClearSearch,
   onSearchEverywhere,
 }) => {
-  const { contactUs } = useAppActions();
+
   const [internalCategory, setInternalCategory] = useState<string>('Tous');
   const selectedCat = externalCategory || internalCategory;
 
   const categories = [
     'Tous',
-    'Business',
-    'Logistique',
-    'Juridique',
-    'Traduction',
-    'Recrutement',
-    'Immobilier',
-    'Santé',
-    'Tourisme',
+    ...(catalogCategories?.length ? catalogCategories : ['Business', 'Logistique', 'Juridique', 'Traduction', 'Recrutement', 'Immobilier', 'Santé', 'Tourisme']),
   ];
 
   const handleCategoryClick = (cat: string) => {
@@ -247,14 +242,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             );
           })}
 
-          {/* 12th Card: Plus de services (demande de service sur-mesure) */}
+          {/* 12th Card: Plus de services : ouvre le catalogue complet */}
           <div
-            onClick={() =>
-              contactUs({
-                subject: 'Autre demande',
-                message: "Bonjour, je recherche un service qui n'apparaît pas dans votre catalogue : ",
-              })
-            }
+            onClick={onOpenAllServicesModal}
             className="group bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-200/60 hover:border-blue-300 hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-5 cursor-pointer transform hover:-translate-y-1"
           >
             <div>

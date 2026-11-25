@@ -3,7 +3,6 @@ import { ArrowRight, Award, BadgeCheck, Loader2, Lock, Search, ShieldX } from 'l
 import { ApiError, api } from '../../lib/api';
 import { CertificateVerification } from '../../lib/academy';
 import { formatDate } from '../../lib/text';
-import { ContactFooterSection } from '../ContactFooterSection';
 
 type State =
   | { kind: 'idle' }
@@ -147,7 +146,6 @@ export const CertificateVerifyPage: React.FC<{ onNavigate: (tab: string) => void
         </div>
       </section>
 
-      <ContactFooterSection showOnlyFooter={true} onScrollToSection={onNavigate} />
     </div>
   );
 };

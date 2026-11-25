@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { api } from '../../../lib/api';
+import { resolveImage } from '../../../lib/assets';
 import {
   TrendingUp,
   ShoppingCart,
@@ -59,7 +61,6 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
   onOpenArticle,
 }) => {
   // Filters
-  const [period, setPeriod] = useState('2020 - 2024');
   const [country, setCountry] = useState('Tous les pays');
   const [sector, setSector] = useState('Toutes les catégories');
   const [analysisType, setAnalysisType] = useState('Toutes les analyses');
@@ -73,16 +74,43 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
   const [hoveredTrendYear, setHoveredTrendYear] = useState<number | null>(null);
   const [hoveredForecastYear, setHoveredForecastYear] = useState<number | null>(null);
   const [selectedArticleModal, setSelectedArticleModal] = useState<ArticleDetail | null>(null);
+  const [apiArticles, setApiArticles] = useState<ArticleDetail[] | null>(null);
+  const [newsletterError, setNewsletterError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams({ placement: 'analyses' });
+    if (country !== 'Tous les pays') params.set('country', country);
+    if (sector !== 'Toutes les catégories') params.set('sector', sector);
+    if (analysisType !== 'Toutes les analyses') params.set('type', analysisType);
+    api
+      .get<
+        { id: string; title: string; dateLabel: string; readTime: string; category: string; image: string; summary: string; keyPoints: string[]; content: string[] }[]
+      >(`/articles?${params.toString()}`)
+      .then((items) =>
+        setApiArticles(
+          items.map((item) => ({
+            id: item.id,
+            title: item.title,
+            date: item.dateLabel,
+            readTime: item.readTime,
+            category: item.category,
+            image: resolveImage(item.image),
+            summary: item.summary,
+            keyPoints: item.keyPoints ?? [],
+            content: item.content ?? [],
+          })),
+        ),
+      )
+      .catch(() => setApiArticles(null));
+  }, [country, sector, analysisType]);
 
   const resetFilters = () => {
-    setPeriod('2020 - 2024');
     setCountry('Tous les pays');
     setSector('Toutes les catégories');
     setAnalysisType('Toutes les analyses');
   };
 
   const hasActiveFilters =
-    period !== '2020 - 2024' ||
     country !== 'Tous les pays' ||
     sector !== 'Toutes les catégories' ||
     analysisType !== 'Toutes les analyses';
@@ -228,6 +256,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
     },
   ];
 
+  const shownArticles = apiArticles ?? articlesList;
+
   const handleDownloadReport = (title: string) => {
     setDownloadToast(`Téléchargement initié : ${title} (PDF, 4.2 Mo)`);
     setTimeout(() => {
@@ -240,7 +270,7 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
       
       {/* Toast Notification */}
       {downloadToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#07152b] text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-sky-400/40 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-[calc(1.5rem+var(--qiao-bottom-bar,0px))] right-6 z-50 bg-[#07152b] text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-sky-400/40 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           <span className="text-xs sm:text-sm font-medium">{downloadToast}</span>
         </div>
@@ -250,25 +280,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
       {/* 1. FILTER BAR (MATCHING SCREENSHOT WITH REAL INTERACTIVITY)               */}
       {/* ========================================================================= */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           
-          {/* Période */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Période</label>
-            <div className="relative">
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-7 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option>2020 - 2024</option>
-                <option>2023 - 2024</option>
-                <option>2018 - 2024</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
           {/* Pays / Région */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">Pays / Région</label>
@@ -331,7 +344,7 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
           {/* Actions: Appliquer & Reset */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {}}
+              onClick={() => document.getElementById('analyses-recentes')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
               className="flex-1 bg-[#0c2448] hover:bg-[#071830] text-white py-2 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Search className="w-3.5 h-3.5 text-white" />
@@ -358,12 +371,6 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
               <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-semibold text-[11px]">
                 {country}
                 <X className="w-3 h-3 cursor-pointer" onClick={() => setCountry('Tous les pays')} />
-              </span>
-            )}
-            {period !== '2020 - 2024' && (
-              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-semibold text-[11px]">
-                {period}
-                <X className="w-3 h-3 cursor-pointer" onClick={() => setPeriod('2020 - 2024')} />
               </span>
             )}
             {sector !== 'Toutes les catégories' && (
@@ -397,8 +404,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.vol}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.vol}</span>
                 <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
@@ -423,8 +430,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.ecom}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.ecom}</span>
                 <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
@@ -449,8 +456,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.export}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.export}</span>
                 <span className="text-xs font-bold text-blue-600 uppercase">USD</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
@@ -475,8 +482,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.usersCn}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.usersCn}</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
                 Consommateurs en ligne en Chine
@@ -500,8 +507,8 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{metrics.usersNa}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1">
+                <span className="text-lg sm:text-2xl whitespace-nowrap font-black text-slate-900 tracking-tight">{metrics.usersNa}</span>
               </div>
               <div className="text-[11px] font-semibold text-slate-600 leading-snug mt-0.5">
                 Consommateurs e-commerce (AN)
@@ -1403,11 +1410,11 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+              <h3 id="analyses-recentes" className="scroll-mt-24 text-sm font-bold text-slate-900 tracking-tight">
                 Analyses récentes
               </h3>
               <button
-                onClick={() => onSelectTab('rapports')}
+                onClick={resetFilters}
                 className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-0.5 cursor-pointer"
               >
                 <span>Voir toutes les analyses</span>
@@ -1416,7 +1423,10 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
             </div>
 
             <div className="space-y-3">
-              {articlesList.map((art) => (
+              {shownArticles.length === 0 && (
+                <p className="text-xs text-slate-500 py-4 text-center">Aucune analyse ne correspond à ces filtres.</p>
+              )}
+              {shownArticles.map((art) => (
                 <div
                   key={art.id}
                   onClick={() => setSelectedArticleModal(art)}
@@ -1495,9 +1505,16 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
                   </div>
                 ) : (
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
-                      if (newsletterEmail) setNewsletterSubscribed(true);
+                      if (!newsletterEmail) return;
+                      setNewsletterError(null);
+                      try {
+                        await api.post('/newsletter/subscribe', { email: newsletterEmail.trim(), topic: 'analyses', source: 'hub-analyses' });
+                        setNewsletterSubscribed(true);
+                      } catch (err) {
+                        setNewsletterError(err instanceof Error ? err.message : 'Inscription impossible.');
+                      }
                     }}
                     className="mt-3 flex items-center gap-1.5"
                   >
@@ -1516,6 +1533,9 @@ export const AnalysesTab: React.FC<AnalysesTabProps> = ({
                       S'abonner
                     </button>
                   </form>
+                )}
+                {newsletterError && !newsletterSubscribed && (
+                  <p className="mt-1.5 text-[11px] text-red-600 font-semibold">{newsletterError}</p>
                 )}
               </div>
             </div>

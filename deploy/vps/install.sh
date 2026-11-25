@@ -21,7 +21,8 @@ say "1/6 Paquets système et Docker"
 export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
 # Attend la fin d'une mise à jour automatique éventuelle plutôt que d'échouer sur le verrou d'apt.
 APT_INSTALL="apt-get -o DPkg::Lock::Timeout=300 install -y"
-apt-get -o DPkg::Lock::Timeout=300 update -y
+# Un dépôt tiers préinstallé peut ne pas exister pour cette version d'Ubuntu (Monarx chez Hostinger) : les autres restent lus.
+apt-get -o DPkg::Lock::Timeout=300 update -y || echo "Avertissement : un dépôt n'a pas pu être lu, installation poursuivie."
 ${APT_INSTALL} ca-certificates curl git openssl ufw fail2ban
 command -v docker >/dev/null 2>&1 || ${APT_INSTALL} docker.io || curl -fsSL https://get.docker.com | sh
 docker compose version >/dev/null 2>&1 || ${APT_INSTALL} docker-compose-v2 || curl -fsSL https://get.docker.com | sh

@@ -97,7 +97,7 @@ export const EventEditor: React.FC<{ eventId: string; tab?: string }> = ({ event
               {event.isPast && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-slate-100 text-slate-500 border-slate-200">Passé</span>}
               <span className="text-[11px] text-slate-500">
                 {event.category} · {EVENT_FORMAT_LABELS[event.format]} · {eventDateLabel(event)} · {event.location}
-                {event.priceLabel && ` · ${event.priceLabel}`}
+                {event.priceLabel && <> · {event.priceLabel}</>}
               </span>
             </div>
             <h2 className="text-lg font-bold text-slate-900 leading-snug">{event.title}</h2>

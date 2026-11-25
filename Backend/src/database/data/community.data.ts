@@ -59,20 +59,20 @@ export interface SeedMember {
 export const SEED_MEMBERS: SeedMember[] = [
   { key: 'li-wei', fullName: 'Li Wei', origin: 'china', avatar: AVATAR('photo-1507003211169-0a1dd7228f2d'), headline: 'Entrepreneur — électronique grand public', company: 'Shanghai Lianhe Electronics', country: 'Chine', city: 'Shanghai', languages: ['zh', 'en', 'fr'], sectors: ['import-export', 'technology'] },
   {
-    key: 'amina', fullName: 'Amina Ben Youssef', origin: 'north-africa', avatar: AVATAR('photo-1573496359142-b8d87734a5a2'), headline: 'Consultante en import-export', company: 'ABY Trade Consulting', country: 'Tunisie', city: 'Tunis', languages: ['fr', 'ar', 'en'], sectors: ['import-export', 'customs'],
+    key: 'amina', fullName: 'Amina Ben Youssef', origin: 'north-africa', avatar: '', headline: 'Consultante en import-export', company: 'ABY Trade Consulting', country: 'Tunisie', city: 'Tunis', languages: ['fr', 'ar', 'en'], sectors: ['import-export', 'customs'],
     bio: "J'accompagne les PME tunisiennes dans leurs premières importations depuis la Chine : sourcing, incoterms, dédouanement.",
     expert: { headline: 'Consultante import-export Chine – Tunisie', categories: ['import-export', 'customs'], countriesServed: ['Tunisie', 'Chine'], years: 12, verification: 'verified' },
   },
-  { key: 'zhang-min', fullName: 'Zhang Min', origin: 'china', avatar: AVATAR('photo-1580489944761-15a19d654956'), headline: "Chargée d'investissements", company: 'Silk Road Capital', country: 'Chine', city: 'Beijing', languages: ['zh', 'en'], sectors: ['investment'] },
+  { key: 'zhang-min', fullName: 'Zhang Min', origin: 'china', avatar: '', headline: "Chargée d'investissements", company: 'Silk Road Capital', country: 'Chine', city: 'Beijing', languages: ['zh', 'en'], sectors: ['investment'] },
   {
     key: 'karim', fullName: 'Karim Haddad', origin: 'north-africa', avatar: AVATAR('photo-1500648767791-00dcc994a43e'), headline: 'Directeur logistique & transit', company: 'Haddad Transit', country: 'Algérie', city: 'Alger', languages: ['fr', 'ar', 'en'], sectors: ['logistics', 'customs'],
     expert: { headline: 'Transitaire maritime Chine – Maghreb, groupage et dédouanement', categories: ['logistics', 'customs'], countriesServed: ['Algérie', 'Tunisie', 'Chine'], years: 15, verification: 'verified' },
   },
   { key: 'chen-tao', fullName: 'Chen Tao', origin: 'china', avatar: AVATAR('photo-1506794778202-cad84cf45f1d'), headline: 'Directeur R&D CleanTech', company: 'Shenzhen SunBridge', country: 'Chine', city: 'Shenzhen', languages: ['zh', 'en'], sectors: ['technology', 'engineering'] },
-  { key: 'nadia', fullName: 'Nadia Belkacem', origin: 'north-africa', avatar: AVATAR('photo-1544005313-94ddf0286df2'), headline: 'Étudiante en Master Commerce International', country: 'Algérie', city: 'Oran', languages: ['fr', 'ar', 'en'], sectors: ['import-export'] },
+  { key: 'nadia', fullName: 'Nadia Belkacem', origin: 'north-africa', avatar: '', headline: 'Étudiante en Master Commerce International', country: 'Algérie', city: 'Oran', languages: ['fr', 'ar', 'en'], sectors: ['import-export'] },
   { key: 'omar', fullName: 'Omar Tazi', origin: 'north-africa', avatar: AVATAR('photo-1492562080023-ab3db95bfbce'), headline: 'Responsable relocation', company: 'Atlas Relocation', country: 'Maroc', city: 'Casablanca', languages: ['fr', 'ar', 'en'], sectors: ['consulting'] },
   {
-    key: 'liu-yan', fullName: 'Liu Yan', origin: 'china', avatar: AVATAR('photo-1573497019940-1c28c88b4f3e'), headline: 'Professeure de mandarin & traductrice assermentée', country: 'Tunisie', city: 'Tunis', languages: ['zh', 'fr', 'ar'], sectors: ['translation'],
+    key: 'liu-yan', fullName: 'Liu Yan', origin: 'china', avatar: '', headline: 'Professeure de mandarin & traductrice assermentée', country: 'Tunisie', city: 'Tunis', languages: ['zh', 'fr', 'ar'], sectors: ['translation'],
     expert: { headline: 'Traductrice chinois – français – arabe (contrats, salons, négociations)', categories: ['translation'], countriesServed: ['Tunisie', 'Chine'], years: 9, verification: 'verified' },
   },
   {
@@ -84,19 +84,19 @@ export const SEED_MEMBERS: SeedMember[] = [
     expert: { headline: "Conseil en stratégie d'implantation au Maroc", categories: ['consulting'], countriesServed: ['Maroc'], years: 14, verification: 'verified' },
   },
   {
-    key: 'zhao-ling', fullName: 'Zhao Ling', origin: 'china', avatar: AVATAR('photo-1534751516642-a1af1ef26a56'), headline: 'Avocate en droit des affaires', company: 'Ling & Partners', country: 'Chine', city: 'Shanghai', languages: ['zh', 'en', 'fr'], sectors: ['legal'],
+    key: 'zhao-ling', fullName: 'Zhao Ling', origin: 'china', avatar: '', headline: 'Avocate en droit des affaires', company: 'Ling & Partners', country: 'Chine', city: 'Shanghai', languages: ['zh', 'en', 'fr'], sectors: ['legal'],
     expert: { headline: 'Avocate en droit des affaires sino-africain (contrats, JV, arbitrage)', categories: ['legal'], countriesServed: ['Chine', 'Tunisie', 'Maroc'], years: 11, verification: 'verified' },
   },
   {
-    key: 'sofia', fullName: 'Sofia Mezhoud', origin: 'north-africa', avatar: AVATAR('photo-1534528741775-53994a69daeb'), headline: 'Investisseuse & mentore', company: 'Carthage Angels', country: 'Tunisie', city: 'Tunis', languages: ['fr', 'ar', 'en'], sectors: ['investment'],
+    key: 'sofia', fullName: 'Sofia Mezhoud', origin: 'north-africa', avatar: '', headline: 'Investisseuse & mentore', company: 'Carthage Angels', country: 'Tunisie', city: 'Tunis', languages: ['fr', 'ar', 'en'], sectors: ['investment'],
     expert: { headline: 'Business angel — startups agri-tech et cleantech', categories: ['investment'], countriesServed: ['Tunisie', 'Algérie'], years: 8, verification: 'none' },
   },
   {
-    key: 'li-mei', fullName: 'Li Mei', origin: 'china', avatar: AVATAR('photo-1438761681033-6461ffad8d80'), headline: 'Responsable supply chain', company: 'Ningbo Ocean Supply', country: 'Chine', city: 'Ningbo', languages: ['zh', 'en'], sectors: ['logistics', 'import-export'],
+    key: 'li-mei', fullName: 'Li Mei', origin: 'china', avatar: '', headline: 'Responsable supply chain', company: 'Ningbo Ocean Supply', country: 'Chine', city: 'Ningbo', languages: ['zh', 'en'], sectors: ['logistics', 'import-export'],
     expert: { headline: "Audit d'usines et supply chain à Ningbo", categories: ['logistics', 'import-export'], countriesServed: ['Chine'], years: 10, verification: 'pending', evidence: 'Certification ISO 9001 Lead Auditor (n° IRCA 2019-55821), 10 ans chez Ningbo Ocean Supply.' },
   },
   {
-    key: 'mona', fullName: 'Mona Fawzy', origin: 'north-africa', avatar: AVATAR('photo-1531123897727-8f129e1688ce'), headline: 'Consultante réglementaire GOEIC', company: 'Nile Compliance', country: 'Égypte', city: 'Le Caire', languages: ['ar', 'en', 'fr'], sectors: ['customs', 'legal'],
+    key: 'mona', fullName: 'Mona Fawzy', origin: 'north-africa', avatar: '', headline: 'Consultante réglementaire GOEIC', company: 'Nile Compliance', country: 'Égypte', city: 'Le Caire', languages: ['ar', 'en', 'fr'], sectors: ['customs', 'legal'],
     expert: { headline: 'Conformité GOEIC et enregistrement des importateurs en Égypte', categories: ['customs', 'legal'], countriesServed: ['Égypte'], years: 13, verification: 'verified' },
   },
   {
@@ -104,7 +104,7 @@ export const SEED_MEMBERS: SeedMember[] = [
     expert: { headline: "Avocat d'affaires : contrats d'achat internationaux et propriété intellectuelle", categories: ['legal'], countriesServed: ['Chine', 'Tunisie', 'France'], years: 16, verification: 'verified' },
   },
   {
-    key: 'salma', fullName: 'Salma Gharbi', origin: 'north-africa', avatar: AVATAR('photo-1594744803329-e58b31de8bf5'), headline: 'Avocate en droit commercial — Barreau de Tunis', company: 'Cabinet Gharbi', country: 'Tunisie', city: 'Tunis', languages: ['fr', 'ar', 'en'], sectors: ['legal'],
+    key: 'salma', fullName: 'Salma Gharbi', origin: 'north-africa', avatar: '', headline: 'Avocate en droit commercial — Barreau de Tunis', company: 'Cabinet Gharbi', country: 'Tunisie', city: 'Tunis', languages: ['fr', 'ar', 'en'], sectors: ['legal'],
     bio: "Avocate au Barreau de Tunis : création de sociétés, contrats de distribution, recouvrement et contentieux commercial.",
     expert: { headline: 'Avocate en droit commercial et des sociétés en Tunisie', categories: ['legal'], countriesServed: ['Tunisie'], years: 12, verification: 'verified' },
   },
@@ -112,7 +112,7 @@ export const SEED_MEMBERS: SeedMember[] = [
     key: 'hichem', fullName: 'Hichem Trabelsi', origin: 'north-africa', avatar: AVATAR('photo-1463453091185-61582044d556'), headline: 'Ingénieur agronome — filière oléicole', company: 'AgriSfax Conseil', country: 'Tunisie', city: 'Sfax', languages: ['fr', 'ar'], sectors: ['agriculture'],
     expert: { headline: "Ingénieur agronome, export d'huile d'olive et de dattes", categories: ['agriculture', 'customs'], countriesServed: ['Tunisie', 'Chine'], years: 18, verification: 'verified' },
   },
-  { key: 'faten', fullName: 'Faten Jlassi', origin: 'north-africa', avatar: AVATAR('photo-1489424731084-a5d8b219a5bb'), headline: "Productrice d'huile d'olive biologique", company: 'Domaine Jlassi', country: 'Tunisie', city: 'Kairouan', languages: ['ar', 'fr'], sectors: ['agriculture'] },
+  { key: 'faten', fullName: 'Faten Jlassi', origin: 'north-africa', avatar: '', headline: "Productrice d'huile d'olive biologique", company: 'Domaine Jlassi', country: 'Tunisie', city: 'Kairouan', languages: ['ar', 'fr'], sectors: ['agriculture'] },
   { key: 'wu-jun', fullName: 'Wu Jun', origin: 'china', avatar: AVATAR('photo-1504257432389-52343af06ae3'), headline: 'Acheteur agroalimentaire', company: 'Qingdao Fresh Foods Group', country: 'Chine', city: 'Qingdao', languages: ['zh', 'en'], sectors: ['agriculture', 'import-export'] },
   { key: 'walid', fullName: 'Walid Mansouri', origin: 'north-africa', avatar: AVATAR('photo-1522529599102-193c0d76b5b6'), headline: 'Gérant de PME textile', company: 'Mansouri Textile', country: 'Tunisie', city: 'Monastir', languages: ['fr', 'ar'], sectors: ['import-export'] },
 ];
@@ -140,10 +140,10 @@ const DEFAULT_RULES =
   "1. Restez courtois et professionnel.\n2. Pas de publicité non sollicitée ni de spam.\n3. Ne partagez pas d'informations personnelles d'autrui.\n4. Les recommandations sont des avis de membres, pas des garanties QIAO.";
 
 export const SEED_COMMUNITIES: SeedCommunity[] = [
-  { slug: 'business', name: 'Business & Entrepreneurs', description: "Entrepreneurs et dirigeants qui développent des affaires entre la Chine et l'Afrique du Nord : retours d'expérience, partenariats, financement.", category: 'entrepreneuriat', icon: 'Users', cover: COVER('photo-1521737604893-d14cc237f11d'), languages: ['fr', 'en', 'zh'], scope: 'Chine · Afrique du Nord', visibility: 'public', policy: 'open', featured: true, members: ['amina', 'youssef', 'li-wei', 'sofia', 'walid', 'omar'], moderators: ['amina'] },
+  { slug: 'business', name: 'Business & Entrepreneurs', description: "Entrepreneurs et dirigeants qui développent des affaires entre la Chine et l'Afrique du Nord : retours d'expérience, partenariats, financement.", category: 'entrepreneuriat', icon: 'Users', cover: COVER('photo-1497366811353-6870744d04b2'), languages: ['fr', 'en', 'zh'], scope: 'Chine · Afrique du Nord', visibility: 'public', policy: 'open', featured: true, members: ['amina', 'youssef', 'li-wei', 'sofia', 'walid', 'omar'], moderators: ['amina'] },
   { slug: 'trade', name: 'China–North Africa Trade', description: 'Le carrefour du commerce sino-maghrébin : opportunités de distribution, sourcing, salons et actualité des corridors.', category: 'chine-afrique', icon: 'Handshake', cover: COVER('photo-1494412574643-ff11b0a5c1c3'), languages: ['fr', 'en', 'zh', 'ar'], scope: 'Chine · Maroc · Algérie · Tunisie · Égypte · Libye', visibility: 'public', policy: 'open', featured: true, members: ['li-wei', 'karim', 'sofia', 'wang-hui', 'wu-jun', 'amina'], moderators: ['wang-hui'], demo: 'active' },
   { slug: 'agriculture', name: 'Agriculture & Agroalimentaire', description: "Producteurs, exportateurs, ingénieurs et acheteurs : huile d'olive, dattes, agrumes, technologies agricoles et normes d'export vers la Chine.", category: 'agriculture', icon: 'Sprout', cover: COVER('photo-1500382017468-9049fed747ef'), languages: ['fr', 'ar', 'zh'], scope: 'Tunisie · Maroc · Algérie · Chine', visibility: 'public', policy: 'open', featured: true, members: ['hichem', 'faten', 'wu-jun', 'sofia', 'mona'], moderators: ['hichem'], demo: 'active' },
-  { slug: 'juridique', name: 'Juridique & Réglementation', description: 'Questions juridiques et réglementaires : création de sociétés, contrats internationaux, propriété intellectuelle, recherche d’avocats.', rules: `${DEFAULT_RULES}\n5. Les réponses ne constituent pas une consultation juridique personnalisée.`, category: 'juridique', icon: 'Scale', cover: COVER('photo-1589829545856-d10d557cf95f'), languages: ['fr', 'ar', 'en', 'zh'], scope: 'Droit tunisien · marocain · chinois', visibility: 'public', policy: 'open', featured: true, members: ['zhao-ling', 'ahmed-chen', 'salma', 'mona', 'walid', 'amina'], moderators: ['zhao-ling'] },
+  { slug: 'juridique', name: 'Juridique & Réglementation', description: 'Questions juridiques et réglementaires : création de sociétés, contrats internationaux, propriété intellectuelle, recherche d’avocats.', rules: `${DEFAULT_RULES}\n5. Les réponses ne constituent pas une consultation juridique personnalisée.`, category: 'juridique', icon: 'Scale', cover: COVER('photo-1450101499163-c8848c66ca85'), languages: ['fr', 'ar', 'en', 'zh'], scope: 'Droit tunisien · marocain · chinois', visibility: 'public', policy: 'open', featured: true, members: ['zhao-ling', 'ahmed-chen', 'salma', 'mona', 'walid', 'amina'], moderators: ['zhao-ling'] },
   { slug: 'import-export', name: 'Import & Export', description: 'Incoterms, sourcing, douane, certifications : toutes les questions pratiques des importateurs et exportateurs.', category: 'import-export', icon: 'Ship', cover: COVER('photo-1578575437130-527eed3abbec'), languages: ['fr', 'ar', 'en'], scope: 'Chine ↔ Maghreb', visibility: 'public', policy: 'open', members: ['amina', 'karim', 'li-mei', 'walid', 'nadia', 'wang-hui'], moderators: ['amina'], demo: 'active' },
   { slug: 'logistique', name: 'Logistique & Transport', description: 'Fret maritime et aérien, groupage, entreposage et dédouanement entre les ports chinois et nord-africains.', category: 'logistique', icon: 'Truck', cover: COVER('photo-1586528116311-ad8dd3c8310d'), languages: ['fr', 'en', 'zh'], scope: 'Ningbo · Shanghai · Radès · Alger · Tanger Med', visibility: 'public', policy: 'open', members: ['karim', 'li-mei', 'amina'], moderators: ['karim'] },
   { slug: 'investment', name: 'Investissement', description: "Investisseurs, fonds et porteurs de projets : opportunités, structuration et retours d'expérience. Adhésion validée par les modérateurs.", category: 'investissement', icon: 'TrendingUp', cover: COVER('photo-1611974789855-9c2a0a7236a3'), languages: ['fr', 'en', 'zh'], scope: 'Chine · Afrique du Nord', visibility: 'restricted', policy: 'approval', members: ['zhang-min', 'sofia', 'wang-hui', 'youssef'], moderators: ['sofia'] },

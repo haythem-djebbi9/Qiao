@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { siteSettings } from '../lib/siteSettings';
 import { Logo } from './Logo';
 import qiaoAcademyHero from '../assets/images/qiao_academy_hero_1791404215248.jpg';
 import {
@@ -40,6 +42,7 @@ import { api } from '../lib/api';
 import { AcademyItemType, Cart, Course, LearningPath } from '../lib/models';
 import { CheckoutModal, CheckoutResult } from './academy/CheckoutModal';
 import { resolveImage } from '../lib/assets';
+import { Avatar } from './community/ui';
 import { CourseOutline, LESSON_TYPE_LABELS, formatMinutes } from '../lib/academy';
 import { LessonTypeIcon } from './academy/ui';
 import { useAuth } from '../context/AuthContext';
@@ -283,7 +286,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
       {cart.count > 0 && !cartOpen && (
         <button
           onClick={() => setCartOpen(true)}
-          className="fixed bottom-6 left-6 z-40 px-4 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white shadow-2xl flex items-center gap-2 text-sm font-bold cursor-pointer"
+          className="fixed bottom-[calc(1.5rem+var(--qiao-bottom-bar,0px))] left-6 z-40 px-4 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white shadow-2xl flex items-center gap-2 text-sm font-bold cursor-pointer"
         >
           <ShoppingCart className="w-5 h-5" />
           <span>Panier ({cart.count})</span>
@@ -351,7 +354,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-sky-400/40 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-[calc(1.5rem+var(--qiao-bottom-bar,0px))] right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-sky-400/40 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           <span className="text-sm font-medium">{toastMessage}</span>
         </div>
@@ -724,12 +727,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
                       {/* Instructor with Avatar */}
                       <div className="flex items-center gap-2 mb-3">
-                        <img
-                          src={resolveImage(course.instructorImg)}
-                          alt={course.instructor}
-                          referrerPolicy="no-referrer"
-                          className="w-6 h-6 rounded-full object-cover border border-slate-200"
-                        />
+                        <Avatar src={course.instructorImg ? resolveImage(course.instructorImg) : null} name={course.instructor} className="w-6 h-6 border border-slate-200" />
                         <span className="text-xs text-slate-600 font-normal">
                           {course.instructor}
                         </span>
@@ -967,12 +965,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
 
                       {/* Instructor */}
                       <div className="flex items-center gap-2 mb-2.5">
-                        <img
-                          src={resolveImage(course.instructorImg)}
-                          alt={course.instructor}
-                          referrerPolicy="no-referrer"
-                          className="w-5 h-5 rounded-full object-cover border border-slate-200"
-                        />
+                        <Avatar src={course.instructorImg ? resolveImage(course.instructorImg) : null} name={course.instructor} className="w-6 h-6 border border-slate-200" />
                         <span className="text-xs text-slate-600 font-normal">
                           {course.instructor}
                         </span>
@@ -1054,7 +1047,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
               {/* 4 Overlapping Avatar Circles */}
               <div className="flex items-center -space-x-2 mb-2">
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80"
                   alt="Expert 1"
                   className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-2xs"
                 />
@@ -1064,7 +1057,7 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
                   className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-2xs"
                 />
                 <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80"
+                  src="https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=120&q=80"
                   alt="Expert 3"
                   className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-2xs"
                 />
@@ -1198,89 +1191,6 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 8. FOOTER DÉDIÉ QIAO (MATCHING OVERALL DESIGN)                           */}
-      {/* ========================================================================= */}
-      <footer className="bg-[#07152b] text-slate-300 text-xs font-light pt-14 pb-8 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-slate-800/80">
-            {/* Left Brand Column */}
-            <div className="md:col-span-5 space-y-4">
-              <div onClick={() => onNavigate('home')} className="cursor-pointer inline-block">
-                <Logo size="sm" />
-              </div>
-
-              <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-                QIAO Academy forme les entrepreneurs, cadres et étudiants aux compétences clés du commerce, de l'investissement et des partenariats sino-nord-africains.
-              </p>
-
-              {/* Social links */}
-              <div className="flex items-center gap-3 pt-1 text-slate-400">
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">in</a>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">f</a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">▶</a>
-                <a href="https://x.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">𝕏</a>
-              </div>
-            </div>
-
-            {/* Nav Columns: Formations, Certifications, Support */}
-            <div className="md:col-span-2">
-              <h5 className="font-semibold text-white text-xs mb-3 uppercase tracking-wider">Formations</h5>
-              <ul className="space-y-2 text-slate-400 text-xs">
-                <li><button onClick={() => { setSelectedDomain('business'); scrollToCatalog(); }} className="hover:text-white transition-colors cursor-pointer">Business & Entrepreneuriat</button></li>
-                <li><button onClick={() => { setSelectedDomain('commerce'); scrollToCatalog(); }} className="hover:text-white transition-colors cursor-pointer">Commerce Sino-Maghreb</button></li>
-                <li><button onClick={() => { setSelectedDomain('investment'); scrollToCatalog(); }} className="hover:text-white transition-colors cursor-pointer">Investissement & Finance</button></li>
-                <li><button onClick={() => { setSelectedDomain('law'); scrollToCatalog(); }} className="hover:text-white transition-colors cursor-pointer">Droit des affaires</button></li>
-              </ul>
-            </div>
-
-            <div className="md:col-span-2">
-              <h5 className="font-semibold text-white text-xs mb-3 uppercase tracking-wider">Parcours</h5>
-              <ul className="space-y-2 text-slate-400 text-xs">
-                {[
-                  ['parcours-1', 'Commerce International'],
-                  ['parcours-2', 'Investissement en Chine'],
-                  ['parcours-3', 'Digital & IA Business'],
-                  ['parcours-4', 'Mandarin Pro & Culture'],
-                ].map(([pathId, label]) => (
-                  <li key={pathId}>
-                    <button
-                      onClick={() => {
-                        const path = allPaths.find((p) => p.id === pathId);
-                        if (path) setActiveParcoursModal(path);
-                      }}
-                      className="hover:text-white transition-colors cursor-pointer"
-                    >
-                      {label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="md:col-span-3">
-              <h5 className="font-semibold text-white text-xs mb-3 uppercase tracking-wider">Contact & Support</h5>
-              <ul className="space-y-2 text-slate-400 text-xs">
-                <li><span>Email : academy@qiao.global</span></li>
-                <li><span>Tél : +216 71 890 123 / +86 21 6888 1234</span></li>
-                <li><span>Bureaux : Tunis · Casablanca · Shanghai</span></li>
-                <li><button onClick={() => onNavigate('certificat')} className="hover:text-white transition-colors cursor-pointer">Vérifier un certificat</button></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-3">
-            <div>© {new Date().getFullYear()} QIAO Academy. Tous droits réservés.</div>
-            <div className="flex gap-4">
-              <button onClick={() => openLegal('training-terms')} className="hover:text-slate-300 cursor-pointer">Conditions générales de formation</button>
-              <button onClick={() => openLegal('privacy')} className="hover:text-slate-300 cursor-pointer">Politique de confidentialité</button>
-              <button onClick={() => openLegal('legal')} className="hover:text-slate-300 cursor-pointer">Mentions légales</button>
-            </div>
-          </div>
-
-        </div>
-      </footer>
 
       {/* ========================================================================= */}
       {/* INTERACTIVE COURSE DETAIL MODAL                                           */}
@@ -1323,10 +1233,10 @@ export const AcademyPage: React.FC<AcademyPageProps> = ({
               {/* Instructor & Meta */}
               <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={resolveImage(activeCourseModal.instructorImg)}
-                    alt={activeCourseModal.instructor}
-                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                  <Avatar
+                    src={activeCourseModal.instructorImg ? resolveImage(activeCourseModal.instructorImg) : null}
+                    name={activeCourseModal.instructor}
+                    className="w-10 h-10 border border-slate-200"
                   />
                   <div>
                     <div className="font-semibold text-slate-900 text-sm">{activeCourseModal.instructor}</div>

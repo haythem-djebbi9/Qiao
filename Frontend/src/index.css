@@ -3,6 +3,17 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  /* Largeur des contenus : 1536 px au lieu de 1280 px, pour éviter les grandes marges blanches
+     sur les écrans larges ou avec un zoom du navigateur à 80-90 %. */
+  --container-7xl: 96rem;
+}
+
+/* Bandeaux du Hub Commerce : sur ordinateur, la photo commence juste après la colonne de texte
+   (jamais dessous) et va jusqu'au bord droit de l'écran. */
+@media (min-width: 1024px) {
+  .hub-hero-media {
+    left: calc(max(0px, (100% - var(--container-7xl)) / 2) + 2rem + 34rem + 2.5rem);
+  }
 }
 
 @layer base {
@@ -34,6 +45,52 @@
   button, input, select, textarea {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   }
+}
+
+/* Langues : polices adaptées ; l'espacement entre lettres casserait les liaisons de l'arabe. */
+html[lang='ar'] *,
+html[lang='ar'] ::before,
+html[lang='ar'] ::after {
+  font-family: 'Noto Sans Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: 0 !important;
+}
+
+html[lang='zh'] *,
+html[lang='zh'] ::before,
+html[lang='zh'] ::after {
+  font-family: 'Noto Sans SC', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+[translate='no'],
+[translate='no'] * {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+}
+
+/* Arabe : un élément étiré des deux côtés le reste, au lieu de voir ses deux positions échangées. */
+html[dir='rtl'] .left-0.right-0 {
+  left: 0;
+  right: 0;
+}
+html[dir='rtl'] .left-4.right-4 {
+  left: calc(var(--spacing) * 4);
+  right: calc(var(--spacing) * 4);
+}
+html[dir='rtl'] .left-5.right-5 {
+  left: calc(var(--spacing) * 5);
+  right: calc(var(--spacing) * 5);
+}
+html[dir='rtl'] .left-6.right-6 {
+  left: calc(var(--spacing) * 6);
+  right: calc(var(--spacing) * 6);
+}
+
+/* Arabe : les flèches indiquent le sens de lecture. */
+html[dir='rtl'] .lucide-arrow-right,
+html[dir='rtl'] .lucide-arrow-left,
+html[dir='rtl'] .lucide-chevron-right,
+html[dir='rtl'] .lucide-chevron-left,
+html[dir='rtl'] .lucide-arrow-up-right {
+  transform: scaleX(-1);
 }
 
 .font-chinese {
@@ -342,4 +399,9 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Mot propre à la phrase française, sans équivalent une fois le titre traduit. */
+html:not([lang='fr']) .fr-only {
+  display: none;
 }

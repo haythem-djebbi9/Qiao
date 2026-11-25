@@ -1,4 +1,5 @@
 import React from 'react';
+import { DEFAULT_SITE_SETTINGS, siteSettings } from '../../lib/siteSettings';
 import { ShieldCheck, X } from 'lucide-react';
 import { LegalKind } from '../../context/AppActionsContext';
 
@@ -8,7 +9,11 @@ const CONTENT: Record<LegalKind, { title: string; sections: { heading: string; t
     sections: [
       {
         heading: 'Données collectées',
-        text: "QIAO collecte uniquement les informations que vous saisissez dans les formulaires (identité, coordonnées professionnelles, projet) ainsi que l'historique de vos actions sur la plateforme (inscriptions, téléchargements, candidatures).",
+        text: "QIAO collecte les informations que vous saisissez dans les formulaires (identité, coordonnées professionnelles, projet) ainsi que l'historique de vos actions sur la plateforme (inscriptions, téléchargements, candidatures).",
+      },
+      {
+        heading: 'Connexion avec Facebook ou WeChat',
+        text: "Si vous choisissez de vous inscrire ou de vous connecter avec Facebook ou WeChat, QIAO reçoit de ce service votre identifiant, votre nom et votre photo de profil, ainsi que votre adresse e-mail pour Facebook. Ces données servent uniquement à créer votre compte QIAO et à vous reconnaître à la connexion suivante. QIAO ne reçoit jamais votre mot de passe Facebook ou WeChat et ne publie rien en votre nom.",
       },
       {
         heading: 'Finalités',
@@ -20,7 +25,24 @@ const CONTENT: Record<LegalKind, { title: string; sections: { heading: string; t
       },
       {
         heading: 'Vos droits',
-        text: "Conformément au RGPD et aux lois tunisienne (loi 2004-63), marocaine (loi 09-08) et algérienne (loi 18-07), vous pouvez accéder, rectifier ou supprimer vos données en écrivant à privacy@qiao.tn.",
+        text: "Conformément au RGPD et aux lois tunisienne (loi 2004-63), marocaine (loi 09-08) et algérienne (loi 18-07), vous pouvez accéder à vos données, les rectifier ou les supprimer en écrivant à privacy@qiao-china.io.",
+      },
+    ],
+  },
+  'data-deletion': {
+    title: 'Suppression de vos données',
+    sections: [
+      {
+        heading: 'Demander la suppression',
+        text: "Écrivez à privacy@qiao-china.io depuis l'adresse e-mail de votre compte QIAO, avec pour objet « Suppression de mes données ». Si votre compte a été créé avec Facebook ou WeChat, indiquez le nom affiché sur ce compte.",
+      },
+      {
+        heading: 'Traitement de la demande',
+        text: "L'équipe QIAO confirme votre identité, supprime vos données et vous répond sous 30 jours. Les pièces que la loi impose de conserver, comme les factures, sont gardées pendant la durée légale.",
+      },
+      {
+        heading: "Retirer seulement l'accès de QIAO",
+        text: 'Dans Facebook, ouvrez Paramètres et confidentialité › Paramètres › Applications et sites web, puis supprimez QIAO. Sur QIAO, vous pouvez aussi délier Facebook ou WeChat dans Community › Paramètres › Comptes & sécurité.',
       },
     ],
   },
@@ -49,7 +71,7 @@ const CONTENT: Record<LegalKind, { title: string; sections: { heading: string; t
     title: 'Mentions légales',
     sections: [
       { heading: 'Éditeur', text: 'QIAO Bridge SARL — Immeuble International City Center, Avenue de la Bourse, Les Berges du Lac, 1053 Tunis, Tunisie.' },
-      { heading: 'Contact', text: 'contact@qiao.tn — +216 71 123 456 (du lundi au vendredi, 9h00 - 18h00 GMT+1).' },
+      { heading: 'Contact', text: 'contact@qiao.tn — +216 28 773 249 (du lundi au vendredi, 9h00 - 18h00 GMT+1).' },
       { heading: 'Bureaux', text: 'Tunis (siège), Shanghai, Alger et Casablanca.' },
       { heading: 'Propriété intellectuelle', text: "La marque QIAO (桥), le logo et l'ensemble des contenus du site sont protégés. Toute reproduction sans autorisation est interdite." },
     ],
@@ -69,6 +91,13 @@ interface LegalModalProps {
   kind: LegalKind | null;
   onClose: () => void;
 }
+
+/** Ligne « Contact » des mentions légales : celle d'origine tant que les coordonnées n'ont pas changé. */
+const contactLine = (text: string) => {
+  const s = siteSettings();
+  if (s.email === DEFAULT_SITE_SETTINGS.email && s.phone === DEFAULT_SITE_SETTINGS.phone) return text;
+  return `${s.email} — ${s.phone} (${s.hours}).`;
+};
 
 export const LegalModal: React.FC<LegalModalProps> = ({ kind, onClose }) => {
   if (!kind) return null;
@@ -96,7 +125,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ kind, onClose }) => {
           {content.sections.map((section) => (
             <div key={section.heading}>
               <h4 className="font-bold text-slate-900 mb-1">{section.heading}</h4>
-              <p>{section.text}</p>
+              <p>{kind === 'legal' && section.heading === 'Contact' ? contactLine(section.text) : section.text}</p>
             </div>
           ))}
           <p className="text-xs text-slate-400">Dernière mise à jour : octobre 2026.</p>

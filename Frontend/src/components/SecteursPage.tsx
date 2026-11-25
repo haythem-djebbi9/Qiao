@@ -16,8 +16,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { SECTORS_LIST } from '../data/sectorsData';
-import { ContactFooterSection } from './ContactFooterSection';
-import heroClearBg from '../data/herophoto.jpg';
+import { HOME_HERO } from '../lib/heroImage';
 import secteursPartnersImg from '../assets/images/secteurs_partners_apparent_1791221199460.jpg';
 
 interface SecteursPageProps {
@@ -77,9 +76,12 @@ export const SecteursPage: React.FC<SecteursPageProps> = ({
         {/* Full Opacity Panoramic Skyline Background Image */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
-            src={heroClearBg}
+            src={HOME_HERO.src}
+            srcSet={HOME_HERO.srcSet}
+            sizes={HOME_HERO.sizes}
+            fetchPriority="high"
+            decoding="async"
             alt="Skyline moderne Chine et Afrique du Nord"
-            referrerPolicy="no-referrer"
             className="w-full h-full object-cover object-center"
           />
           {/* Soft White Gradient strictly on the left to keep skyline at full opacity */}
@@ -306,7 +308,7 @@ export const SecteursPage: React.FC<SecteursPageProps> = ({
                 <Globe className="w-8 h-8 text-[#1d4ed8] mb-2 stroke-[1.5]" />
                 <div className="text-3xl sm:text-4xl font-extrabold text-[#0a1c3d]">6</div>
                 <div className="text-xs text-slate-600 font-medium mt-1 leading-snug">
-                  Pays d'Afrique<br />du Nord couverts
+                  <span className="whitespace-pre-line">{"Pays d'Afrique\ndu Nord couverts"}</span>
                 </div>
               </div>
 
@@ -391,10 +393,6 @@ export const SecteursPage: React.FC<SecteursPageProps> = ({
       {/* ========================================================================= */}
       {/* 6. FOOTER SECTION                                                          */}
       {/* ========================================================================= */}
-      <ContactFooterSection
-        showOnlyFooter={true}
-        onScrollToSection={onNavigate}
-      />
     </div>
   );
 };

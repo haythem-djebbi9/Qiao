@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   BarChart3,
   ArrowLeftRight,
@@ -17,8 +17,7 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
-  Play,
-  X
+  CalendarDays,
 } from 'lucide-react';
 import { AppTab, CommerceHubTab } from '../../types';
 import { VueEnsembleTab } from './tabs/VueEnsembleTab';
@@ -33,6 +32,8 @@ import { AnalysesTab } from './tabs/AnalysesTab';
 import { CommerceHubBottomBanner } from './components/CommerceHubBottomBanner';
 import { FlagIcon } from '../common/FlagIcon';
 import { useDownloads } from '../../hooks/useDownloads';
+import { useAppActions } from '../../context/AppActionsContext';
+import { slugify } from '../../lib/text';
 import ecommerceCargoShipImg from '../../assets/images/ecommerce_hero_cargo_ship_1790887696581.jpg';
 import reglementationHeroPortImg from '../../assets/images/reglementation_hero_port_1790896278386.jpg';
 import rapportsHeroReportsImg from '../../assets/images/rapports_hero_reports_1790896412608.jpg';
@@ -40,7 +41,7 @@ import produitsHeroContainerImg from '../../assets/images/produits_hero_containe
 import opportunitesHeroImg from '../../assets/images/opportunites_hero_handshake_port_1790897415451.jpg';
 import entreprisesHeroImg from '../../assets/images/china_africa_handshake_1787501713904.jpg';
 import ecommerceDevicesImg from '../../assets/images/ecommerce_devices_marketplace_1790934935730.jpg';
-import analysesHeroDeskImg from '../../assets/images/analyses_hero_data_desk_1791034393458.jpg';
+import analysesHeroDeskImg from '../../assets/images/intelligence_globe_hero_1789905766229.jpg';
 
 interface CommerceHubPageProps {
   initialTab?: CommerceHubTab;
@@ -56,10 +57,21 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
   onNavigateTab,
   onOpenConsultation,
   onOpenSignUp,
+  focus,
+  onFocusHandled,
 }) => {
   const [activeCommerceTab, setActiveCommerceTab] = useState<CommerceHubTab>(initialTab);
+  const [focusCompanyId, setFocusCompanyId] = useState<string | null>(null);
+  const { openDocument, openArticle } = useAppActions();
+
+  // Recherche globale : l'entreprise choisie s'ouvre dans l'onglet Entreprises.
+  useEffect(() => {
+    if (focus?.type !== 'company') return;
+    setActiveCommerceTab('entreprises');
+    setFocusCompanyId(focus.id);
+    onFocusHandled?.();
+  }, [focus, onFocusHandled]);
   const [modalReportTitle, setModalReportTitle] = useState<string | null>(null);
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { downloadDocument } = useDownloads();
 
   useEffect(() => {
@@ -67,6 +79,15 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
       setActiveCommerceTab(initialTab);
     }
   }, [initialTab]);
+
+  // Mobile : l'onglet actif reste visible dans la ligne d'onglets qui défile.
+  const tabsRow = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = tabsRow.current;
+    const active = row?.querySelector<HTMLElement>(`[data-hub-tab="${activeCommerceTab}"]`);
+    if (!row || !active || row.scrollWidth <= row.clientWidth) return;
+    row.scrollTo({ left: active.offsetLeft - (row.clientWidth - active.offsetWidth) / 2, behavior: 'smooth' });
+  }, [activeCommerceTab]);
 
   // Tab definitions exactly matching screenshot: icon on top, label below
   const navTabs: { id: CommerceHubTab; label: string; icon: React.ReactNode }[] = [
@@ -87,18 +108,10 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
       {/* ========================================================================= */}
       {/* 1. HERO BANNER: DYNAMIC ACCORDING TO ACTIVE SUB-TAB                        */}
       {/* ========================================================================= */}
-      <div className={`relative bg-white border-b border-slate-200 overflow-hidden ${
-        activeCommerceTab === 'opportunites' || activeCommerceTab === 'reglementation' || activeCommerceTab === 'rapports' || activeCommerceTab === 'produits' || activeCommerceTab === 'entreprises' || activeCommerceTab === 'marches-ecommerce' || activeCommerceTab === 'analyses'
-          ? 'pt-24 sm:pt-28 pb-14 sm:pb-16 lg:pb-20 min-h-[380px] sm:min-h-[430px] flex items-center'
-          : 'pt-24 sm:pt-28 pb-12 lg:pb-14'
-      }`}>
+      <div className="relative bg-white border-b border-slate-200 overflow-hidden pt-24 sm:pt-28 pb-6 lg:pb-16 flex flex-col lg:flex-row lg:items-center lg:min-h-[440px]">
         
         {/* Right Side: Photo with High Opacity & Clean Presentation */}
-        <div className={`absolute right-0 top-[64px] sm:top-[72px] bottom-0 pointer-events-none select-none overflow-hidden ${
-          activeCommerceTab === 'entreprises'
-            ? 'w-full lg:w-[68%] xl:w-[65%]'
-            : 'w-full lg:w-[68%] xl:w-[65%]'
-        }`}>
+        <div className="hub-hero-media order-last lg:order-none relative mt-6 mx-4 sm:mx-6 h-52 sm:h-72 rounded-2xl lg:rounded-none lg:mx-0 lg:mt-0 lg:h-auto lg:absolute lg:right-0 lg:top-[72px] lg:bottom-0 pointer-events-none select-none overflow-hidden">
           <img
             src={
               activeCommerceTab === 'opportunites'
@@ -142,243 +155,14 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
           />
 
           {/* Minimal, soft left edge feathering only to let photo shine strongly */}
-          <div className={`absolute left-0 top-0 bottom-0 pointer-events-none ${
-            activeCommerceTab === 'entreprises'
-              ? 'w-4 sm:w-8 bg-gradient-to-r from-white to-transparent'
-              : 'w-6 sm:w-12 bg-gradient-to-r from-white to-transparent'
-          }`} />
+          <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent pointer-events-none" />
 
-          {/* Analyses Overlays matching screenshot */}
-          {activeCommerceTab === 'analyses' && (
-            <>
-              {/* Top-left: DATA / INSIGHTS / STRATEGY... */}
-              <div className="absolute top-4 sm:top-6 left-6 sm:left-12 text-left z-20 pointer-events-none hidden md:block">
-                <div className="text-[11px] sm:text-[12px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  DATA<br />
-                  INSIGHTS<br />
-                  STRATEGY<br />
-                  OPPORTUNITIES<br />
-                  A STRONGER TOMORROW
-                </div>
-                <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
-              </div>
 
-              {/* Far top-right: DES DONNÉES / AUX OPPORTUNITÉS... with red vertical bar */}
-              <div className="absolute top-4 sm:top-6 right-6 lg:right-10 text-left z-20 pointer-events-none hidden md:block">
-                <div className="flex items-start gap-2">
-                  <div className="w-[3px] h-20 bg-red-600 rounded-full shadow-xs shrink-0 mt-0.5" />
-                  <div className="text-[10px] sm:text-[11px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                    DES DONNÉES<br />
-                    AUX OPPORTUNITÉS<br />
-                    POUR UN PARTENARIAT<br />
-                    DURABLE<br />
-                    CHINE - AFRIQUE<br />
-                    DU NORD
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Flux commerciaux Overlays matching screenshot */}
-          {activeCommerceTab === 'flux-commerciaux' && (
-            <div className="absolute top-4 sm:top-6 left-6 sm:left-12 text-left z-20 pointer-events-none hidden md:block">
-              <div className="text-[11px] sm:text-[12px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                CHINA ↔ NORTH AFRICA<br />
-                TRADE FLOWS<br />
-                REAL DATA<br />
-                REAL OPPORTUNITIES
-              </div>
-              <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
-            </div>
-          )}
-
-          {/* Marchés e-commerce Overlays matching screenshot */}
-          {activeCommerceTab === 'marches-ecommerce' && (
-            <>
-              {/* CHINE ↔ AFRIQUE DU NORD overlay (middle-left of image) */}
-              <div className="absolute top-4 sm:top-6 left-6 sm:left-12 text-left z-20 pointer-events-none hidden md:block">
-                <div className="text-[11px] sm:text-[12px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  CHINE ↔ AFRIQUE DU NORD<br />
-                  E-COMMERCE<br />
-                  PLUS DE MARCHÉS<br />
-                  PLUS D'OPPORTUNITÉS
-                </div>
-                <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
-              </div>
-
-              {/* PLATEFORMES / CONSOMMATEURS / PRODUITS overlay (top-right of image) */}
-              <div className="absolute top-4 sm:top-6 right-6 lg:right-10 text-left z-20 pointer-events-none hidden md:block">
-                <div className="text-[10px] sm:text-[11px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  PLATEFORMES<br />
-                  CONSOMMATEURS<br />
-                  PRODUITS<br />
-                  LOGISTIQUE<br />
-                  PAIEMENTS<br />
-                  CROISSANCE
-                </div>
-                <div className="w-8 h-[2px] bg-red-600 ml-auto mt-2 rounded-full shadow-xs" />
-              </div>
-            </>
-          )}
-
-          {/* Opportunités Overlays matching user screenshot */}
-          {activeCommerceTab === 'opportunites' && (
-            <>
-              {/* Connecting Markets Text (middle-left of image) */}
-              <div className="absolute top-4 sm:top-6 left-8 sm:left-12 text-left z-20 pointer-events-none hidden md:block">
-                <div className="text-[11px] sm:text-[12px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  CONNECTING<br />
-                  MARKETS<br />
-                  CREATING<br />
-                  OPPORTUNITIES
-                </div>
-                <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
-              </div>
-
-              {/* Trade Partnerships Text (top-right of image) */}
-              <div className="absolute top-4 sm:top-6 right-6 lg:right-10 text-left z-20 pointer-events-none hidden md:block">
-                <div className="text-[10px] sm:text-[11px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  TRADE<br />
-                  PARTNERSHIPS<br />
-                  INVESTMENT<br />
-                  DISTRIBUTION<br />
-                  JOINT VENTURES<br />
-                  A SUSTAINABLE FUTURE
-                </div>
-                <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
-              </div>
-            </>
-          )}
-
-          {/* Far Right Top Editorial Typography Overlay */}
-          {activeCommerceTab === 'reglementation' && (
-            <div className="absolute top-4 sm:top-6 right-6 lg:right-10 text-right z-20 pointer-events-none hidden md:block">
-              <div className="text-[10px] sm:text-[11px] tracking-[0.2em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                RÈGLES<br />
-                NORMES<br />
-                DOUANES<br />
-                CERTIFICATIONS<br />
-                ACCORDS COMMERCIAUX<br />
-                UN COMMERCE SÛR<br />
-                UN AVENIR DURABLE
-              </div>
-              <div className="w-7 h-[2px] bg-red-600 ml-auto mt-2 rounded-full shadow-xs" />
-            </div>
-          )}
-
-          {activeCommerceTab === 'rapports' && (
-            <div className="absolute top-4 sm:top-6 right-6 lg:right-10 text-right z-20 pointer-events-none hidden md:block">
-              <div className="text-[10px] sm:text-[11px] tracking-[0.2em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                KNOWLEDGE<br />
-                INSIGHTS<br />
-                OPPORTUNITIES<br />
-                A STRONGER<br />
-                CHINA – NORTH AFRICA<br />
-                TOMORROW
-              </div>
-              <div className="w-7 h-[2px] bg-red-600 ml-auto mt-2 rounded-full shadow-xs" />
-            </div>
-          )}
-
-          {activeCommerceTab === 'entreprises' && (
-            <>
-              {/* CONNECTER LES ENTREPRISES... overlay (middle-left) */}
-              <div className="absolute top-4 sm:top-6 left-6 sm:left-10 text-left z-20 pointer-events-none hidden md:block">
-                <div className="text-[10.5px] sm:text-[11.5px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  CONNECTER<br />
-                  LES ENTREPRISES<br />
-                  CHINOISES ET<br />
-                  NORD-AFRICAINES<br />
-                  POUR UNE CROISSANCE<br />
-                  PARTAGÉE
-                </div>
-                <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
-              </div>
-
-              {/* BUSINESS PARTNERSHIPS... overlay (top-right) */}
-              <div className="absolute top-4 sm:top-6 right-6 lg:right-10 text-left z-20 pointer-events-none hidden md:block">
-                <div className="text-[10px] sm:text-[11px] tracking-[0.16em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                  BUSINESS<br />
-                  PARTNERSHIPS<br />
-                  SUPPLY CHAINS<br />
-                  DISTRIBUTION<br />
-                  JOINT VENTURES<br />
-                  A SHARED FUTURE
-                </div>
-                <div className="w-8 h-[2px] bg-red-600 mt-2 rounded-full shadow-xs" />
-              </div>
-            </>
-          )}
-
-          {activeCommerceTab === 'produits' && (
-            <div className="absolute top-6 sm:top-8 right-6 lg:right-10 text-right z-20 pointer-events-none hidden md:block">
-              <div className="text-[10px] sm:text-[11px] tracking-[0.2em] font-extrabold text-white uppercase leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
-                CHINA<br />
-                NORTH AFRICA<br />
-                TRADE<br />
-                PEOPLE<br />
-                OPPORTUNITIES
-              </div>
-              <div className="w-7 h-[2px] bg-red-600 ml-auto mt-2 rounded-full shadow-xs" />
-            </div>
-          )}
-
-          {/* Far Right Bottom Glass Card (Matching Screenshot) */}
-          {activeCommerceTab !== 'opportunites' && activeCommerceTab !== 'marches-ecommerce' && activeCommerceTab !== 'entreprises' && (
-            <div className="absolute bottom-6 right-6 lg:right-10 z-20 pointer-events-none hidden md:block">
-              <div className="bg-white/90 backdrop-blur-md border-l-4 border-l-red-600 border border-white/60 px-4 py-2.5 rounded-lg shadow-xl text-left">
-                <div className="text-[10.5px] font-black text-[#0f2448] tracking-[0.16em] leading-snug">
-                  {activeCommerceTab === 'produits' ? (
-                    <>
-                      DES PRODUITS<br />
-                      DES MARCHÉS<br />
-                      DES PARTENARIATS<br />
-                      UN AVENIR COMMUN
-                    </>
-                  ) : activeCommerceTab === 'reglementation' ? (
-                    <>
-                      COMPLIANCE<br />
-                      BUILDS<br />
-                      OPPORTUNITIES
-                    </>
-                  ) : activeCommerceTab === 'rapports' ? (
-                    <>
-                      QIAO<br />
-                      INTELLIGENCE REPORT
-                    </>
-                  ) : activeCommerceTab === 'flux-commerciaux' ? (
-                    <>
-                      DES PONTS<br />
-                      DES MARCHÉS<br />
-                      DES PARTENARIATS<br />
-                      UN AVENIR<br />
-                      COMMUN
-                    </>
-                  ) : activeCommerceTab === 'analyses' ? (
-                    <>
-                      DES INSIGHTS<br />
-                      DES DONNÉES<br />
-                      DES DÉCISIONS<br />
-                      UN IMPACT RÉEL
-                    </>
-                  ) : (
-                    <>
-                      BRIDGING<br />
-                      BUSINESSES<br />
-                      PEOPLES<br />
-                      OPPORTUNITIES
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Left Side Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
-          <div className={activeCommerceTab === 'entreprises' ? 'max-w-xl' : 'max-w-2xl'}>
+          <div className="max-w-2xl lg:max-w-[34rem]">
             
             {/* Top Breadcrumb */}
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mb-3">
@@ -547,21 +331,11 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
               </button>
 
               <button
-                onClick={() => setIsVideoModalOpen(true)}
+                onClick={() => (onOpenConsultation ? onOpenConsultation() : onNavigateTab('contact'))}
                 className="bg-white/95 hover:bg-white text-slate-800 border border-slate-300 hover:border-slate-400 px-4 py-2.5 rounded-lg font-medium text-xs sm:text-sm flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
               >
-                <Play className="w-3.5 h-3.5 fill-slate-700 text-slate-700" />
-                <span>
-                  {activeCommerceTab === 'opportunites'
-                    ? 'Comment ça marche ?'
-                    : activeCommerceTab === 'reglementation'
-                    ? 'Voir le guide vidéo'
-                    : activeCommerceTab === 'flux-commerciaux'
-                    ? 'Voir la méthodologie'
-                    : activeCommerceTab === 'analyses'
-                    ? 'Méthodologie d’analyse'
-                    : 'Voir la vidéo'}
-                </span>
+                <CalendarDays className="w-4 h-4 text-slate-700" />
+                <span>Parler à un expert</span>
               </button>
             </div>
 
@@ -576,16 +350,17 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
           
           {/* 9 Tabs Container */}
-          <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 divide-x divide-slate-200/80 border-x border-slate-200/80 py-1.5 sm:py-2">
+          <div ref={tabsRow} className="flex gap-1 overflow-x-auto scrollbar-none lg:grid lg:grid-cols-9 lg:gap-0 lg:divide-x divide-slate-200/80 lg:border-x border-slate-200/80 py-1.5 sm:py-2">
             {navTabs.map((tab) => {
               const isActive = activeCommerceTab === tab.id;
               return (
                 <button
                   key={tab.id}
+                  data-hub-tab={tab.id}
                   onClick={() => {
                     setActiveCommerceTab(tab.id);
                   }}
-                  className={`flex flex-col items-center justify-center py-2.5 px-1.5 sm:px-2 text-center transition-all cursor-pointer relative ${
+                  className={`shrink-0 min-w-[96px] lg:min-w-0 flex flex-col items-center justify-center py-2.5 px-2 text-center transition-all cursor-pointer relative ${
                     isActive
                       ? 'bg-[#0c4a9e] text-white rounded-lg shadow-xs font-semibold'
                       : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-medium'
@@ -619,9 +394,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'flux-commerciaux' && (
           <FluxCommerciauxTab
             onSelectTab={setActiveCommerceTab}
-            onOpenReport={(title) => {
-              setActiveCommerceTab('rapports');
-            }}
+            onOpenReport={openDocument}
           />
         )}
 
@@ -637,12 +410,13 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'marches-ecommerce' && (
           <MarchesEcommerceTab
             onSelectTab={setActiveCommerceTab}
-            onOpenReport={(title) => setActiveCommerceTab('rapports')}
+            onOpenReport={openDocument}
           />
         )}
 
         {activeCommerceTab === 'entreprises' && (
           <EntreprisesTab
+            focusCompanyId={focusCompanyId}
             onSelectTab={setActiveCommerceTab}
             onOpenCompanyDetail={(name) => {
               setActiveCommerceTab('opportunites');
@@ -653,9 +427,6 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'opportunites' && (
           <OpportunitesTab
             onSelectTab={setActiveCommerceTab}
-            onOpenOpportunityDetail={(id) => {
-              if (onOpenConsultation) onOpenConsultation();
-            }}
             onOpenSignUp={onOpenSignUp}
           />
         )}
@@ -663,9 +434,8 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'reglementation' && (
           <ReglementationTab
             onSelectTab={setActiveCommerceTab}
-            onOpenDocDetail={(title) => {
-              setActiveCommerceTab('rapports');
-            }}
+            onOpenConsultation={onOpenConsultation}
+            onOpenDocDetail={openDocument}
           />
         )}
 
@@ -681,9 +451,7 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         {activeCommerceTab === 'analyses' && (
           <AnalysesTab
             onSelectTab={setActiveCommerceTab}
-            onOpenArticle={(title) => {
-              // open or highlight
-            }}
+            onOpenArticle={(title) => openArticle(slugify(title))}
           />
         )}
       </main>
@@ -777,54 +545,6 @@ export const CommerceHubPage: React.FC<CommerceHubPageProps> = ({
         </div>
       )}
 
-      {/* Video Modal (Voir la vidéo) */}
-      {isVideoModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-3xl bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
-            <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                <h3 className="text-sm sm:text-base font-bold text-white">
-                  QIAO Intelligence • Commerce & E-commerce Chine – Afrique du Nord
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsVideoModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
-                aria-label="Fermer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
-              <img
-                src={ecommerceCargoShipImg}
-                alt="Video Preview"
-                className="w-full h-full object-cover opacity-60"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-              <div className="relative z-10 text-center p-6 max-w-lg">
-                <div className="w-16 h-16 rounded-full bg-red-600/90 text-white flex items-center justify-center mx-auto mb-4 shadow-xl shadow-red-600/40">
-                  <Play className="w-7 h-7 fill-white text-white ml-1" />
-                </div>
-                <h4 className="text-lg font-bold text-white mb-2">
-                  Comprendre les flux commerciaux bilatéraux en 3 minutes
-                </h4>
-                <p className="text-xs text-slate-300 leading-relaxed mb-4">
-                  Découvrez comment les corridors logistiques maritimes et les plateformes numériques relient la Chine au Maroc, à la Tunisie, à l'Algérie et à l'Égypte.
-                </p>
-                <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400">
-                  <span>Durée : 3m 45s</span>
-                  <span>•</span>
-                  <span>Qualité : 4K HDR</span>
-                  <span>•</span>
-                  <span>Audio : Français / 中文</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

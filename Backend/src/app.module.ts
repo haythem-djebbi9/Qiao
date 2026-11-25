@@ -18,6 +18,8 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { EventsModule } from './modules/events/events.module';
 import { SeoModule } from './modules/seo/seo.module';
 import { HealthController } from './modules/health/health.controller';
+import { I18nModule } from './modules/i18n/i18n.module';
+import { SiteAdminModule } from './modules/site-admin/site-admin.module';
 import { NewsletterModule } from './modules/newsletter/newsletter.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
@@ -67,9 +69,15 @@ const FRONTEND_DIST = process.env.FRONTEND_DIST ?? join(__dirname, '..', '..', '
             rootPath: FRONTEND_DIST,
             exclude: ['/api/(.*)'],
             serveStaticOptions: {
-              // Fichiers compilés (nom haché) : cache long ; le reste, dont index.html, est revalidé à chaque visite.
+              // Fichiers compilés et images dont le nom contient une empreinte (ex. accueil-1600.bffcfad5.webp) :
+              // cache long ; le reste, dont index.html, est revalidé à chaque visite.
               setHeaders: (res: { setHeader: (name: string, value: string) => void }, path: string) =>
-                res.setHeader('Cache-Control', /[\\/]assets[\\/]/.test(path) ? 'public, max-age=31536000, immutable' : 'public, max-age=0, must-revalidate'),
+                res.setHeader(
+                  'Cache-Control',
+                  /[\\/]assets[\\/]|\.[0-9a-f]{8}\.(webp|avif|jpe?g|png)$/.test(path)
+                    ? 'public, max-age=31536000, immutable'
+                    : 'public, max-age=0, must-revalidate',
+                ),
             },
           }),
         ]
@@ -84,6 +92,8 @@ const FRONTEND_DIST = process.env.FRONTEND_DIST ?? join(__dirname, '..', '..', '
     CatalogModule,
     EventsModule,
     SeoModule,
+    I18nModule,
+    SiteAdminModule,
     AcademyModule,
     CommunityModule,
     PaymentsModule,

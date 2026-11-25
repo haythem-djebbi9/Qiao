@@ -15,17 +15,14 @@ import {
   Building2,
   Globe,
   Star,
-  MapPin,
   ArrowRight,
 } from 'lucide-react';
-import { VisitorLocation } from '../lib/geo';
-import { FlagIcon } from './common/FlagIcon';
 
 interface HeroProps {
   onSearch?: (query: string) => void;
+  /** Catégories qui ont au moins un service : les raccourcis sans service sont masqués. */
+  availableCategories?: string[];
   onSelectCategory?: (cat: string) => void;
-  /** Position détectée automatiquement (compte, fuseau horaire ou langue). */
-  visitorLocation: VisitorLocation;
   onExploreOpportunities?: () => void;
   onOpenCalculator?: () => void;
   onOpenRegister?: () => void;
@@ -34,18 +31,15 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({
+  availableCategories,
   onSearch,
   onSelectCategory,
-  visitorLocation,
   onExploreOpportunities,
   onOpenCalculator,
   onOpenRegister,
   onOpenVideo,
   onExploreServices,
 }) => {
-  const fromChina = visitorLocation.region === 'china';
-  const fromNorthAfrica = visitorLocation.region === 'north-africa';
-
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('Business');
 
@@ -105,8 +99,8 @@ export const Hero: React.FC<HeroProps> = ({
             <span className="block text-2xl sm:text-4xl lg:text-[42px] font-semibold text-white/95">
               Le pont entre
             </span>
-            <span className="block mt-1.5">
-              la <span className="text-red-500">Chine</span> &amp; <span className="text-sky-400">l'Afrique du Nord</span>
+            <span className="block mt-1.5 text-balance">
+              <span className="fr-only" translate="no">la </span><span className="text-red-500">Chine</span> &amp; <span className="text-sky-400">l'Afrique du Nord</span>
             </span>
           </h1>
 
@@ -117,47 +111,20 @@ export const Hero: React.FC<HeroProps> = ({
             <p>et développez vos projets en toute sérénité.</p>
           </div>
 
-          {/* Position détectée automatiquement + parcours adapté - Centered base of the pyramid */}
+          {/* Deux parcours, identiques pour tous les visiteurs (aucune détection de position). */}
           <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-5">
-            {/* Detected location pill */}
-            <div
-              className={`px-5 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium flex items-center gap-2.5 shadow-xl backdrop-blur-md text-white ${
-                fromChina ? 'bg-[#dc2626]' : 'bg-[#0a1b38]/90 border border-white/20'
-              }`}
-              title="Position détectée automatiquement"
-            >
-              {visitorLocation.countryCode ? (
-                <FlagIcon country={visitorLocation.countryCode} size="md" className="rounded-sm overflow-hidden shrink-0" />
-              ) : (
-                <MapPin className="w-4 h-4 shrink-0" />
-              )}
-              <span>
-                {fromChina || fromNorthAfrica ? (
-                  <>
-                    Vous êtes en <strong className="font-semibold">{visitorLocation.country}</strong>
-                  </>
-                ) : (
-                  'Bienvenue sur QIAO'
-                )}
-              </span>
-            </div>
-
-            {/* Personalized CTA according to the detected region */}
             <button
-              onClick={fromChina || fromNorthAfrica ? onExploreOpportunities : onExploreServices}
-              className={`px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl active:scale-98 ${
-                fromChina
-                  ? 'bg-[#0a1b38]/90 hover:bg-[#122852] text-white border border-white/20 backdrop-blur-md'
-                  : 'bg-[#dc2626] hover:bg-[#b91c1c] text-white'
-              }`}
+              onClick={onExploreOpportunities}
+              className="px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl active:scale-98 bg-[#0a1b38]/90 hover:bg-[#122852] text-white border border-white/20 backdrop-blur-md"
             >
-              <span>
-                {fromChina
-                  ? "S'implanter en Afrique du Nord"
-                  : fromNorthAfrica
-                  ? 'Sourcer & exporter avec la Chine'
-                  : 'Découvrir nos services'}
-              </span>
+              <span>Explorer les opportunités</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onExploreServices}
+              className="px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-xl active:scale-98 bg-[#dc2626] hover:bg-[#b91c1c] text-white"
+            >
+              <span>Découvrir nos services</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -169,14 +136,14 @@ export const Hero: React.FC<HeroProps> = ({
         
         {/* Sleek Dark Frosted Glass Dock (Search + Categories on Left, Key Metrics on Right) */}
         <div className="bg-[#061329]/85 backdrop-blur-xl rounded-[24px] p-3.5 sm:p-4 lg:p-5 px-5 sm:px-7 text-white border border-white/20 shadow-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-center">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-4 xl:gap-5 items-center">
             
             {/* Left Section: Search Bar & Categories Row (7 Columns) */}
-            <div className="lg:col-span-7 flex flex-col justify-between space-y-3">
+            <div className="min-w-0 flex flex-col justify-between space-y-3">
               {/* Search Form Pill */}
               <form onSubmit={handleSearchSubmit} className="relative">
                 <div className="flex items-center bg-[#0b1d3a]/60 border border-white/20 rounded-2xl p-1.5 focus-within:border-sky-400 transition-all shadow-inner">
-                  <div className="pl-3.5 pr-2 text-white/70">
+                  <div className="pl-2.5 sm:pl-3.5 pr-2 text-white/70">
                     <Search className="w-4.5 h-4.5 text-white/80" />
                   </div>
                   <input
@@ -184,43 +151,49 @@ export const Hero: React.FC<HeroProps> = ({
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Rechercher un service, un expert, une opportunité..."
-                    className="flex-1 bg-transparent text-white placeholder-white/50 text-xs sm:text-sm font-light focus:outline-none pr-2"
+                    className="flex-1 min-w-0 bg-transparent text-white placeholder-white/55 text-xs sm:text-sm font-light focus:outline-none pr-2"
                   />
                   <button
                     type="submit"
-                    className="px-6 sm:px-8 py-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-medium text-xs sm:text-sm rounded-xl transition-all shadow-md cursor-pointer active:scale-98"
+                    className="shrink-0 px-4 sm:px-8 py-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-medium text-xs sm:text-sm rounded-xl transition-all shadow-md cursor-pointer active:scale-98"
                   >
                     Rechercher
                   </button>
                 </div>
               </form>
 
-              {/* Service Categories Icons Row with Outline Icons */}
-              <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1 scrollbar-none pt-0.5">
-                {categories.map((cat) => {
+              {/* Raccourcis des catégories : tuiles de 3 par ligne sur téléphone, 5 sur tablette, une seule ligne sur grand écran.
+                  Chaque libellé a toujours sa place (jamais de chevauchement) et chaque tuile est assez grande pour le doigt. */}
+              <div className="flex flex-wrap justify-center gap-2 lg:flex-nowrap lg:justify-between lg:gap-1.5">
+                {categories
+                  .filter((cat) => cat.name === 'Plus' || !availableCategories || availableCategories.includes(cat.name))
+                  .map((cat) => {
                   const Icon = cat.icon;
                   const isSelected = activeCategory === cat.name;
                   return (
                     <button
                       key={cat.name}
+                      type="button"
                       onClick={() => handleCategoryClick(cat.name)}
-                      className={`flex flex-col items-center gap-1 group transition-all min-w-[50px] sm:min-w-[58px] p-1 rounded-lg cursor-pointer ${
-                        isSelected ? 'text-white font-medium' : 'text-white/70 hover:text-white'
+                      className={`basis-[calc((100%_-_1rem)/3_-_1px)] sm:basis-[calc((100%_-_2rem)/5_-_1px)] lg:basis-0 lg:flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-2 lg:py-1.5 rounded-xl border group transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-white/15 border-white/35 text-white'
+                          : 'bg-white/[0.04] border-white/10 text-white/80 hover:bg-white/10 hover:border-white/25 hover:text-white'
                       }`}
                     >
                       <div className="flex items-center justify-center w-6 h-6 group-hover:scale-110 transition-transform">
                         {cat.name === 'Plus' ? (
                           <div className="grid grid-cols-2 gap-1 w-3.5 h-3.5 place-items-center">
-                            <span className="w-1.5 h-1.5 rounded-full border border-white/60 group-hover:border-white" />
-                            <span className="w-1.5 h-1.5 rounded-full border border-white/60 group-hover:border-white" />
-                            <span className="w-1.5 h-1.5 rounded-full border border-white/60 group-hover:border-white" />
-                            <span className="w-1.5 h-1.5 rounded-full border border-white/60 group-hover:border-white" />
+                            <span className="w-1.5 h-1.5 rounded-full border border-white/70 group-hover:border-white" />
+                            <span className="w-1.5 h-1.5 rounded-full border border-white/70 group-hover:border-white" />
+                            <span className="w-1.5 h-1.5 rounded-full border border-white/70 group-hover:border-white" />
+                            <span className="w-1.5 h-1.5 rounded-full border border-white/70 group-hover:border-white" />
                           </div>
                         ) : (
-                          <Icon className="w-5 h-5 text-white/70 group-hover:text-white stroke-[1.5]" />
+                          <Icon className="w-5 h-5 stroke-[1.6]" />
                         )}
                       </div>
-                      <span className="text-[11px] text-white/70 group-hover:text-white whitespace-nowrap font-light">
+                      <span className="max-w-full text-[11px] leading-tight whitespace-nowrap">
                         {cat.name}
                       </span>
                     </button>
@@ -230,71 +203,71 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Right Section: 5 Statistics Columns (5 Columns, with divider line) */}
-            <div className="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-white/20 pt-3 lg:pt-0 lg:pl-6">
-              <div className="grid grid-cols-5 gap-1 sm:gap-2 items-start text-center">
+            <div className="border-t xl:border-t-0 xl:border-l border-white/20 pt-4 xl:pt-0 xl:pl-5">
+              <div className="flex flex-wrap justify-center gap-y-4 sm:grid sm:grid-cols-5 sm:gap-2 xl:flex xl:flex-nowrap xl:justify-between xl:gap-3.5 2xl:gap-5 items-start text-center">
                 
                 {/* 1. +10,000 Utilisateurs actifs */}
-                <div className="flex flex-col items-center">
+                <div className="basis-1/3 sm:basis-auto flex flex-col items-center">
                   <div className="mb-1 text-sky-400">
                     <Users className="w-5 h-5 sm:w-6 sm:h-6 text-sky-400 stroke-[1.6]" />
                   </div>
-                  <div className="text-sm sm:text-base lg:text-[17px] font-bold text-white tracking-tight leading-tight">
+                  <div className="text-sm sm:text-base lg:text-[17px] xl:text-base 2xl:text-[17px] font-bold text-white tracking-tight leading-tight">
                     +10,000
                   </div>
-                  <div className="text-[10px] sm:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
+                  <div className="text-[10px] sm:text-[11px] xl:text-[10px] 2xl:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
                     Utilisateurs<br />actifs
                   </div>
                 </div>
 
                 {/* 2. +5,000 Experts & prestataires vérifiés */}
-                <div className="flex flex-col items-center">
+                <div className="basis-1/3 sm:basis-auto flex flex-col items-center">
                   <div className="mb-1 text-red-400">
                     <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 stroke-[1.6]" />
                   </div>
-                  <div className="text-sm sm:text-base lg:text-[17px] font-bold text-white tracking-tight leading-tight">
+                  <div className="text-sm sm:text-base lg:text-[17px] xl:text-base 2xl:text-[17px] font-bold text-white tracking-tight leading-tight">
                     +5,000
                   </div>
-                  <div className="text-[10px] sm:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
+                  <div className="text-[10px] sm:text-[11px] xl:text-[10px] 2xl:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
                     Experts &amp;<br />prestataires<br />vérifiés
                   </div>
                 </div>
 
                 {/* 3. +1,200 Entreprises accompagnées */}
-                <div className="flex flex-col items-center">
+                <div className="basis-1/3 sm:basis-auto flex flex-col items-center">
                   <div className="mb-1 text-sky-400">
                     <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-sky-400 stroke-[1.6]" />
                   </div>
-                  <div className="text-sm sm:text-base lg:text-[17px] font-bold text-white tracking-tight leading-tight">
+                  <div className="text-sm sm:text-base lg:text-[17px] xl:text-base 2xl:text-[17px] font-bold text-white tracking-tight leading-tight">
                     +1,200
                   </div>
-                  <div className="text-[10px] sm:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
+                  <div className="text-[10px] sm:text-[11px] xl:text-[10px] 2xl:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
                     Entreprises<br />accompagnées
                   </div>
                 </div>
 
                 {/* 4. +20 Pays connectés */}
-                <div className="flex flex-col items-center">
+                <div className="basis-1/3 sm:basis-auto flex flex-col items-center">
                   <div className="mb-1 text-red-400">
                     <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 stroke-[1.6]" />
                   </div>
-                  <div className="text-sm sm:text-base lg:text-[17px] font-bold text-white tracking-tight leading-tight">
+                  <div className="text-sm sm:text-base lg:text-[17px] xl:text-base 2xl:text-[17px] font-bold text-white tracking-tight leading-tight">
                     +20
                   </div>
-                  <div className="text-[10px] sm:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
+                  <div className="text-[10px] sm:text-[11px] xl:text-[10px] 2xl:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
                     Pays<br />connectés
                   </div>
                 </div>
 
                 {/* 5. 98% Taux de satisfaction */}
-                <div className="flex flex-col items-center">
+                <div className="basis-1/3 sm:basis-auto flex flex-col items-center">
                   <div className="mb-1 text-amber-400">
                     <Star className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 stroke-[1.6]" />
                   </div>
-                  <div className="text-sm sm:text-base lg:text-[17px] font-bold text-white tracking-tight leading-tight">
+                  <div className="text-sm sm:text-base lg:text-[17px] xl:text-base 2xl:text-[17px] font-bold text-white tracking-tight leading-tight">
                     98%
                   </div>
-                  <div className="text-[10px] sm:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
-                    Taux de<br />satisfaction
+                  <div className="text-[10px] sm:text-[11px] xl:text-[10px] 2xl:text-[11px] text-white/75 font-light mt-0.5 leading-tight">
+                    <span className="whitespace-pre-line">{'Taux de\nsatisfaction'}</span>
                   </div>
                 </div>
 
@@ -304,41 +277,14 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Bottom Coordinates & Rating Strip - Full, unreduced size at the end of the photo */}
-        <div className="mt-3.5 sm:mt-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-          {/* Left: Shanghai Coordinates Pill */}
-          <div className="flex items-center gap-2.5 bg-[#061329]/85 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full shadow-lg">
-            <span className="w-5 h-5 rounded-full bg-red-700 border border-red-500/40 flex items-center justify-center text-[10px] text-white shadow-xs font-bold shrink-0">
-              ★
-            </span>
-            <div className="text-left">
-              <div className="font-semibold text-white tracking-wider text-[11px]">SHANGHAI, CHINA</div>
-              <div className="text-[10px] text-white/60 font-mono">31.2304° N, 121.4737° E</div>
-            </div>
+        {/* Slogan et note, centrés sous la barre de recherche */}
+        <div className="mt-3.5 sm:mt-4 text-center text-xs px-2 py-0.5">
+          <div className="text-white/90 text-xs sm:text-[13px] font-light">
+            Des experts vérifiés et des services fiables pour accompagner vos projets internationaux.
           </div>
-
-          {/* Center: Mission Slogan & 4.8/5 Star Rating */}
-          <div className="text-center px-2 py-0.5">
-            <div className="text-white/90 text-xs sm:text-[13px] font-light">
-              Des experts vérifiés et des services fiables pour accompagner vos projets internationaux.
-            </div>
-            <div className="flex items-center justify-center gap-1.5 mt-1">
-              <span className="text-xs font-semibold text-white">4.8/5</span>
-              <div className="flex items-center text-amber-400 text-xs tracking-widest">
-                ★★★★★
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Tunis Coordinates Pill */}
-          <div className="flex items-center gap-2.5 bg-[#061329]/85 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full shadow-lg">
-            <span className="w-5 h-5 rounded-full bg-blue-600 border border-white/40 flex items-center justify-center text-[10px] text-white shadow-xs font-bold shrink-0">
-              🌍
-            </span>
-            <div className="text-left">
-              <div className="font-semibold text-white tracking-wider text-[11px]">TUNIS, TUNISIA</div>
-              <div className="text-[10px] text-white/60 font-mono">36.8065° N, 10.1815° E</div>
-            </div>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <span className="text-xs font-semibold text-white">4.8/5</span>
+            <div className="flex items-center text-amber-400 text-xs tracking-widest">★★★★★</div>
           </div>
         </div>
       </div>

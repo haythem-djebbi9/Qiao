@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { WeChatQrCard } from './common/WeChatQrCard';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
   Users,
@@ -189,7 +192,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
       fullText:
         'La jeune pousse GreenDattes a réussi à exporter 40 tonnes de dattes biologiques et dérivés vers les chaînes premium de Shanghai et Guangzhou en bénéficiant du mentorat direct d’experts QIAO en packaging et réglementation phytosanitaire.',
       image:
-        'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
+        'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=600&q=80',
     },
   ];
 
@@ -312,7 +315,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
           {/* Main Title */}
           <h1 className={`font-black text-white tracking-tight leading-[1.15] ${isHome ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-2xl sm:text-3xl'}`}>
             Bienvenue dans <br className="sm:hidden" />
-            <span className="text-red-500">QIAO</span> Community
+            <span className="text-red-500">QIAO</span> <span translate="no">Community</span>
           </h1>
 
           {isHome && (
@@ -584,11 +587,16 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
 
             {/* LEFT COLUMN: Discussions & publications (8 cols) */}
             <div className="lg:col-span-8">
+              {/* Téléphone et tablette : le QR WeChat juste avant les discussions (la colonne de droite passe en dessous). */}
+              <WeChatQrCard className="lg:hidden mb-6" />
               <FeedSection showDiscover />
             </div>
 
             {/* RIGHT COLUMN: Sidebar (4 cols) */}
             <div className="lg:col-span-4 space-y-6">
+
+              {/* QR WeChat en tête de colonne : visible dès l'arrivée sur le forum, sans descendre en bas de page. */}
+              <WeChatQrCard className="hidden lg:block" />
 
               {/* Widget 1: Experts & membres à découvrir */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
@@ -1070,179 +1078,6 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 9. FOOTER SECTION                                                         */}
-      {/* ========================================================================= */}
-      <footer className="bg-[#051126] text-white pt-16 pb-8 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-slate-800">
-            
-            {/* Column 1: Logo & Manifesto (4 cols) */}
-            <div className="lg:col-span-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center p-1.5 border border-white/20">
-                  <Logo />
-                </div>
-                <div>
-                  <span className="text-xl font-black tracking-wider text-white block">QIAO</span>
-                  <span className="text-[9px] uppercase tracking-widest text-slate-400 block -mt-1 font-semibold">
-                    THE BRIDGE BETWEEN CHINA & NORTH AFRICA
-                  </span>
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs text-slate-400 leading-relaxed font-light max-w-sm">
-                QIAO connecte les entreprises, les institutions et les talents entre la Chine et l'Afrique du Nord pour construire ensemble un avenir prospère.
-              </p>
-
-              {/* Social icons */}
-              <div className="mt-6 flex items-center gap-3 text-slate-400">
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">in</span>
-                </a>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">fb</span>
-                </a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">yt</span>
-                </a>
-                <a href="https://x.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-white hover:bg-white/10 transition-colors">
-                  <span className="text-xs font-bold">𝕏</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Column 2: À propos (2 cols) */}
-            <div className="lg:col-span-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-                À propos
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-400">
-                <li>
-                  <button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer">
-                    Qui sommes-nous
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer">
-                    Notre mission
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer">
-                    Notre équipe
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer">
-                    Carrières
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Services (2 cols) */}
-            <div className="lg:col-span-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-                Services
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-400">
-                <li>
-                  <button onClick={() => onNavigate('services')} className="hover:text-white transition-colors cursor-pointer">
-                    Conseil stratégique
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('services')} className="hover:text-white transition-colors cursor-pointer">
-                    Développement business
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('services')} className="hover:text-white transition-colors cursor-pointer">
-                    Investissement
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('services')} className="hover:text-white transition-colors cursor-pointer">
-                    Accompagnement
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 4: Ressources (2 cols) */}
-            <div className="lg:col-span-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-                Ressources
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-400">
-                <li>
-                  <button onClick={() => onNavigate('intelligence')} className="hover:text-white transition-colors cursor-pointer">
-                    Blog
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('resources')} className="hover:text-white transition-colors cursor-pointer">
-                    Guides & Rapports
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('intelligence')} className="hover:text-white transition-colors cursor-pointer">
-                    Études de marché
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('resources')} className="hover:text-white transition-colors cursor-pointer">
-                    FAQ
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 5: Support (2 cols) */}
-            <div className="lg:col-span-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-                Support
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-400">
-                <li>
-                  <button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors cursor-pointer">
-                    Centre d'aide
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => openLegal('terms')} className="hover:text-white transition-colors cursor-pointer">
-                    Conditions d'utilisation
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => openLegal('privacy')} className="hover:text-white transition-colors cursor-pointer">
-                    Politique de confidentialité
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors cursor-pointer">
-                    Nous contacter
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-          </div>
-
-          {/* Bottom Copyright bar */}
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
-            <div>© {new Date().getFullYear()} QIAO. Tous droits réservés.</div>
-            <div className="flex items-center gap-1">
-              <span>Conçu avec</span>
-              <span className="text-red-500">❤️</span>
-              <span>pour connecter les mondes.</span>
-            </div>
-          </div>
-
-        </div>
-      </footer>
 
     </div>
   );

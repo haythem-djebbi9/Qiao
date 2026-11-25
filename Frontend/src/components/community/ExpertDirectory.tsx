@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { JoinedList } from '../common/JoinedList';
 import { BadgeCheck, Briefcase, Languages, Mail, MapPin, Search, ShieldCheck, UserCheck, UserPlus } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useApi } from '../../hooks/useApi';
@@ -179,9 +180,15 @@ export const ExpertDirectory: React.FC = () => {
                   {(expert.country || expert.countriesServed.length > 0) && (
                     <p className="flex items-start gap-1">
                       <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
-                      {[expert.country, expert.countriesServed.filter((c) => c !== expert.country).length ? `intervient : ${expert.countriesServed.join(', ')}` : null]
-                        .filter(Boolean)
-                        .join(' · ')}
+                      <span>
+                        {expert.country}
+                        {expert.countriesServed.filter((c) => c !== expert.country).length > 0 && (
+                          <>
+                            {expert.country ? ' · ' : ''}
+                            <span>intervient :</span> <JoinedList items={expert.countriesServed} />
+                          </>
+                        )}
+                      </span>
                     </p>
                   )}
                   {expert.languages.length > 0 && (

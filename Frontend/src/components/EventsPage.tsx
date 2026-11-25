@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
   MapPin,
@@ -45,7 +47,7 @@ import { useAppActions } from '../context/AppActionsContext';
 // Local High-Definition Images
 import evenementPageBg from '../assets/images/evenement_page_bg.jpg';
 import evenementsHeroPlaza from '../assets/images/evenements_hero_plaza_1791399698341.jpg';
-import catSalonsCanton from '../assets/images/cat_salons_canton_1791399715213.jpg';
+import catSalonsCanton from '../assets/images/event_canton_fair_exterior_1791399745116.jpg';
 import catOrganisateursStage from '../assets/images/cat_organisateurs_stage_1791399731228.jpg';
 import eventCantonFairExterior from '../assets/images/event_canton_fair_exterior_1791399745116.jpg';
 import shanghaiSkylineDusk from '../assets/images/secteurs_hero_skyline_1791220840877.jpg';
@@ -782,118 +784,6 @@ export const EventsPage: React.FC<EventsPageProps> = ({
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 6. INSTITUTIONAL FOOTER (Matching Événements.png exactly)                 */}
-      {/* ========================================================================= */}
-      <footer className="bg-white border-t border-slate-200 pt-8 pb-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Top row: Logo, Nav, Socials & Language dropdown */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100">
-            {/* QIAO Logo on left */}
-            <div className="cursor-pointer" onClick={() => onNavigate('home')}>
-              <Logo size="md" />
-            </div>
-
-            {/* Navigation links separated by pipe */}
-            <nav className="flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600 font-medium">
-              <button onClick={() => onNavigate('home')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Accueil
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('about')} className="hover:text-red-600 transition-colors cursor-pointer">
-                À propos
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('secteurs')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Secteurs
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('partners')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Pays
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('commerce-hub')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Opportunités
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('intelligence')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Analyses
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('evenements')} className="text-red-600 font-bold cursor-pointer">
-                Événements
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('resources')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Ressources
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('contact')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Contact
-              </button>
-            </nav>
-
-            {/* Socials & Language dropdown button */}
-            <div className="flex items-center gap-3">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-md bg-[#0a66c2] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-4 h-4 fill-current" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-md bg-[#ff0000] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-                aria-label="YouTube"
-              >
-                <Youtube className="w-4 h-4 fill-current" />
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-md bg-black text-white flex items-center justify-center hover:opacity-90 transition-opacity font-bold text-xs"
-                aria-label="X (Twitter)"
-              >
-                ✕
-              </a>
-
-              {/* Language Dropdown FR */}
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-300 text-xs font-bold text-slate-700 bg-white">
-                <span>FR</span>
-                <ChevronDown className="w-3 h-3 text-slate-500" />
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom row: Legal links & Copyright */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-slate-500">
-            <div className="flex items-center gap-4">
-              <button onClick={() => openLegal('privacy')} className="hover:text-slate-800 transition-colors cursor-pointer">
-                Confidentialité
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => openLegal('terms')} className="hover:text-slate-800 transition-colors cursor-pointer">
-                Conditions d'utilisation
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => openLegal('legal')} className="hover:text-slate-800 transition-colors cursor-pointer">
-                Mentions légales
-              </button>
-            </div>
-            <div>
-              © {new Date().getFullYear()} QIAO. Tous droits réservés.
-            </div>
-          </div>
-
-        </div>
-      </footer>
 
       {/* ========================================================================= */}
       {/* MODAL: DETAILED EVENT VIEW                                                */}

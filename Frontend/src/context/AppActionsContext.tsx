@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { Opportunity } from '../lib/models';
 
-export type LegalKind = 'privacy' | 'terms' | 'legal' | 'training-terms';
+export type LegalKind = 'privacy' | 'terms' | 'legal' | 'training-terms' | 'data-deletion';
 
 export interface ContactPrefill {
   subject?: string;
@@ -26,6 +26,8 @@ export interface AppActions {
   openDocument: (titleOrId: string) => void;
   applyToOpportunity: (opportunity: Opportunity) => void;
   openSearch: (query?: string) => void;
+  /** Page des opportunités : une opportunité, un pays, un secteur, ou toutes. */
+  openOpportunities: (target?: { id?: string; country?: string; sector?: string }) => void;
 }
 
 const noop = () => undefined;
@@ -40,6 +42,7 @@ export const AppActionsContext = createContext<AppActions>({
   openDocument: noop,
   applyToOpportunity: noop,
   openSearch: noop,
+  openOpportunities: noop,
 });
 
 export const useAppActions = () => useContext(AppActionsContext);

@@ -39,7 +39,7 @@ const RAW_SERVICES: Partial<ServiceOffering>[] = [
     description: 'Expertise juridique et fiscale pour sécuriser vos activités et optimiser votre structure.',
     category: 'Juridique',
     iconName: 'Scale',
-    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80',
     accentColor: 'blue',
     details: [
       'Rédaction et révision des contrats bilingues (Chinois, Français, Arabe, Anglais)',
@@ -54,7 +54,7 @@ const RAW_SERVICES: Partial<ServiceOffering>[] = [
     description: 'Services linguistiques professionnels en chinois, arabe, français et anglais pour tous vos besoins.',
     category: 'Traduction',
     iconName: 'Languages',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80',
     accentColor: 'red',
     details: [
       'Interprétation simultanée et consécutive pour délégations et foires (Canton Fair, etc.)',
@@ -69,7 +69,7 @@ const RAW_SERVICES: Partial<ServiceOffering>[] = [
     description: 'Recrutez les meilleurs talents locaux et gérez vos ressources humaines efficacement.',
     category: 'Recrutement',
     iconName: 'Users',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80',
     accentColor: 'blue',
     details: [
       'Chasse de têtes de profils biculturels et trilingues (Chine - Maghreb)',
@@ -141,7 +141,7 @@ const RAW_SERVICES: Partial<ServiceOffering>[] = [
     description: 'Développez vos compétences grâce à nos formations professionnelles et sessions de coaching sur-mesure.',
     category: 'Business',
     iconName: 'GraduationCap',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80',
     isNew: true,
     accentColor: 'red',
     details: [

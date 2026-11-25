@@ -202,7 +202,7 @@ export const PartnersNetworkSection: React.FC<PartnersNetworkSectionProps> = ({
 
             {/* Logos Row */}
             <div className="flex-1 flex items-center justify-around gap-6 overflow-x-auto py-2 px-2 scrollbar-none">
-              {clientLogos.map((client) => (
+              {[...clientLogos.slice(carouselIndex), ...clientLogos.slice(0, carouselIndex)].map((client) => (
                 <div
                   key={client.id}
                   className="flex items-center justify-center px-4 py-2 hover:scale-105 transition-transform shrink-0"

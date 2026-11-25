@@ -55,7 +55,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
           {service.details && (
             <div>
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                Prestations & Accompagnement inclus
+                Sous-services inclus
               </h4>
               <div className="space-y-2.5">
                 {service.details.map((item, i) => (

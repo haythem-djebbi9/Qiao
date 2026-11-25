@@ -1,11 +1,39 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import postcss from 'postcss';
+import postcssRTLCSS from 'postcss-rtlcss';
+import {Mode} from 'postcss-rtlcss/options';
+import {defineConfig, type Plugin} from 'vite';
+
+/**
+ * Arabe : ajoute au CSS final, sous [dir="rtl"], la version miroir des marges, positions et alignements.
+ * Fait sur le CSS compilé, où Tailwind n'a plus de règles imbriquées. Les éléments centrés par left-1/2 + translate restent tels quels.
+ */
+const rtlCss = (): Plugin => ({
+  name: 'qiao-rtl-css',
+  apply: 'build',
+  enforce: 'post',
+  async generateBundle(_, bundle) {
+    const keepCentered: postcss.Plugin = {
+      postcssPlugin: 'qiao-keep-centered',
+      Once(root) {
+        root.walkRules(/(left|right|inset-x)-1\\\/2/, (rule) => {
+          rule.before(postcss.comment({text: 'rtl:ignore'}));
+        });
+      },
+    };
+    for (const file of Object.values(bundle)) {
+      if (file.type !== 'asset' || !file.fileName.endsWith('.css')) continue;
+      const result = await postcss([keepCentered, postcssRTLCSS({mode: Mode.override})]).process(String(file.source), {from: undefined});
+      file.source = result.css;
+    }
+  },
+});
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), rtlCss()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

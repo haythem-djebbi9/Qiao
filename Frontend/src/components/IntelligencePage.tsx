@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { siteSettings } from '../lib/siteSettings';
 import { Logo } from './Logo';
 import intelligenceHeroBg from '../data/qiao_intelligence.jpg';
 import chinaNightCorridorBg from '../assets/images/china_corridor_night_skyline_1790804583067.jpg';
@@ -7,7 +9,7 @@ import solarFarmTunisiaImg from '../assets/images/solar_farm_tunisia_17908051653
 import containerPortCargoImg from '../assets/images/container_port_cargo_1790805153002.jpg';
 import oliveOilExportImg from '../assets/images/olive_oil_export_1790805177453.jpg';
 import industrialEngineerMachineImg from '../assets/images/industrial_engineer_machine_1790805190415.jpg';
-import chinaEcommerceReportImg from '../assets/images/china_ecommerce_report_1790808742649.jpg';
+import chinaEcommerceReportImg from '../assets/images/ecommerce_devices_marketplace_1790934935730.jpg';
 import {
   Search,
   ArrowRight,
@@ -64,13 +66,12 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
   onRequestAnalysis,
   onOpenRegister,
 }) => {
-  const { applyToOpportunity, openDocument, openArticle, openLegal } = useAppActions();
+  const { openOpportunities, openDocument, openArticle, openLegal } = useAppActions();
   const { downloadDocument, pending } = useDownloads();
   const [searchQuery, setSearchQuery] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('Tous les secteurs');
   const [activeCorridorModal, setActiveCorridorModal] = useState<'cn-na' | 'na-cn' | null>(null);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [opportunityPage, setOpportunityPage] = useState(0);
   const [analysisOffset, setAnalysisOffset] = useState(0);
 
@@ -672,7 +673,7 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
             {visibleOpportunities.map((opp) => (
               <div
                 key={opp.id}
-                onClick={() => setSelectedOpportunity(opp)}
+                onClick={() => openOpportunities({ id: opp.id, country: opp.country })}
                 className="group bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 p-3 sm:p-3.5 flex flex-row items-stretch gap-3 cursor-pointer"
               >
                 {/* Left Side: Rounded Photo Thumbnail */}
@@ -959,151 +960,10 @@ export const IntelligencePage: React.FC<IntelligencePageProps> = ({
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 8. FOOTER DÉDIÉ (MATCHING SCREENSHOT EXACTLY)                             */}
-      {/* ========================================================================= */}
-      <footer className="bg-[#07152b] text-slate-300 text-xs font-light pt-14 pb-8 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-slate-800/80">
-            {/* Left Brand Column */}
-            <div className="md:col-span-5 space-y-4">
-              {/* QIAO Logo with Seal */}
-              <div onClick={() => onNavigate('home')} className="cursor-pointer inline-block">
-                <Logo size="sm" />
-              </div>
-
-              <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-                QIAO Intelligence fournit des analyses, des données et des opportunités pour renforcer les relations économiques entre la Chine et l'Afrique du Nord.
-              </p>
-
-              {/* Social links */}
-              <div className="flex items-center gap-3 pt-1 text-slate-400">
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">in</a>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">f</a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">▶</a>
-                <a href="https://x.com" target="_blank" rel="noreferrer" className="hover:text-white cursor-pointer transition-colors font-bold">𝕏</a>
-              </div>
-            </div>
-
-            {/* Nav Columns: À propos, Ressources, Support */}
-            <div className="md:col-span-2">
-              <h5 className="font-semibold text-white text-xs mb-3 uppercase tracking-wider">À propos</h5>
-              <ul className="space-y-2 text-slate-400 text-xs">
-                <li><button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer">Qui sommes-nous</button></li>
-                <li><button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer">Notre mission</button></li>
-                <li><button onClick={() => onNavigate('about')} className="hover:text-white transition-colors cursor-pointer">Notre équipe</button></li>
-                <li><button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors cursor-pointer">Carrières</button></li>
-              </ul>
-            </div>
-
-            <div className="md:col-span-2">
-              <h5 className="font-semibold text-white text-xs mb-3 uppercase tracking-wider">Ressources</h5>
-              <ul className="space-y-2 text-slate-400 text-xs">
-                <li><button onClick={() => onNavigate('analyses' as AppTab)} className="hover:text-white transition-colors cursor-pointer">Analyses</button></li>
-                <li><button onClick={() => onNavigate('rapports' as AppTab)} className="hover:text-white transition-colors cursor-pointer">Rapports</button></li>
-                <li><button onClick={() => onNavigate('marches-ecommerce' as AppTab)} className="hover:text-white transition-colors cursor-pointer">Études de marché</button></li>
-                <li><button onClick={() => onNavigate('resources')} className="hover:text-white transition-colors">Blog</button></li>
-              </ul>
-            </div>
-
-            <div className="md:col-span-3">
-              <h5 className="font-semibold text-white text-xs mb-3 uppercase tracking-wider">Support</h5>
-              <ul className="space-y-2 text-slate-400 text-xs">
-                <li><button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors">Centre d'aide</button></li>
-                <li><button onClick={() => openLegal('terms')} className="hover:text-white transition-colors cursor-pointer">Conditions d'utilisation</button></li>
-                <li><button onClick={() => openLegal('privacy')} className="hover:text-white transition-colors cursor-pointer">Politique de confidentialité</button></li>
-                <li><button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors">Nous contacter</button></li>
-              </ul>
-            </div>
-
-          </div>
-
-          {/* Bottom Copyright Strip */}
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-slate-500 text-[11px] gap-2">
-            <div>© {new Date().getFullYear()} QIAO. Tous droits réservés.</div>
-            <div>Conçu avec <span className="text-red-500">❤️</span> pour connecter les mondes.</div>
-          </div>
-
-        </div>
-      </footer>
 
       {/* ========================================================================= */}
       {/* MODAL: OPPORTUNITY DETAILS                                               */}
       {/* ========================================================================= */}
-      {selectedOpportunity && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="relative h-48 w-full">
-              <img
-                src={resolveImage(selectedOpportunity.image)}
-                alt={selectedOpportunity.title}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
-              <button
-                onClick={() => setSelectedOpportunity(null)}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <span className="absolute bottom-3 left-3 bg-slate-900 text-sky-300 text-xs font-bold px-3 py-1 rounded-md">
-                {selectedOpportunity.type}
-              </span>
-            </div>
-
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                {selectedOpportunity.title}
-              </h3>
-
-              <div className="flex flex-wrap gap-4 text-xs text-slate-600 mb-4 pb-4 border-b border-slate-100">
-                <span className="flex items-center gap-1 font-medium text-slate-900">
-                  <MapPin className="w-3.5 h-3.5 text-red-600" />
-                  {selectedOpportunity.country}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Zap className="w-3.5 h-3.5 text-amber-500" />
-                  {selectedOpportunity.sector}
-                </span>
-                <span className="flex items-center gap-1 font-bold text-slate-900">
-                  <Tag className="w-3.5 h-3.5 text-red-600" />
-                  {selectedOpportunity.amountLabel}
-                </span>
-                {selectedOpportunity.deadline && (
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    Date limite : {selectedOpportunity.deadline}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6 font-light">
-                {selectedOpportunity.description}
-              </p>
-
-              <div className="flex items-center justify-between gap-3">
-                <button
-                  onClick={() => setSelectedOpportunity(null)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 cursor-pointer"
-                >
-                  Fermer
-                </button>
-                <button
-                  onClick={() => {
-                    const opportunity = selectedOpportunity;
-                    setSelectedOpportunity(null);
-                    applyToOpportunity(opportunity);
-                  }}
-                  className="px-6 py-2.5 rounded-xl bg-red-600 text-white text-xs font-medium hover:bg-red-700 shadow-md transition-all cursor-pointer"
-                >
-                  Postuler / Contacter l'expert
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* MODAL: CORRIDOR DETAILS                                                  */}

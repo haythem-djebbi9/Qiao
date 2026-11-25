@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { TrainingDomain } from '../types';
 import { useApi } from '../hooks/useApi';
-import academyHeroImg from '../assets/images/qiao_academy_hero_1787505055310.jpg';
+import academyHeroImg from '../assets/images/qiao_academy_hero_1791404215248.jpg';
 
 const DEFAULT_DOMAINS: TrainingDomain[] = [
   {
@@ -203,6 +203,7 @@ export const AcademySection: React.FC<AcademySectionProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-slate-900/10 pointer-events-none" />
 
               {/* Center Floating Video Play Button */}
+              {onOpenVideo && (
               <button
                 onClick={onOpenVideo}
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/95 hover:bg-white text-red-600 shadow-xl flex items-center justify-center cursor-pointer transform hover:scale-110 active:scale-95 transition-all z-20 group"
@@ -210,6 +211,7 @@ export const AcademySection: React.FC<AcademySectionProps> = ({
               >
                 <Play className="w-6 h-6 fill-red-600 ml-1 group-hover:scale-105 transition-transform" />
               </button>
+              )}
 
               {/* Floating Top-Left Badge: 100+ Formations spécialisées */}
               <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md rounded-2xl p-2.5 sm:p-3 shadow-lg border border-slate-100 flex items-center gap-2.5 z-10 animate-in fade-in">

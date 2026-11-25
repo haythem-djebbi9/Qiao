@@ -1,5 +1,6 @@
 /** Services & paiements sécurisés : formes renvoyées par l'API (Backend/src/modules/payments) et libellés. */
 import { useEffect, useState } from 'react';
+import { appLocale } from '../i18n/runtime';
 
 export type TxStatus =
   | 'REQUESTED'
@@ -255,7 +256,7 @@ export const CURRENCY_DECIMALS: Record<string, number> = { EUR: 2, USD: 2, CNY: 
 
 export function formatMoney(minor: number, currency: string): string {
   const decimals = CURRENCY_DECIMALS[currency] ?? 2;
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency, minimumFractionDigits: decimals }).format(minor / 10 ** decimals);
+  return new Intl.NumberFormat(appLocale(), { style: 'currency', currency, minimumFractionDigits: decimals }).format(minor / 10 ** decimals);
 }
 
 /** Valeur à pré-remplir dans un champ de saisie (« 1600,50 »). */

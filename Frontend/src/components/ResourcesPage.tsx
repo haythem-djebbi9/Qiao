@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { SocialLinks } from './common/SocialLinks';
+import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
   Download,
@@ -129,14 +131,14 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
       title: 'Réglementations & Normes',
       subtitle: 'Les textes et exigences clés',
       image:
-        'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
+        'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 'statistiques',
       title: 'Données & Statistiques',
       subtitle: 'Des chiffres pour comprendre les marchés',
       image:
-        'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80',
+        'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 'videos',
@@ -157,7 +159,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
       title: 'Cas d\'usage & Témoignages',
       subtitle: 'Des expériences réelles qui inspirent',
       image:
-        'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
+        'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=600&q=80',
     },
   ];
 
@@ -384,12 +386,13 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
             className="w-full h-full object-cover object-center filter contrast-105"
           />
           {/* Soft White Gradient strictly on the left to keep text crystal clear and legible */}
-          <div className="absolute inset-y-0 left-0 w-full sm:w-4/5 lg:w-3/5 bg-gradient-to-r from-white/95 via-white/85 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-white/10 pointer-events-none" />
+          {/* Lisibilité : voile blanc sur mobile ; sur ordinateur, fondu blanc sous toute la colonne de texte. */}
+          <div className="sm:hidden absolute inset-0 bg-white/85 pointer-events-none" />
+          <div className="hidden sm:block absolute inset-y-0 left-0 w-[85%] lg:w-[70%] bg-gradient-to-r from-white from-0% via-white/95 via-80% to-transparent pointer-events-none" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-2xl sm:max-w-3xl space-y-4">
+          <div className="max-w-2xl lg:max-w-[38rem] space-y-4">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0B1D3A] tracking-tight leading-none">
               Ressources
             </h1>
@@ -1220,104 +1223,6 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 9. INSTITUTIONAL FOOTER (Matching Ressources.png)                          */}
-      {/* ========================================================================= */}
-      <footer className="bg-white border-t border-slate-200 pt-8 pb-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100">
-            {/* Logo */}
-            <div className="cursor-pointer" onClick={() => onNavigate('home')}>
-              <Logo size="md" />
-            </div>
-
-            {/* Main Links */}
-            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs sm:text-sm text-slate-600 font-medium">
-              <button onClick={() => onNavigate('home')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Accueil
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('about')} className="hover:text-red-600 transition-colors cursor-pointer">
-                À propos
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('secteurs')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Secteurs
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('partners')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Pays
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('commerce-hub')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Opportunités
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('intelligence')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Analyses
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('evenements')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Événements
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('resources')} className="text-red-600 font-bold cursor-pointer">
-                Ressources
-              </button>
-              <span className="text-slate-300">|</span>
-              <button onClick={() => onNavigate('contact')} className="hover:text-red-600 transition-colors cursor-pointer">
-                Contact
-              </button>
-            </nav>
-
-            {/* Socials & Lang */}
-            <div className="flex items-center gap-3">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors font-bold text-xs"
-              >
-                𝕏
-              </a>
-
-              <div className="pl-2 border-l border-slate-200">
-                <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                  FR ⌵
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sublinks & Copyright */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 text-xs text-slate-400">
-            <div className="flex items-center gap-4">
-              <button onClick={() => openLegal('privacy')} className="hover:text-slate-600 transition-colors cursor-pointer">Confidentialité</button>
-              <span>|</span>
-              <button onClick={() => openLegal('terms')} className="hover:text-slate-600 transition-colors cursor-pointer">Conditions d'utilisation</button>
-              <span>|</span>
-              <button onClick={() => openLegal('legal')} className="hover:text-slate-600 transition-colors cursor-pointer">Mentions légales</button>
-            </div>
-            <div>© {new Date().getFullYear()} QIAO. Tous droits réservés.</div>
-          </div>
-        </div>
-      </footer>
 
       {/* ========================================================================= */}
       {/* 10. DEMANDER UNE RESSOURCE MODAL                                          */}
