@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SocialLinks } from './common/SocialLinks';
+import { WeChatQrCard } from './common/WeChatQrCard';
 import { siteSettings } from '../lib/siteSettings';
 import {
   Search,
@@ -586,11 +587,16 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({
 
             {/* LEFT COLUMN: Discussions & publications (8 cols) */}
             <div className="lg:col-span-8">
+              {/* Téléphone et tablette : le QR WeChat juste avant les discussions (la colonne de droite passe en dessous). */}
+              <WeChatQrCard className="lg:hidden mb-6" />
               <FeedSection showDiscover />
             </div>
 
             {/* RIGHT COLUMN: Sidebar (4 cols) */}
             <div className="lg:col-span-4 space-y-6">
+
+              {/* QR WeChat en tête de colonne : visible dès l'arrivée sur le forum, sans descendre en bas de page. */}
+              <WeChatQrCard className="hidden lg:block" />
 
               {/* Widget 1: Experts & membres à découvrir */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">

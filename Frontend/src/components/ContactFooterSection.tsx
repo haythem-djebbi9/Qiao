@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SocialLinks } from './common/SocialLinks';
-import { resolveImage } from '../lib/assets';
-import { siteSettings, telHref, wechatQrSquare, whatsappHref } from '../lib/siteSettings';
+import { siteSettings, telHref, whatsappHref } from '../lib/siteSettings';
+import { WeChatQrCard } from './common/WeChatQrCard';
 import {
   Clock,
   ShieldCheck,
@@ -588,23 +588,7 @@ export const ContactFooterSection: React.FC<ContactFooterSectionProps> = ({
                 <span>{settings.hours}</span>
               </div>
             </div>
-            {settings.wechatQr && (
-              <div className="mt-4 flex items-center gap-3.5 max-w-xs rounded-2xl bg-white/[0.04] border border-slate-700/70 p-3">
-                <img
-                  src={resolveImage(wechatQrSquare(settings.wechatQr))}
-                  alt="QR code WeChat QIAO"
-                  loading="lazy"
-                  className="w-[92px] h-[92px] shrink-0 rounded-xl bg-white p-1.5 object-contain"
-                />
-                <div className="min-w-0 space-y-1">
-                  <div className="flex items-center gap-1.5 text-sm font-bold text-white">
-                    <MessageCircle className="w-4 h-4 text-[#07c160] fill-[#07c160]/20" />
-                    <span>WeChat</span>
-                  </div>
-                  <p className="text-[11px] leading-snug text-slate-400">Scannez le QR code avec votre application WeChat</p>
-                </div>
-              </div>
-            )}
+            <WeChatQrCard tone="dark" lazy className="mt-4" />
           </div>
 
         </div>

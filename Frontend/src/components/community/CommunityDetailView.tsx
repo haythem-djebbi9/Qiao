@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { JoinedList } from '../common/JoinedList';
+import { WeChatQrCard } from '../common/WeChatQrCard';
 import { ArrowLeft, Check, Flag, Languages, Lock, MapPin, MessageSquare, ShieldCheck, UserMinus, UserPlus, Users, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { CommunityDetail, CommunitySummary, LANGUAGE_LABELS, MemberSummary, POLICY_LABELS, Paged, navigateCommunity } from '../../lib/community';
@@ -215,6 +216,7 @@ export const CommunityDetailView: React.FC<{ slug: string; section?: string }> =
               Lire toutes les règles
             </button>
           </Card>
+          <WeChatQrCard />
           {!user && (
             <Card className="text-center">
               <p className="text-xs text-slate-600 mb-3">Un compte QIAO suffit pour rejoindre les communautés, poser vos questions et contacter les experts.</p>

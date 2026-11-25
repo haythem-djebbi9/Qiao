@@ -4,6 +4,7 @@ import { api, ApiError } from '../../lib/api';
 import { Paged, PostView, navigateCommunity } from '../../lib/community';
 import { useAuth } from '../../context/AuthContext';
 import { PostCard } from './PostCard';
+import { WeChatQrCard } from '../common/WeChatQrCard';
 import { Avatar, Card, EmptyState, Loading, MemberName, SectionTitle, VerifiedBadge } from './ui';
 
 /** Page d'une discussion (accessible par URL directe, avec contrôle d'accès côté serveur). */
@@ -93,6 +94,7 @@ export const PostDetailView: React.FC<{ postId: string }> = ({ postId }) => {
               <p className="text-[11px] text-slate-500 mt-1">Voir toutes les discussions de cette communauté.</p>
             </Card>
           )}
+          <WeChatQrCard />
           {post.type === 'question' && (
             <Card>
               <SectionTitle title="Besoin d'un professionnel ?" />
